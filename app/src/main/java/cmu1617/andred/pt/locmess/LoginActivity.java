@@ -3,21 +3,19 @@ package cmu1617.andred.pt.locmess;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
-import android.content.pm.PackageManager;
-import android.support.annotation.NonNull;
-import android.support.design.widget.Snackbar;
-import android.support.v7.app.AppCompatActivity;
 import android.app.LoaderManager.LoaderCallbacks;
-
 import android.content.CursorLoader;
 import android.content.Loader;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.AsyncTask;
-
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.ContactsContract;
+import android.support.annotation.NonNull;
+import android.support.design.widget.Snackbar;
+import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
 import android.view.KeyEvent;
 import android.view.View;
@@ -31,6 +29,9 @@ import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import pt.andred.cmu1617.LocMessAPIClient;
+import pt.andred.cmu1617.LocMessAPIClientImpl;
 
 import static android.Manifest.permission.READ_CONTACTS;
 
@@ -314,6 +315,8 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             } catch (InterruptedException e) {
                 return false;
             }
+
+            LocMessAPIClient client = LocMessAPIClientImpl.getInstance();
 
             for (String credential : DUMMY_CREDENTIALS) {
                 String[] pieces = credential.split(":");

@@ -8,8 +8,19 @@ import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
+
+import javax.crypto.BadPaddingException;
+import javax.crypto.Cipher;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.KeyGenerator;
+import javax.crypto.NoSuchPaddingException;
+import javax.crypto.SecretKey;
 
 /**
  * Created by andre on 28/03/17.
@@ -21,10 +32,19 @@ class LocMessAPIClientBase {
     private final ApplicationConfiguration config;
 
     private final HttpClient client;
+    private final SecretKey secretKey;
 
     LocMessAPIClientBase(ApplicationConfiguration config) {
         this.config = config;
         client = new HttpClientOkHttp();
+        KeyGenerator keyGenerator = null;
+        try {
+            keyGenerator = KeyGenerator.getInstance("AES");
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        }
+        keyGenerator.init(128);
+        secretKey = keyGenerator.generateKey();
     }
 
 
@@ -63,12 +83,46 @@ class LocMessAPIClientBase {
         if (authorization != null) {
             httpRequest.withAuthorization(authorization);
         }
+        Map<String, String> getSecure = new HashMap<>();
+        Map<String, String> postSecure = new HashMap<>();
+        try {
 
-        httpRequest.withGet(get);
-        httpRequest.withPost(post);
+            Cipher cipher = Cipher.getInstance("AES/CBC/PKCS7Padding", "BC");
+            cipher.init(Cipher.ENCRYPT_MODE, secretKey);
+            for (Map.Entry<String, String> entry : get.entrySet()) {
+                getSecure.put(
+                        Base64.getEncoder().encodeToString(cipher.doFinal(entry.getKey().getBytes())),
+                        Base64.getEncoder().encodeToString(cipher.doFinal(entry.getValue().getBytes()))
+                );
+            }
+            for (Map.Entry<String, String> entry : post.entrySet()) {
+                postSecure.put(
+                        Base64.getEncoder().encodeToString(cipher.doFinal(entry.getKey().getBytes())),
+                        Base64.getEncoder().encodeToString(cipher.doFinal(entry.getValue().getBytes()))
+                );
+            }
+            postSecure.put("key", Base64.getEncoder().encodeToString(secretKey.getEncoded()));
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        } catch (NoSuchProviderException e) {
+            e.printStackTrace();
+        } catch (NoSuchPaddingException e) {
+            e.printStackTrace();
+        } catch (InvalidKeyException e) {
+            e.printStackTrace();
+        } catch (BadPaddingException e) {
+            e.printStackTrace();
+        } catch (IllegalBlockSizeException e) {
+            e.printStackTrace();
+        }
+
+        httpRequest.withGet(getSecure);
+        httpRequest.withPost(postSecure);
 
         try {
 
+            Cipher cipher = Cipher.getInstance("AES/ECB/PKCS7Padding", "BC");
+            cipher.init(Cipher.DECRYPT_MODE, secretKey);
             ClientResponse clientResponse = client.handleHttpRequest(httpRequest);
 
             if (clientResponse.getStatusCode() == 401) {
@@ -79,11 +133,16 @@ class LocMessAPIClientBase {
                 throw new APIException(error, errorDescription);
             }
             if (endpoint.getResponseClass().equals(JSONArray.class)) {
-                return (T) new JSONArray(clientResponse.getResponse());
+                byte[] byteResponse = Base64.getDecoder().decode(clientResponse.getResponse());
+                String response = cipher.doFinal(byteResponse).toString();
+                return (T) new JSONArray(response);
             } else if (endpoint.getResponseClass().equals(JSONObject.class)) {
-                return (T) new JSONObject(clientResponse.getResponse());
+                byte[] byteResponse = Base64.getDecoder().decode(clientResponse.getResponse());
+                String response = cipher.doFinal(byteResponse).toString();
+                return (T) new JSONObject(response);
             } else if (endpoint.getResponseClass().equals(File.class)) {
-                return (T) clientResponse.getResponse().getBytes();
+                byte[] byteResponse = Base64.getDecoder().decode(clientResponse.getResponse());
+                return (T) cipher.doFinal(byteResponse);
             } else {
                 throw new APIException("Could not identify return type", null);
             }
@@ -93,6 +152,13 @@ class LocMessAPIClientBase {
         } catch (IOException e) {
             e.printStackTrace();
             throw new APIException(e, e.getMessage());
+        } catch (NoSuchPaddingException |
+                NoSuchAlgorithmException |
+                NoSuchProviderException |
+                InvalidKeyException |
+                BadPaddingException | IllegalBlockSizeException e) {
+            e.printStackTrace();
+            throw new APIException(e);
         }
     }
 

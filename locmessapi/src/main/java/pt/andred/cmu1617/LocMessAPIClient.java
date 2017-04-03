@@ -7,17 +7,17 @@ public interface LocMessAPIClient {
 
     Authorization refreshAccessToken(Authorization oldAuthorization);
 
-    void signup(String email, String password);
+    boolean signup(String email, String password);
 
-    String login(String userid, String password);
+    boolean login(String userid, String password);
 
     void logout(String token);
 
     Map<String, Map<String, String>> listLocations(String token);
 
-    String addLocation(String token, String latitude, String longitude);
+    void addLocation(String token, String name, String latitude, String longitude, int radius);
 
-    String addLocation(String token, String... sddid);
+    void addLocation(String token, String name, String... sddid);
 
     void deleteLocation(String token, String locationId);
 

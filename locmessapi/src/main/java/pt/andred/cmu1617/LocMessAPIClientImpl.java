@@ -1,5 +1,8 @@
 package pt.andred.cmu1617;
 
+import org.json.JSONObject;
+
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -9,8 +12,9 @@ import java.util.Map;
 
 public final class LocMessAPIClientImpl extends LocMessAPIClientBase implements LocMessAPIClient {
 
+    private static final int TRIES = 5;
     private static LocMessAPIClient _instance;
-    private final OAuthAuthorization _auth;
+    private OAuthAuthorization _auth;
 
     LocMessAPIClientImpl(ApplicationConfiguration config) {
         super(config);
@@ -29,22 +33,88 @@ public final class LocMessAPIClientImpl extends LocMessAPIClientBase implements 
 
     @Override
     public Authorization refreshAccessToken(Authorization oldAuthorization) {
+
         return null;
     }
 
     @Override
-    public void signup(String email, String password) {
-
+    public boolean signup(String email, String password) {
+        Map<String, String> post = new HashMap<>();
+        post.put("email", email);
+        post.put("password", password);
+        for (int i = 0; i < TRIES; i++) {
+            JSONObject response = invoke(Endpoint.SIGN_UP, (Map<String, String>) null, post);
+            if (response == null) {
+                continue;
+            }
+            if (!response.has("status")) continue;
+            if (response.getInt("status") != 200) {
+                throw new APIException("HTTP Error: " +
+                        response.getInt("status") + " " +
+                        (response.has("description") ? response.getString("description") : ""));
+            }
+            if (!response.has("success")) {
+                throw new APIException("Response is malformed. Token missing");
+            }
+            return response.getBoolean("success");
+        }
+        throw new APIException("Couldn't connect to server");
     }
 
     @Override
-    public String login(String userid, String password) {
-        return null;
+    public boolean login(String email, String password){
+        Map<String, String> post = new HashMap<>();
+        post.put("email", email);
+        post.put("password", password);
+        for (int i = 0; i < TRIES; i++) {
+            JSONObject response = invoke(Endpoint.SIGN_UP, (Map<String, String>) null, post);
+            if (response == null) {
+                continue;
+            }
+            if (!response.has("status")) continue;
+            if (response.getInt("status") != 200) {
+                throw new APIException("HTTP Error: " +
+                        response.getInt("status") + " " +
+                        (response.has("description") ? response.getString("description") : ""));
+            }
+            if (!response.has("success")){
+                throw new APIException("Response is malformed. Token missing");
+            }
+            if(response.getBoolean("success")){
+                if(!response.has("access_token")){
+                    throw new APIException("Response is malformed. access_token missing");
+                }
+                else if(!response.has("refresh_token")){
+                    throw new APIException("Response is malformed. refresh_token missing");
+                }
+                _auth = new OAuthAuthorizationImpl(
+                        response.getString("access_token"),
+                        response.getString("refresh_token"));
+            }
+            return response.getBoolean("success");
+        }
+        throw new APIException("Couldn't connect to server");
     }
 
     @Override
-    public void logout(String token) {
-
+    public void logout(String token){
+        Map<String, String> post = new HashMap<>();
+        post.put("token", token);
+        for (int i = 0; i < TRIES; i++) {
+            JSONObject response = invoke(Endpoint.SIGN_UP, (Map<String, String>) null, post);
+            if (response == null) {
+                continue;
+            }
+            if (!response.has("status")) continue;
+            if (response.getInt("status") != 200) {
+                throw new APIException("HTTP Error: " +
+                        response.getInt("status") + " " +
+                        (response.has("description") ? response.getString("description") : ""));
+            }
+            _auth = null;
+            return;
+        }
+        throw new APIException("Couldn't connect to server");
     }
 
     @Override
@@ -52,19 +122,64 @@ public final class LocMessAPIClientImpl extends LocMessAPIClientBase implements 
         return null;
     }
 
+    public void addLocation(Map<String, String> post){
+        for (int i = 0; i < TRIES; i++) {
+            JSONObject response = invoke(Endpoint.SIGN_UP, (Map<String, String>) null, post);
+            if (response == null) {
+                continue;
+            }
+            if (!response.has("status")) continue;
+            if (response.getInt("status") != 200) {
+                throw new APIException("HTTP Error: " +
+                        response.getInt("status") + " " +
+                        (response.has("description") ? response.getString("description") : ""));
+            }
+            if (!response.has("success")) {
+                throw new APIException("Response is malformed. Token missing");
+            }
+            if (response.getBoolean("success")) {
+                if (!response.has("access_token")) {
+                    throw new APIException("Response is malformed. access_token missing");
+                } else if (!response.has("refresh_token")) {
+                    throw new APIException("Response is malformed. refresh_token missing");
+                }
+            } else {
+                if (!response.has("error")) {
+                    throw new APIException("Response is malformed. error missing");
+                }
+                if (!response.has("description")) {
+                    throw new APIException("Response is malformed. error missing");
+                }
+                throw new APIException(
+                        response.getString("error"),
+                        response.getString("description"));
+            }
+        }
+        throw new APIException("Couldn't connect to server");
+    }
     @Override
-    public String addLocation(String token, String latitude, String longitude) {
-        return null;
+    public void addLocation(String token, String name, String latitude, String longitude, int radius) {
+        Map<String, String> post = new HashMap<>();
+        post.put("location_type", "coordinates");
+        post.put("name", name);
+        post.put("latitude", latitude);
+        post.put("longitude", longitude);
+        post.put("radius", radius + "");
+        addLocation(post);
     }
 
     @Override
-    public String addLocation(String token, String... sddid) {
-        return null;
+    public void addLocation(String token, String name, String... sddid) {
+        Map<String, String> post = new HashMap<>();
+        post.put("location_type", "wifi");
+        post.put("name", name);
+        post.put("ssid_list", String.join(" ", sddid));
+        addLocation(post);
     }
 
     @Override
     public void deleteLocation(String token, String locationId) {
-
+        // TODO: 02/04/17
     }
 
     @Override

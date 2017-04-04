@@ -8,9 +8,11 @@ import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
+import java.security.SecureRandom;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
@@ -21,6 +23,7 @@ import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.KeyGenerator;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SecretKey;
+import javax.crypto.spec.IvParameterSpec;
 
 /**
  * Created by andre on 28/03/17.
@@ -85,10 +88,13 @@ class LocMessAPIClientBase {
         }
         Map<String, String> getSecure = new HashMap<>();
         Map<String, String> postSecure = new HashMap<>();
+        IvParameterSpec ivSpec = null;
         try {
-
             Cipher cipher = Cipher.getInstance("AES/CBC/PKCS7Padding", "BC");
-            cipher.init(Cipher.ENCRYPT_MODE, secretKey);
+            byte[] iv = new byte[cipher.getBlockSize()];
+            new SecureRandom().nextBytes(iv);
+            ivSpec = new IvParameterSpec(iv);
+            cipher.init(Cipher.ENCRYPT_MODE, secretKey, ivSpec);
             for (Map.Entry<String, String> entry : get.entrySet()) {
                 getSecure.put(
                         Base64.getEncoder().encodeToString(cipher.doFinal(entry.getKey().getBytes())),
@@ -102,6 +108,7 @@ class LocMessAPIClientBase {
                 );
             }
             postSecure.put("key", Base64.getEncoder().encodeToString(secretKey.getEncoded()));
+            postSecure.put("iv", Base64.getEncoder().encodeToString(iv));
         } catch (NoSuchAlgorithmException e) {
             e.printStackTrace();
         } catch (NoSuchProviderException e) {
@@ -114,6 +121,8 @@ class LocMessAPIClientBase {
             e.printStackTrace();
         } catch (IllegalBlockSizeException e) {
             e.printStackTrace();
+        } catch (InvalidAlgorithmParameterException e) {
+            e.printStackTrace();
         }
 
         httpRequest.withGet(getSecure);
@@ -122,7 +131,8 @@ class LocMessAPIClientBase {
         try {
 
             Cipher cipher = Cipher.getInstance("AES/ECB/PKCS7Padding", "BC");
-            cipher.init(Cipher.DECRYPT_MODE, secretKey);
+            cipher.init(Cipher.DECRYPT_MODE, secretKey, ivSpec);
+
             ClientResponse clientResponse = client.handleHttpRequest(httpRequest);
 
             if (clientResponse.getStatusCode() == 401) {
@@ -156,7 +166,7 @@ class LocMessAPIClientBase {
                 NoSuchAlgorithmException |
                 NoSuchProviderException |
                 InvalidKeyException |
-                BadPaddingException | IllegalBlockSizeException e) {
+                BadPaddingException | IllegalBlockSizeException | InvalidAlgorithmParameterException e) {
             e.printStackTrace();
             throw new APIException(e);
         }

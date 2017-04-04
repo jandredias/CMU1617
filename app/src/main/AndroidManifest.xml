@@ -16,8 +16,7 @@
         android:theme="@style/AppTheme">
         <activity
             android:name=".LoginActivity"
-            android:label="@string/app_name">
-        </activity>
+            android:label="@string/app_name"></activity>
 
         <service
             android:name=".MainService"
@@ -33,10 +32,12 @@
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="cmu1617.andred.pt.locmess.LoginActivity" />
         </activity>
+        <activity android:name=".MainActivity"></activity>
     </application>
 
 </manifest>

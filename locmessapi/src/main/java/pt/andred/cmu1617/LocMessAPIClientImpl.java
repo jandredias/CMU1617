@@ -101,7 +101,7 @@ public final class LocMessAPIClientImpl extends LocMessAPIClientBase implements 
         Map<String, String> post = new HashMap<>();
         post.put("token", token);
         for (int i = 0; i < TRIES; i++) {
-            JSONObject response = invoke(Endpoint.SIGN_UP, (Map<String, String>) null, post);
+            JSONObject response = invoke(Endpoint.SIGN_UP, _auth, null, post);
             if (response == null) {
                 continue;
             }
@@ -124,7 +124,7 @@ public final class LocMessAPIClientImpl extends LocMessAPIClientBase implements 
 
     public void addLocation(Map<String, String> post){
         for (int i = 0; i < TRIES; i++) {
-            JSONObject response = invoke(Endpoint.SIGN_UP, (Map<String, String>) null, post);
+            JSONObject response = invoke(Endpoint.SIGN_UP, _auth, null, post);
             if (response == null) {
                 continue;
             }

@@ -39,6 +39,12 @@ public final class LocMessAPIClientImpl extends LocMessAPIClientBase implements 
         return null;
     }
 
+//    @Override
+//    public User getUserDetails() {
+//
+//        return null;
+//    }
+
     @Override
     public boolean signup(String email, String password) {
         Map<String, String> post = new HashMap<>();

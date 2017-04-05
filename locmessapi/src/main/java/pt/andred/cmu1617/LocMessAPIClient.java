@@ -7,6 +7,8 @@ public interface LocMessAPIClient {
 
     Authorization refreshAccessToken(Authorization oldAuthorization);
 
+//    User getUserDetails();
+
     boolean signup(String email, String password);
 
     boolean login(String userid, String password);

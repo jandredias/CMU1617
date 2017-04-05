@@ -6,6 +6,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+;
+
 /**
  * Created by andre on 28/03/17.
  */
@@ -25,7 +27,7 @@ public final class LocMessAPIClientImpl extends LocMessAPIClientBase implements 
         if (_instance == null) _instance =
                 new LocMessAPIClientImpl(
                         new ApplicationConfiguration(
-                                "http://marge.rnl.tecnico.ulisboa.pt",//baseurl
+                                "http://newbie.rnl.tecnico.ulisboa.pt:31500",//baseurl
                                 "",//Consumer Key
                                 "")); //Secret Key
         return _instance;
@@ -40,7 +42,7 @@ public final class LocMessAPIClientImpl extends LocMessAPIClientBase implements 
     @Override
     public boolean signup(String email, String password) {
         Map<String, String> post = new HashMap<>();
-        post.put("email", email);
+        post.put("user_id", email);
         post.put("password", password);
         for (int i = 0; i < TRIES; i++) {
             JSONObject response = invoke(Endpoint.SIGN_UP, (Map<String, String>) null, post);
@@ -53,10 +55,7 @@ public final class LocMessAPIClientImpl extends LocMessAPIClientBase implements 
                         response.getInt("status") + " " +
                         (response.has("description") ? response.getString("description") : ""));
             }
-            if (!response.has("success")) {
-                throw new APIException("Response is malformed. Token missing");
-            }
-            return response.getBoolean("success");
+            return response.getInt("status") == 200;
         }
         throw new APIException("Couldn't connect to server");
     }
@@ -64,10 +63,10 @@ public final class LocMessAPIClientImpl extends LocMessAPIClientBase implements 
     @Override
     public boolean login(String email, String password){
         Map<String, String> post = new HashMap<>();
-        post.put("email", email);
+        post.put("user_id", email);
         post.put("password", password);
         for (int i = 0; i < TRIES; i++) {
-            JSONObject response = invoke(Endpoint.SIGN_UP, (Map<String, String>) null, post);
+            JSONObject response = invoke(Endpoint.OAUTH_LOGIN, (Map<String, String>) null, post);
             if (response == null) {
                 continue;
             }
@@ -76,11 +75,8 @@ public final class LocMessAPIClientImpl extends LocMessAPIClientBase implements 
                 throw new APIException("HTTP Error: " +
                         response.getInt("status") + " " +
                         (response.has("description") ? response.getString("description") : ""));
-            }
-            if (!response.has("success")){
-                throw new APIException("Response is malformed. Token missing");
-            }
-            if(response.getBoolean("success")){
+            } else {
+
                 if(!response.has("access_token")){
                     throw new APIException("Response is malformed. access_token missing");
                 }
@@ -90,8 +86,9 @@ public final class LocMessAPIClientImpl extends LocMessAPIClientBase implements 
                 _auth = new OAuthAuthorizationImpl(
                         response.getString("access_token"),
                         response.getString("refresh_token"));
+                return response.getInt("status") == 200;
             }
-            return response.getBoolean("success");
+//            return response.getBoolean("success");
         }
         throw new APIException("Couldn't connect to server");
     }

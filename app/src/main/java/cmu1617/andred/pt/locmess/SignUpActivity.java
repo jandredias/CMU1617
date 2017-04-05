@@ -14,6 +14,7 @@ import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -282,6 +283,7 @@ public class SignUpActivity extends AppCompatActivity implements LoaderCallbacks
         protected Boolean doInBackground(Void... params) {
 
             boolean result = LocMessAPIClientImpl.getInstance().signup(mEmail, mPassword);
+            Log.wtf("result: " , ""+result);
             if(result) {
                 LocMessAPIClientImpl.getInstance().login(mEmail,mPassword); //Hopefully this will never fail
             }

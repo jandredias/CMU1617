@@ -9,7 +9,7 @@ import okhttp3.MediaType;
  */
 
 enum Endpoint {
-    SIGN_UP("/oauth/login", Scope.AUTH, HttpMethod.POST, MediaType.parse("application/json; charset=utf-8"), JSONObject.class),
+    SIGN_UP("/user/signup", Scope.AUTH, HttpMethod.POST, MediaType.parse("application/json; charset=utf-8"), JSONObject.class),
     OAUTH_LOGIN("/oauth/login", Scope.AUTH, HttpMethod.POST, MediaType.parse("application/json; charset=utf-8"), JSONObject.class),
 
     SET_KEYWORD("/oauth/login", Scope.AUTH, HttpMethod.POST, MediaType.parse("application/json; charset=utf-8"), JSONObject.class),
@@ -29,7 +29,7 @@ enum Endpoint {
     OAUTH_REFRESH_ACCESS_TOKEN("/oauth/refresh_token", Scope.AUTH, HttpMethod.POST, MediaType.parse("application/json; charset=utf-8"), JSONObject.class);
 
 
-    private final static String ENDPOINT_PREFIX = "/api/snapcity/v1";
+    private final static String ENDPOINT_PREFIX = "/api/locmess/v1";
     private String pathRegex;
     private Scope scope;
     private HttpMethod httpMethod;

@@ -8,11 +8,8 @@ import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
-import java.security.InvalidAlgorithmParameterException;
-import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
-import java.security.SecureRandom;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
@@ -23,7 +20,6 @@ import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.KeyGenerator;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SecretKey;
-import javax.crypto.spec.IvParameterSpec;
 
 /**
  * Created by andre on 28/03/17.
@@ -79,59 +75,61 @@ class LocMessAPIClientBase {
                            Map<String, String> get, Map<String, String> post) {
         if (get == null) get = new HashMap<>();
         if (post == null) post = new HashMap<>();
-        get.put("lang", config.getLocale().getLanguage() + "-" + config.getLocale().getCountry());
+//        get.put("lang", config.getLocale().getLanguage() + "-" + config.getLocale().getCountry());
 
         HttpRequest httpRequest = RequestFactory.fromEndpoint(config, endpoint);
 
         if (authorization != null) {
             httpRequest.withAuthorization(authorization);
         }
-        Map<String, String> getSecure = new HashMap<>();
-        Map<String, String> postSecure = new HashMap<>();
-        IvParameterSpec ivSpec = null;
-        try {
-            Cipher cipher = Cipher.getInstance("AES/CBC/PKCS7Padding", "BC");
-            byte[] iv = new byte[cipher.getBlockSize()];
-            new SecureRandom().nextBytes(iv);
-            ivSpec = new IvParameterSpec(iv);
-            cipher.init(Cipher.ENCRYPT_MODE, secretKey, ivSpec);
-            for (Map.Entry<String, String> entry : get.entrySet()) {
-                getSecure.put(
-                        Base64.getEncoder().encodeToString(cipher.doFinal(entry.getKey().getBytes())),
-                        Base64.getEncoder().encodeToString(cipher.doFinal(entry.getValue().getBytes()))
-                );
-            }
-            for (Map.Entry<String, String> entry : post.entrySet()) {
-                postSecure.put(
-                        Base64.getEncoder().encodeToString(cipher.doFinal(entry.getKey().getBytes())),
-                        Base64.getEncoder().encodeToString(cipher.doFinal(entry.getValue().getBytes()))
-                );
-            }
-            postSecure.put("key", Base64.getEncoder().encodeToString(secretKey.getEncoded()));
-            postSecure.put("iv", Base64.getEncoder().encodeToString(iv));
-        } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
-        } catch (NoSuchProviderException e) {
-            e.printStackTrace();
-        } catch (NoSuchPaddingException e) {
-            e.printStackTrace();
-        } catch (InvalidKeyException e) {
-            e.printStackTrace();
-        } catch (BadPaddingException e) {
-            e.printStackTrace();
-        } catch (IllegalBlockSizeException e) {
-            e.printStackTrace();
-        } catch (InvalidAlgorithmParameterException e) {
-            e.printStackTrace();
-        }
+//        Map<String, String> getSecure = new HashMap<>();
+//        Map<String, String> postSecure = new HashMap<>();
+//        IvParameterSpec ivSpec = null;
+//        try {
+//            Cipher cipher = Cipher.getInstance("AES/CBC/PKCS7Padding", "BC");
+//            byte[] iv = new byte[cipher.getBlockSize()];
+//            new SecureRandom().nextBytes(iv);
+//            ivSpec = new IvParameterSpec(iv);
+//            cipher.init(Cipher.ENCRYPT_MODE, secretKey, ivSpec);
+//            for (Map.Entry<String, String> entry : get.entrySet()) {
+//                getSecure.put(
+//                        Base64.getEncoder().encodeToString(cipher.doFinal(entry.getKey().getBytes())),
+//                        Base64.getEncoder().encodeToString(cipher.doFinal(entry.getValue().getBytes()))
+//                );
+//            }
+//            for (Map.Entry<String, String> entry : post.entrySet()) {
+//                postSecure.put(
+//                        Base64.getEncoder().encodeToString(cipher.doFinal(entry.getKey().getBytes())),
+//                        Base64.getEncoder().encodeToString(cipher.doFinal(entry.getValue().getBytes()))
+//                );
+//            }
+//            postSecure.put("key", Base64.getEncoder().encodeToString(secretKey.getEncoded()));
+//            postSecure.put("iv", Base64.getEncoder().encodeToString(iv));
+//        } catch (NoSuchAlgorithmException e) {
+//            e.printStackTrace();
+//        } catch (NoSuchProviderException e) {
+//            e.printStackTrace();
+//        } catch (NoSuchPaddingException e) {
+//            e.printStackTrace();
+//        } catch (InvalidKeyException e) {
+//            e.printStackTrace();
+//        } catch (BadPaddingException e) {
+//            e.printStackTrace();
+//        } catch (IllegalBlockSizeException e) {
+//            e.printStackTrace();
+//        } catch (InvalidAlgorithmParameterException e) {
+//            e.printStackTrace();
+//        }
+//        httpRequest.withGet(getSecure);
+//        httpRequest.withPost(postSecure);
 
-        httpRequest.withGet(getSecure);
-        httpRequest.withPost(postSecure);
+        httpRequest.withGet(get);
+        httpRequest.withPost(post);
 
         try {
 
             Cipher cipher = Cipher.getInstance("AES/ECB/PKCS7Padding", "BC");
-            cipher.init(Cipher.DECRYPT_MODE, secretKey, ivSpec);
+//            cipher.init(Cipher.DECRYPT_MODE, secretKey, ivSpec);
 
             ClientResponse clientResponse = client.handleHttpRequest(httpRequest);
 
@@ -147,9 +145,10 @@ class LocMessAPIClientBase {
                 String response = cipher.doFinal(byteResponse).toString();
                 return (T) new JSONArray(response);
             } else if (endpoint.getResponseClass().equals(JSONObject.class)) {
-                byte[] byteResponse = Base64.getDecoder().decode(clientResponse.getResponse());
-                String response = cipher.doFinal(byteResponse).toString();
-                return (T) new JSONObject(response);
+//                byte[] byteResponse = Base64.getDecoder().decode(clientResponse.getResponse());
+//                String response = cipher.doFinal(byteResponse).toString();
+//                return (T) new JSONObject(response);
+                return (T) new JSONObject(clientResponse.getResponse());
             } else if (endpoint.getResponseClass().equals(File.class)) {
                 byte[] byteResponse = Base64.getDecoder().decode(clientResponse.getResponse());
                 return (T) cipher.doFinal(byteResponse);
@@ -165,8 +164,8 @@ class LocMessAPIClientBase {
         } catch (NoSuchPaddingException |
                 NoSuchAlgorithmException |
                 NoSuchProviderException |
-                InvalidKeyException |
-                BadPaddingException | IllegalBlockSizeException | InvalidAlgorithmParameterException e) {
+//                InvalidKeyException |
+                BadPaddingException | IllegalBlockSizeException /*| InvalidAlgorithmParameterException*/ e) {
             e.printStackTrace();
             throw new APIException(e);
         }

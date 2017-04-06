@@ -13,7 +13,7 @@ public interface LocMessAPIClient {
 
     boolean login(String userid, String password);
 
-    void logout(String token);
+    void logout();
 
     Map<String, Map<String, String>> listLocations(String token);
 

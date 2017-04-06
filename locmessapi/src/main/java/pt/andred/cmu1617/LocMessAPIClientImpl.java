@@ -100,24 +100,8 @@ public final class LocMessAPIClientImpl extends LocMessAPIClientBase implements 
     }
 
     @Override
-    public void logout(String token){
-        Map<String, String> post = new HashMap<>();
-        post.put("token", token);
-        for (int i = 0; i < TRIES; i++) {
-            JSONObject response = invoke(Endpoint.SIGN_UP, _auth, null, post);
-            if (response == null) {
-                continue;
-            }
-            if (!response.has("status")) continue;
-            if (response.getInt("status") != 200) {
-                throw new APIException("HTTP Error: " +
-                        response.getInt("status") + " " +
-                        (response.has("description") ? response.getString("description") : ""));
-            }
-            _auth = null;
-            return;
-        }
-        throw new APIException("Couldn't connect to server");
+    public void logout(){
+        _auth = null;
     }
 
     @Override

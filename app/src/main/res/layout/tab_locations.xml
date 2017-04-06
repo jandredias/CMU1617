@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:id="@+id/ActivityChat_inner_linear"
+    android:background="@color/colorPrimary"
+    android:elevation="5dp"
+    android:layout_height="55dp"
+    android:orientation="horizontal">
+    <LinearLayout
+        android:id="@+id/tab_outer_0"
+        android:orientation="vertical"
+        android:layout_weight="1"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+        <TextView
+            android:id="@+id/text_0"
+            android:gravity="center"
+            android:layout_weight="1"
+            android:textColor="@color/white"
+            android:textSize="18sp"
+            android:text="@string/gps_string"
+            android:layout_height="match_parent"
+            android:layout_width="match_parent"/>
+
+        <LinearLayout
+            android:id="@+id/underline_0"
+            android:layout_width="match_parent"
+            android:layout_height="3dp"
+            android:background="@color/white"
+            android:orientation="horizontal" />
+    </LinearLayout>
+
+
+    <LinearLayout
+        android:id="@+id/tab_outer_1"
+        android:orientation="vertical"
+        android:layout_weight="1"
+        android:alpha="0.6"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <TextView
+            android:id="@+id/text_1"
+            android:gravity="center"
+            android:layout_weight="1"
+            android:textColor="@color/white"
+            android:textSize="18sp"
+            android:text="@string/wifi_string"
+            android:layout_height="match_parent"
+            android:layout_width="match_parent" />
+
+        <LinearLayout
+            android:id="@+id/underline_1"
+            android:layout_width="match_parent"
+            android:layout_height="3dp"
+            android:background="@color/white"
+            android:orientation="horizontal" />
+    </LinearLayout>
+</LinearLayout>

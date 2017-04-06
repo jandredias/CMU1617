@@ -17,26 +17,23 @@
         android:orientation="vertical"
         tools:context="cmu1617.andred.pt.locmess.MainActivity">
 
-        <FrameLayout
-            android:id="@+id/content"
+        <android.support.design.widget.CoordinatorLayout
+            android:id="@+id/coordinator"
             android:layout_width="match_parent"
-            android:layout_height="0dp"
+            android:layout_height="match_parent"
             android:layout_weight="1">
 
-            <TextView
-                android:id="@+id/message"
+            <FrameLayout
+                android:id="@+id/main_container"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="@dimen/activity_vertical_margin"
-                android:layout_marginLeft="@dimen/activity_horizontal_margin"
-                android:layout_marginRight="@dimen/activity_horizontal_margin"
-                android:layout_marginTop="@dimen/activity_vertical_margin"
-                android:text="@string/title_home" />
-
-        </FrameLayout>
+                android:layout_height="match_parent"
+                android:layout_above="@+id/three_buttom_navigation"
+                android:layout_alignParentTop="true">
+            </FrameLayout>
+        </android.support.design.widget.CoordinatorLayout>
 
         <android.support.design.widget.BottomNavigationView
-            android:id="@+id/navigation"
+            android:id="@+id/three_buttom_navigation"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="bottom"
@@ -51,7 +48,7 @@
         <!--android:layout_height="match_parent" />-->
 
     <android.support.design.widget.NavigationView
-        android:id="@+id/nav_view"
+        android:id="@+id/left_menu"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:layout_gravity="start"

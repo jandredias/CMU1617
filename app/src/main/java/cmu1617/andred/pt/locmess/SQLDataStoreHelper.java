@@ -18,12 +18,20 @@ public class SQLDataStoreHelper extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase sqLiteDatabase) {
-        sqLiteDatabase.execSQL(DataStore.SQL_CREATE_CHATS_MESSAGES);
+        sqLiteDatabase.execSQL(DataStore.SQL_CREATE_WIFI_LOCATION);
+        sqLiteDatabase.execSQL(DataStore.SQL_CREATE_WIFI_LOCATION_SSID);
+
+
+
+
+        sqLiteDatabase.execSQL(DataStore.SQL_POPULATE_WIFI_LOCATION);
+        sqLiteDatabase.execSQL(DataStore.SQL_POPULATE_WIFI_LOCATION_SSID);
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase sqLiteDatabase, int i, int i1) {
-        sqLiteDatabase.execSQL(DataStore.SQL_DELETE_CHAT_ENTRIES);
+        sqLiteDatabase.execSQL(DataStore.SQL_DELETE_WIFI_LOCATION);
+        sqLiteDatabase.execSQL(DataStore.SQL_DELETE_WIFI_LOCATION_SSID);
         onCreate(sqLiteDatabase);
     }
 }

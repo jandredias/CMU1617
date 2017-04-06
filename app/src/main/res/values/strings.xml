@@ -18,9 +18,9 @@
     </string>
     <string name="title_activity_sign_up">Sign Up</string>
     <string name="title_activity_main">MainActivity</string>
-    <string name="title_home">Home</string>
+    <string name="title_list_locations">Locations</string>
     <string name="title_dashboard">Dashboard</string>
-    <string name="title_notifications">Notifications</string>
+    <string name="title_archive">Archive</string>
     <string name="title_activity_navigation_drawer">NavigationDrawer</string>
 
     <string name="navigation_drawer_open">Open navigation drawer</string>
@@ -32,4 +32,6 @@
     <string name="logout">logout</string>
     <string name="drawer_open">drawer_open</string>
     <string name="drawer_close">drawer_close</string>
+    <string name="gps_string">GPS</string>
+    <string name="wifi_string">WIFI</string>
 </resources>

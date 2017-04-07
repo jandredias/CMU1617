@@ -6,9 +6,6 @@ package cmu1617.andred.pt.locmess;
 
 public interface DataStore {
 
-
-
-
     String SQL_WIFI_LOCATION = "wifi_location";
     String SQL_WIFI_LOCATION_SSID = "wifi_location_ssid";
 

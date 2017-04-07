@@ -1,12 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical" android:layout_width="match_parent"
-    android:layout_height="match_parent">
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="horizontal"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="10dp" >
 
     <TextView
+        android:layout_alignParentRight="true"
+        android:id="@+id/location_number_questions"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:gravity="center"
+        android:textColor="@color/white"
+        android:background="@drawable/circle"
+        android:text="5"/>
+    <TextView
         android:id="@+id/location_name"
+        android:layout_toLeftOf="@id/location_number_questions"
+        android:layout_marginRight="20dp"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:text="lalala"/>
-
-</LinearLayout>
+        android:gravity="center_vertical"
+        android:paddingLeft="20dp"
+        android:textSize="18sp"
+        android:layout_height="50dp"
+        android:text="location_name"/>
+</RelativeLayout>

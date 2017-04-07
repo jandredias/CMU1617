@@ -15,7 +15,6 @@ import android.view.ViewGroup;
 
 public class LocationsFragment extends Fragment implements ViewPager.OnPageChangeListener {
     private static final String TAG = "LocationsFragment";
-    private SQLDataStoreHelper _dbHelper;
     private View _tab_outer0;
     private View _tab_outer1;
     private View _underline0;
@@ -23,19 +22,8 @@ public class LocationsFragment extends Fragment implements ViewPager.OnPageChang
     private ViewPager _mainViewPager;
 
 
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
 
-        _dbHelper = new SQLDataStoreHelper(getContext());
 
-    }
-
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        _dbHelper.close();
-    }
 
     @Override
     public View onCreateView(LayoutInflater inflater,

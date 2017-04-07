@@ -30,6 +30,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        _main_fragment = new LocationsFragment();
 
         // To  identify click on the drawer
         NavigationView navigationView = (NavigationView) findViewById(R.id.left_menu);

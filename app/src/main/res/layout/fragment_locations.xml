@@ -5,10 +5,9 @@
     android:orientation="vertical">
 
     <include layout="@layout/tab_locations" />
-    <FrameLayout
-        android:id="@+id/locations_frame"
+    <android.support.v4.view.ViewPager
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/locations_pager"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_alignParentTop="true">
-    </FrameLayout>
+        android:layout_height="match_parent" />
 </LinearLayout>

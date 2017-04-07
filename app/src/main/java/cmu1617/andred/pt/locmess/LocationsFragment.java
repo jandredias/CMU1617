@@ -13,14 +13,14 @@ import android.view.ViewGroup;
  * Created by miguel on 06/04/17.
  */
 
-public class LocationsFragment extends Fragment implements ViewPager.OnPageChangeListener, View.OnClickListener {
+public class LocationsFragment extends Fragment implements ViewPager.OnPageChangeListener {
     private static final String TAG = "LocationsFragment";
     private SQLDataStoreHelper _dbHelper;
-    private ViewPager _mainViewPager;
     private View _tab_outer0;
     private View _tab_outer1;
     private View _underline0;
     private View _underline1;
+    private ViewPager _mainViewPager;
 
 
     @Override
@@ -28,8 +28,6 @@ public class LocationsFragment extends Fragment implements ViewPager.OnPageChang
         super.onCreate(savedInstanceState);
 
         _dbHelper = new SQLDataStoreHelper(getContext());
-
-
 
     }
 
@@ -44,7 +42,7 @@ public class LocationsFragment extends Fragment implements ViewPager.OnPageChang
                              ViewGroup container,
                              Bundle savedInstanceState) {
 
-        View view = inflater.inflate(R.layout.locations, container, false);
+        View view = inflater.inflate(R.layout.fragment_locations, container, false);
         _mainViewPager = (ViewPager) view.findViewById(R.id.locations_pager);
         MainPageAdapter adapterViewPager = new MainPageAdapter(getChildFragmentManager());
         _mainViewPager.setAdapter(adapterViewPager);
@@ -56,23 +54,15 @@ public class LocationsFragment extends Fragment implements ViewPager.OnPageChang
         _underline0 = view.findViewById(R.id.underline_0);
         _underline1 = view.findViewById(R.id.underline_1);
 
-        _tab_outer0.setOnClickListener(this);
-        _tab_outer1.setOnClickListener(this);
+        ViewClickListener viewListener = new ViewClickListener();
+
+        _tab_outer0.setOnClickListener(viewListener);
+        _tab_outer1.setOnClickListener(viewListener);
 
         return view;
     }
 
-    @Override
-    public void onClick(View view) {
-        switch (view.getId()) {
-            case R.id.tab_outer_0:
-                _mainViewPager.setCurrentItem(0);
-                break;
-            case R.id.tab_outer_1:
-                _mainViewPager.setCurrentItem(1);
-                break;
-        }
-    }
+
 
     @Override
     public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
@@ -122,6 +112,22 @@ public class LocationsFragment extends Fragment implements ViewPager.OnPageChang
         @Override
         public int getCount() {
             return 2;
+        }
+    }
+    public class ViewClickListener implements View.OnClickListener {
+
+        @Override
+        public void onClick(View view) {
+            switch (view.getId()) {
+                case R.id.text_0:
+                case R.id.tab_outer_0:
+                    _mainViewPager.setCurrentItem(0);
+                    break;
+                case R.id.text_1:
+                case R.id.tab_outer_1:
+                    _mainViewPager.setCurrentItem(1);
+                    break;
+            }
         }
     }
 

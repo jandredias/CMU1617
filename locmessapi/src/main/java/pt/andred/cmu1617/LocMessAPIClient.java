@@ -1,5 +1,7 @@
 package pt.andred.cmu1617;
 
+import org.json.JSONObject;
+
 import java.util.List;
 import java.util.Map;
 
@@ -15,23 +17,23 @@ public interface LocMessAPIClient {
 
     void logout();
 
-    Map<String, Map<String, String>> listLocations(String token);
+    JSONObject listLocations();
 
-    void addLocation(String token, String name, String latitude, String longitude, int radius);
+    void addLocation(String name, String latitude, String longitude, int radius);
 
-    void addLocation(String token, String name, String... sddid);
+    void addLocation(String name, String... sddid);
 
-    void deleteLocation(String token, String locationId);
+    void deleteLocation(String locationId);
 
-    List<Map<String, Map<String, String>>> listMessages(String token);
+    List<Map<String, Map<String, String>>> listMessages();
 
-    void putMessage(String token, String message);
+    void putMessage(String message);
 
-    void editProfile(String token, String a);
+    void editProfile(String a);
 
-    void editProfileKeys(String token, String name, String value);
+    void editProfileKeys(String name, String value);
 
-    void removeProfileKeys(String token, String name);
+    void removeProfileKeys(String name);
 
-    Map<String, String> listProfileKeys(String token, String userid);
+    Map<String, String> listProfileKeys(String userid);
 }

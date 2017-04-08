@@ -31,6 +31,8 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         _main_fragment = new LocationsFragment();
+        final FragmentTransaction transaction = _fragmentManager.beginTransaction();
+        transaction.replace(R.id.main_container, _main_fragment).commit();
 
         // To  identify click on the drawer
         NavigationView navigationView = (NavigationView) findViewById(R.id.left_menu);

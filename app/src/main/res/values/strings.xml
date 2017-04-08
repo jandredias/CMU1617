@@ -34,4 +34,6 @@
     <string name="drawer_close">drawer_close</string>
     <string name="gps_string">GPS</string>
     <string name="wifi_string">WIFI</string>
+    <string name="title_activity_location_messages">LocationMessages</string>
+    <string name="username_already_exists">username already exists</string>
 </resources>

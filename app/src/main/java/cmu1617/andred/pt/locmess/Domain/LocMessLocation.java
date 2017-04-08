@@ -1,13 +1,16 @@
-package cmu1617.andred.pt.locmess;
+package cmu1617.andred.pt.locmess.Domain;
 
 import android.content.ContentValues;
 import android.database.Cursor;
+
+import cmu1617.andred.pt.locmess.DataStore;
+import cmu1617.andred.pt.locmess.SQLDataStoreHelper;
 
 /**
  * Created by miguel on 07/04/17.
  */
 
-class LocMessLocation {
+public class LocMessLocation {
 
     private String _id;
     private String _name;
@@ -34,7 +37,12 @@ class LocMessLocation {
         cursor.close();
     }
 
+    public String id(){
+        return _id;
+    }
+
     public void name(String name) {
+
         String[] selectionArgs = {_id};
         ContentValues values = new ContentValues();
         values.put("name", name);
@@ -42,6 +50,7 @@ class LocMessLocation {
                 values,
                 "location_id = ?",
                 selectionArgs);
+        _name = name;
     }
 
     public String name() {

@@ -56,6 +56,9 @@ public final class LocMessAPIClientImpl extends LocMessAPIClientBase implements 
                 continue;
             }
             if (!response.has("status")) continue;
+            if (response.getInt("status") == 500) {
+                return false;
+            }
             if (response.getInt("status") != 200) {
                 throw new APIException("HTTP Error: " +
                         response.getInt("status") + " " +
@@ -77,6 +80,9 @@ public final class LocMessAPIClientImpl extends LocMessAPIClientBase implements 
                 continue;
             }
             if (!response.has("status")) continue;
+            if (response.getInt("status") == 401) {
+                return false;
+            }
             if (response.getInt("status") != 200) {
                 throw new APIException("HTTP Error: " +
                         response.getInt("status") + " " +
@@ -105,13 +111,12 @@ public final class LocMessAPIClientImpl extends LocMessAPIClientBase implements 
     }
 
     @Override
-    public Map<String, Map<String, String>> listLocations(String token) {
-        return null;
-    }
-
-    public void addLocation(Map<String, String> post){
+    public JSONObject listLocations() {
+        //        if (_auth == null) {
+        //        }
         for (int i = 0; i < TRIES; i++) {
-            JSONObject response = invoke(Endpoint.SIGN_UP, _auth, null, post);
+
+            JSONObject response = invoke(Endpoint.LIST_LOCATIONS, _auth, null, null);
             if (response == null) {
                 continue;
             }
@@ -121,15 +126,15 @@ public final class LocMessAPIClientImpl extends LocMessAPIClientBase implements 
                         response.getInt("status") + " " +
                         (response.has("description") ? response.getString("description") : ""));
             }
-            if (!response.has("success")) {
-                throw new APIException("Response is malformed. Token missing");
-            }
-            if (response.getBoolean("success")) {
-                if (!response.has("access_token")) {
-                    throw new APIException("Response is malformed. access_token missing");
-                } else if (!response.has("refresh_token")) {
-                    throw new APIException("Response is malformed. refresh_token missing");
+            if (response.getInt("status") == 200) {
+                if (!response.has("wifi")) {
+                    throw new APIException("Response is malformed. wifi missing");
+                } else if (!response.has("coordinates")) {
+                    throw new APIException("Response is malformed. coordinates missing");
                 }
+
+                return response;
+
             } else {
                 if (!response.has("error")) {
                     throw new APIException("Response is malformed. error missing");
@@ -144,8 +149,15 @@ public final class LocMessAPIClientImpl extends LocMessAPIClientBase implements 
         }
         throw new APIException("Couldn't connect to server");
     }
+
+    public void addLocation(Map<String, String> post){
+        for (int i = 0; i < TRIES; i++) {
+
+        }
+        throw new APIException("Couldn't connect to server");
+    }
     @Override
-    public void addLocation(String token, String name, String latitude, String longitude, int radius) {
+    public void addLocation(String name, String latitude, String longitude, int radius) {
         Map<String, String> post = new HashMap<>();
         post.put("location_type", "coordinates");
         post.put("name", name);
@@ -156,7 +168,7 @@ public final class LocMessAPIClientImpl extends LocMessAPIClientBase implements 
     }
 
     @Override
-    public void addLocation(String token, String name, String... sddid) {
+    public void addLocation(String name, String... sddid) {
         Map<String, String> post = new HashMap<>();
         post.put("location_type", "wifi");
         post.put("name", name);
@@ -165,37 +177,37 @@ public final class LocMessAPIClientImpl extends LocMessAPIClientBase implements 
     }
 
     @Override
-    public void deleteLocation(String token, String locationId) {
+    public void deleteLocation(String locationId) {
         // TODO: 02/04/17
     }
 
     @Override
-    public List<Map<String, Map<String, String>>> listMessages(String token) {
+    public List<Map<String, Map<String, String>>> listMessages() {
         return null;
     }
 
     @Override
-    public void putMessage(String token, String message) {
+    public void putMessage(String message) {
 
     }
 
     @Override
-    public void editProfile(String token, String a) {
+    public void editProfile(String a) {
 
     }
 
     @Override
-    public void editProfileKeys(String token, String name, String value) {
+    public void editProfileKeys(String name, String value) {
 
     }
 
     @Override
-    public void removeProfileKeys(String token, String name) {
+    public void removeProfileKeys(String name) {
 
     }
 
     @Override
-    public Map<String, String> listProfileKeys(String token, String userid) {
+    public Map<String, String> listProfileKeys(String userid) {
         return null;
     }
 }

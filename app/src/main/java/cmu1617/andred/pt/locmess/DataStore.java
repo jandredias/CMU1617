@@ -21,11 +21,11 @@ public interface DataStore {
     String SQL_CREATE_WIFI_LOCATION =
             "CREATE TABLE " + SQL_WIFI_LOCATION + " (" +
             "location_id INT NOT NULL," +
-            "name VARCHAR(255) NOT NULL)";
+            "name VARCHAR(255) )";
     String SQL_CREATE_WIFI_LOCATION_SSID =
             "CREATE TABLE " + SQL_WIFI_LOCATION_SSID + " (" +
             "location_id INT NOT NULL," +
-            "ssid VARCHAR(255) NOT NULL)";
+            "ssid VARCHAR(255) )";
 
 
     String SQL_POPULATE_WIFI_LOCATION =

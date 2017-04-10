@@ -3,7 +3,6 @@ package cmu1617.andred.pt.locmess;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.TypedArray;
-import android.database.Cursor;
 import android.graphics.Canvas;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
@@ -27,21 +26,28 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+import cmu1617.andred.pt.locmess.Domain.GPSLocation;
 import cmu1617.andred.pt.locmess.Domain.LocMessLocation;
+import cmu1617.andred.pt.locmess.Domain.WIFILocation;
 import pt.andred.cmu1617.LocMessAPIClientImpl;
 
 /**
  * Created by miguel on 07/04/17.
  */
 
-public class LocationFragment extends Fragment {
+public abstract class LocationFragment extends Fragment {
     private String Tag = "Location Fragment";
     private RecyclerView mRecyclerView;
-    private RecyclerViewAdapter mAdapter;
     private RecyclerView.LayoutManager mLayoutManager;
-    private SQLDataStoreHelper _dbHelper;
     private SwipeRefreshLayout _refreshLayout;
     private View _emptyView;
+
+    protected RecyclerViewAdapter mAdapter;
+    protected SQLDataStoreHelper _dbHelper;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -70,20 +76,12 @@ public class LocationFragment extends Fragment {
         mRecyclerView.setLayoutManager(mLayoutManager);
 
         // specify an adapter (see also next example)
-        mAdapter = new RecyclerViewAdapter();
+        mAdapter = createNewAdapter();
         mRecyclerView.setAdapter(mAdapter);
         mRecyclerView.addItemDecoration(new DividerItemDecoration(getContext(), LinearLayoutManager.VERTICAL));
         mRecyclerView.setItemAnimator(new DefaultItemAnimator());
 
-//        _noMessagesLayout = v.findViewById(R.id.empty_chats);
-//
-//        if (_noMessagesLayout != null) {
-//            if (_adapter.getItemCount() != 0) {
-//                _noMessagesLayout.setVisibility(View.GONE);
-//            } else {
-//                _noMessagesLayout.setVisibility(View.VISIBLE);
-//            }
-//        }
+
         mRecyclerView.addOnItemTouchListener(new RecyclerTouchListener(getContext(), mRecyclerView, new ClickListener() {
             @Override
             public void onClick(View view, int position) {
@@ -132,6 +130,8 @@ public class LocationFragment extends Fragment {
         return view;
     }
 
+    public abstract RecyclerViewAdapter createNewAdapter();
+
     private void treatEmptyView(){
 
         if (_emptyView  != null) {
@@ -143,70 +143,6 @@ public class LocationFragment extends Fragment {
         }
     }
 
-    private class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapter.ViewHolder> {
-
-        @Override
-        public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-            View l = LayoutInflater.from(parent.getContext()).inflate(R.layout.location_item, parent, false);
-            return new ViewHolder(l);
-        }
-
-        public LocMessLocation getItem(int position) {
-            Cursor cursor = _dbHelper.getReadableDatabase().query(
-                    DataStore.SQL_WIFI_LOCATION, //table name
-                    DataStore.SQL_WIFI_LOCATION_COLUMNS, //columns to return
-                    null, //selection string
-                    null, //selection args
-                    null, //groupBy
-                    null, //having
-                    null //orderBy
-            );
-            if (cursor.getCount() == 0) {
-                cursor.close();
-                return null;
-            }
-            cursor.moveToPosition(cursor.getCount() - position - 1);
-
-            return new LocMessLocation(_dbHelper, cursor.getString(0));
-        }
-
-        @Override
-        public void onBindViewHolder(ViewHolder holder, int position) {
-            LocMessLocation location = getItem(position);
-            ViewHolder v = holder;
-
-            v._name.setText(location.name());
-        }
-
-        @Override
-        public int getItemCount() {
-            Cursor cursor = _dbHelper.getReadableDatabase().query(
-                    DataStore.SQL_WIFI_LOCATION, //table name
-                    DataStore.SQL_WIFI_LOCATION_COLUMNS, //columns to return
-                    null, //selection string
-                    null, //selection args
-                    null, //groupBy
-                    null, //having
-                    null //orderBy
-            );
-            int c = cursor.getCount();
-            cursor.close();
-            return c;
-        }
-
-        class ViewHolder extends RecyclerView.ViewHolder {
-            View _holder;
-            TextView _name;
-
-
-
-            ViewHolder(View itemView) {
-                super(itemView);
-                _holder = itemView;
-                _name = (TextView) itemView.findViewById(R.id.location_name);
-            }
-        }
-    }
     private class DividerItemDecoration extends RecyclerView.ItemDecoration {
 
         private final int[] ATTRS = new int[]{
@@ -286,6 +222,43 @@ public class LocationFragment extends Fragment {
         }
     }
 
+    protected abstract class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapter.ViewHolder> {
+
+        @Override
+        public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+            View l = LayoutInflater.from(parent.getContext()).inflate(R.layout.location_item, parent, false);
+            return new ViewHolder(l);
+        }
+
+        @Override
+        public abstract int getItemCount();
+        public abstract LocMessLocation getItem(int position);
+
+        @Override
+        public void onBindViewHolder(ViewHolder holder, int position) {
+            LocMessLocation location = getItem(position);
+            ViewHolder v = holder;
+
+            v._name.setText(location.name());
+        }
+
+
+
+        class ViewHolder extends RecyclerView.ViewHolder {
+            View _holder;
+            TextView _name;
+
+
+
+            ViewHolder(View itemView) {
+                super(itemView);
+                _holder = itemView;
+                _name = (TextView) itemView.findViewById(R.id.location_name);
+            }
+        }
+    }
+
+
     /**
      * Represents an asynchronous login/registration task used to authenticate
      * the user.
@@ -313,21 +286,21 @@ public class LocationFragment extends Fragment {
                     JSONObject location = wifiMap.getJSONObject(i);
                     String name = location.getString("name");
                     String location_id = location.getString("location_id");
-                    String[] ssid_list = location.getString("list").split(",");
-                    Log.d(Tag,"new location");
-                    LocMessLocation loc = new LocMessLocation(_dbHelper, location_id);
-                    loc.name(name);
+                    List<String> ssidList = new ArrayList<String>(Arrays.asList(location.getString("list").split(",")));
+                    Log.d(Tag,"new WIFI location");
+                    WIFILocation loc = new WIFILocation(_dbHelper, location_id);
+                    loc.completeObject(name,ssidList);
                 }
                 for (int i = 0; i < gpsMap.length(); i++) {
                     JSONObject location = gpsMap.getJSONObject(i);
                     String name = location.getString("name");
                     String location_id = location.getString("location_id");
-                    String latitude = location.getString("latitude");
-                    String longitude = location.getString("longitude");
-                    String radius = location.getString("radius");
-                    Log.d(Tag,"new location");
-                    LocMessLocation loc = new LocMessLocation(_dbHelper, location_id);
-                    loc.name(name);
+                    double latitude = location.getDouble("latitude");
+                    double longitude = location.getDouble("longitude");
+                    int radius = location.getInt("radius");
+                    Log.d(Tag,"new GPS location");
+                    GPSLocation loc = new GPSLocation(_dbHelper, location_id);
+                    loc.completeObject(name, latitude, longitude, radius);
 //                    LocMessLocation loc = new LocMessLocation(_dbHelper, location_id);
                 }
             } catch (JSONException e) {
@@ -342,11 +315,13 @@ public class LocationFragment extends Fragment {
             if (_refreshLayout != null) {
                 _refreshLayout.setRefreshing(false);
             }
-            RecyclerViewAdapter newA = new RecyclerViewAdapter();
+            RecyclerViewAdapter newA = createNewAdapter();
 
 
             mRecyclerView.swapAdapter(newA,true);
             mAdapter = newA;
+            treatEmptyView();
+
 
         }
 

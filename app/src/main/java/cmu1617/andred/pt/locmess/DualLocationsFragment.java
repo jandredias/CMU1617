@@ -89,9 +89,9 @@ public class LocationsFragment extends Fragment implements ViewPager.OnPageChang
         public Fragment getItem(int position) {
             switch (position) {
                 case 0:
-                    return new WifiLocationsFragment();
-                case 1:
                     return new GPSLocationsFragment();
+                case 1:
+                    return new WifiLocationsFragment();
                 default:
                     return null;
             }

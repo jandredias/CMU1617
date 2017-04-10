@@ -36,4 +36,17 @@
     <string name="wifi_string">WIFI</string>
     <string name="title_activity_location_messages">LocationMessages</string>
     <string name="username_already_exists">username already exists</string>
+    <string name="post_message">Post Message</string>
+    <string name="server_mode">Server Mode</string>
+    <string name="centralized_mode">Centralized Mode</string>
+    <string name="post_message_title">Add a Message</string>
+
+    <string-array name="equal_different_array">
+        <item>≠</item>
+        <item>==</item>
+    </string-array>
+    <string-array name="keywords_array">
+        <item>profession</item>
+        <item>damn</item>
+    </string-array>
 </resources>

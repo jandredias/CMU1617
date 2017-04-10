@@ -1,9 +1,166 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context="cmu1617.andred.pt.locmess.NewMessageActivity">
 
-</android.support.constraint.ConstraintLayout>
+    <ScrollView  xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:id="@+id/scroll_view_new_message"
+        android:fadeScrollbars="false"
+        tools:context="cmu1617.andred.pt.locmess.NewMessageActivity">
+        <LinearLayout
+            android:id="@+id/container_new_message"
+            android:orientation="vertical"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+
+            android:layout_margin="20dip">
+            <TextView
+                android:textSize="15sp"
+                android:id="@+id/post_message_title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/post_message_title"/>
+
+            <android.support.design.widget.TextInputLayout
+                android:id="@+id/post_message_box"
+                android:layout_below="@id/post_message_title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:errorEnabled="true"
+                android:gravity="center_horizontal" >
+
+                <android.support.design.widget.TextInputEditText
+                    android:id="@+id/post_message"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/post_message_title"
+                    android:inputType="textPersonName"
+                    android:hint="@string/post_message" />
+            </android.support.design.widget.TextInputLayout>
+
+            <LinearLayout
+                android:id="@+id/send_mode_box"
+
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:weightSum="2"
+                android:layout_below="@id/post_message_box">
+
+                <Switch
+                    android:id="@+id/switch_send_mode"
+                    android:layout_width="0dp"
+                    android:layout_weight="2"
+                    android:layout_height="wrap_content"
+                    android:textSize="15sp"
+                    android:text="@string/server_mode" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:gravity="center_vertical"
+                    android:textSize="15sp"
+                    android:layout_height="match_parent"
+                    android:layout_marginStart="40dp"
+
+                    android:text="@string/centralized_mode"/>
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/date_constraint"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/send_mode_box"
+                android:orientation="vertical">
+                <!--<android.support.design.widget.TextInputLayout-->
+                    <!--android:id="@+id/chose_date_time_begin_layout"-->
+                    <!--android:layout_width="match_parent"-->
+                    <!--android:layout_height="wrap_content"-->
+                    <!--android:layout_marginEnd="40dp"-->
+                    <!--android:layout_marginStart="40dp"-->
+                    <!--app:errorEnabled="true">-->
+
+                    <EditText
+                        android:layout_marginEnd="40dp"
+                        android:layout_marginBottom="10dp"
+                        android:focusable="false"
+                        android:layout_marginStart="40dp"
+                        android:id="@+id/edit_start_text"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="datetime"
+                        android:gravity="center_horizontal"
+                        android:hint="From: 13/3/2013 - 21:14" />
+
+                <!--</android.support.design.widget.TextInputLayout>-->
+                <!--<android.support.design.widget.TextInputLayout-->
+                    <!--android:id="@+id/chose_date_time_end_layout"-->
+                    <!--android:layout_width="match_parent"-->
+                    <!--android:layout_height="wrap_content"-->
+                    <!--android:layout_marginEnd="40dp"-->
+                    <!--android:layout_marginStart="40dp"-->
+                    <!--app:errorEnabled="true">-->
+
+                    <EditText
+                        android:id="@+id/edit_end_text"
+                        android:gravity="center_horizontal"
+                        android:layout_width="match_parent"
+                        android:focusable="false"
+                        android:layout_marginEnd="40dp"
+                        android:layout_marginStart="40dp"
+                        android:layout_height="wrap_content"
+                        android:inputType="datetime"
+                        android:hint="Until: 13/3/2013 - 21:14" />
+
+                <!--</android.support.design.widget.TextInputLayout>-->
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="fill_parent"
+                android:id="@+id/list_constraints"
+                android:orientation="vertical"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp" />
+
+            <android.support.design.widget.CoordinatorLayout
+                android:id="@+id/add_constraint_box"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/list_constraints"
+                android:layout_margin="10dp">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginStart="40dp"
+                    android:textSize="20sp"
+                    android:text="Add Constraint"/>
+
+                <android.support.design.widget.FloatingActionButton
+                    android:id="@+id/add_constraint"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:layout_gravity="end"
+                    android:layout_marginEnd="50dp"
+                    android:layout_marginTop="15dp"
+                    android:layout_marginBottom="15dp"
+                    android:backgroundTint="@color/colorAccent"
+                    android:tint="@color/white"
+                    app:srcCompat="@drawable/ic_add"/>
+
+            </android.support.design.widget.CoordinatorLayout >
+
+            <Button
+                android:id="@+id/send_new_message_to_server_button"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:layout_marginTop="25dp"
+                android:layout_marginEnd="40dp"
+                android:layout_marginStart="40dp"
+                android:layout_below="@id/add_constraint_box"
+                android:text="Create post message"
+                />
+
+        </LinearLayout>
+
+    </ScrollView >

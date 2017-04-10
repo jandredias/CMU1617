@@ -30,7 +30,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        _main_fragment = new LocationsFragment();
+        _main_fragment = new DualLocationsFragment();
         final FragmentTransaction transaction = _fragmentManager.beginTransaction();
         transaction.replace(R.id.main_container, _main_fragment).commit();
 
@@ -77,7 +77,7 @@ public class MainActivity extends AppCompatActivity {
                 int id = item.getItemId();
                 switch (id){
                     case R.id.navigation_locations:
-                        _main_fragment = new LocationsFragment();
+                        _main_fragment = new DualLocationsFragment();
                         break;
                     case R.id.navigation_dashboard:
                         _main_fragment = new DashboardFragment();

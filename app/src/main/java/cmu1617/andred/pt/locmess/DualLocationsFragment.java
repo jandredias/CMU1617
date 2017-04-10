@@ -13,8 +13,8 @@ import android.view.ViewGroup;
  * Created by miguel on 06/04/17.
  */
 
-public class LocationsFragment extends Fragment implements ViewPager.OnPageChangeListener {
-    private static final String TAG = "LocationsFragment";
+public class DualLocationsFragment extends Fragment implements ViewPager.OnPageChangeListener {
+    private static final String TAG = "DualLocationsFragment";
     private View _tab_outer0;
     private View _tab_outer1;
     private View _underline0;

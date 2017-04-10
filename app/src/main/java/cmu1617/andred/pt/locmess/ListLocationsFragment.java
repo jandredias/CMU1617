@@ -39,7 +39,7 @@ import pt.andred.cmu1617.LocMessAPIClientImpl;
  * Created by miguel on 07/04/17.
  */
 
-public abstract class LocationFragment extends Fragment {
+public abstract class ListLocationsFragment extends Fragment {
     private String Tag = "Location Fragment";
     private RecyclerView mRecyclerView;
     private RecyclerView.LayoutManager mLayoutManager;
@@ -80,7 +80,6 @@ public abstract class LocationFragment extends Fragment {
         mRecyclerView.setAdapter(mAdapter);
         mRecyclerView.addItemDecoration(new DividerItemDecoration(getContext(), LinearLayoutManager.VERTICAL));
         mRecyclerView.setItemAnimator(new DefaultItemAnimator());
-
 
         mRecyclerView.addOnItemTouchListener(new RecyclerTouchListener(getContext(), mRecyclerView, new ClickListener() {
             @Override
@@ -143,7 +142,7 @@ public abstract class LocationFragment extends Fragment {
         }
     }
 
-    private class DividerItemDecoration extends RecyclerView.ItemDecoration {
+    protected static class DividerItemDecoration extends RecyclerView.ItemDecoration {
 
         private final int[] ATTRS = new int[]{
                 android.R.attr.listDivider

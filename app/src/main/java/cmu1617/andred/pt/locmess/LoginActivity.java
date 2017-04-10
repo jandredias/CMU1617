@@ -30,6 +30,7 @@ public class LoginActivity extends AppCompatActivity {
      * Keep track of the login task to ensure we can cancel it if requested.
      */
     private UserLoginTask mAuthTask = null;
+    protected SQLDataStoreHelper _db;
 
     // UI references.
     private AutoCompleteTextView mEmailView;
@@ -40,7 +41,18 @@ public class LoginActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+
+
         setContentView(R.layout.activity_login);
+        _db = new SQLDataStoreHelper(this);
+
+        //Automatic Login
+        Login login = new Login(_db);
+        if(!login.needNewLogin()) {
+            startActivity(new Intent(this, MainActivity.class));
+        }
+
         // Set up the login form.
         mEmailView = (AutoCompleteTextView) findViewById(R.id.email);
 
@@ -191,8 +203,12 @@ public class LoginActivity extends AppCompatActivity {
 
         @Override
         protected Boolean doInBackground(Void... params) {
-            boolean result = LocMessAPIClientImpl.getInstance().login(mEmail,mPassword); //Hopefully this will never fail
-            return result;
+            String[] result = LocMessAPIClientImpl.getInstance().login(mEmail,mPassword); //Hopefully this will never fail
+            String last = result[result.length-1];
+            if(last .equals( "true")) {
+                new Login(_db).registerLogin(mEmail,result[0],result[1]);
+            }
+            return last .equals( "true");
         }
 
         @Override

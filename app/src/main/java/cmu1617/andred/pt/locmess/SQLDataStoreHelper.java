@@ -9,7 +9,7 @@ import android.database.sqlite.SQLiteOpenHelper;
  */
 
 public class SQLDataStoreHelper extends SQLiteOpenHelper {
-    public static final int DATABASE_VERSION = 5;
+    public static final int DATABASE_VERSION = 8;
     public static final String DATABASE_NAME = "LocMess.db";
 
     public SQLDataStoreHelper(Context context) {
@@ -21,6 +21,9 @@ public class SQLDataStoreHelper extends SQLiteOpenHelper {
         sqLiteDatabase.execSQL(DataStore.SQL_CREATE_LOCATION);
         sqLiteDatabase.execSQL(DataStore.SQL_CREATE_WIFI_LOCATION_SSID);
         sqLiteDatabase.execSQL(DataStore.SQL_CREATE_GPS_LOCATION);
+        sqLiteDatabase.execSQL(DataStore.SQL_CREATE_LOGIN);
+        sqLiteDatabase.execSQL(DataStore.SQL_CREATE_KEYWORDS);
+        sqLiteDatabase.execSQL(DataStore.SQL_CREATE_USER_KEYWORDS);
 
 
 
@@ -34,6 +37,9 @@ public class SQLDataStoreHelper extends SQLiteOpenHelper {
         sqLiteDatabase.execSQL(DataStore.SQL_DELETE_LOCATION);
         sqLiteDatabase.execSQL(DataStore.SQL_DELETE_WIFI_LOCATION_SSID);
         sqLiteDatabase.execSQL(DataStore.SQL_DELETE_GPS_LOCATION);
+        sqLiteDatabase.execSQL(DataStore.SQL_DELETE_LOGIN);
+        sqLiteDatabase.execSQL(DataStore.SQL_DELETE_KEYWORDS);
+        sqLiteDatabase.execSQL(DataStore.SQL_DELETE_USER_KEYWORDS);
 
         onCreate(sqLiteDatabase);
     }

@@ -14,7 +14,7 @@ enum Endpoint {
 
     SET_KEYWORD("/dummy/dummy", Scope.AUTH, HttpMethod.POST, MediaType.parse("application/json; charset=utf-8"), JSONObject.class),
     DELETE_KEYWORD("/dummy/dummy", Scope.AUTH, HttpMethod.POST, MediaType.parse("application/json; charset=utf-8"), JSONObject.class),
-    LIST_KEYWORDS("/dummy/dummy", Scope.AUTH, HttpMethod.POST, MediaType.parse("application/json; charset=utf-8"), JSONObject.class),
+    LIST_KEYWORDS("/keyword/list", Scope.AUTH, HttpMethod.POST, MediaType.parse("application/json; charset=utf-8"), JSONObject.class),
     LIST_LOCATIONS("/location/list", Scope.AUTH, HttpMethod.POST, MediaType.parse("application/json; charset=utf-8"), JSONObject.class),
     CREATE_LOCATIONS("/dummy/dummy", Scope.AUTH, HttpMethod.POST, MediaType.parse("application/json; charset=utf-8"), JSONObject.class),
     DELETE_LOCATIONS("/dummy/dummy", Scope.AUTH, HttpMethod.POST, MediaType.parse("application/json; charset=utf-8"), JSONObject.class),

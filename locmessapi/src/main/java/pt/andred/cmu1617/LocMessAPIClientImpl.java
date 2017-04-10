@@ -1,5 +1,6 @@
 package pt.andred.cmu1617;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.util.HashMap;
@@ -31,6 +32,11 @@ public final class LocMessAPIClientImpl extends LocMessAPIClientBase implements 
                                 "",//Consumer Key
                                 "")); //Secret Key
         return _instance;
+    }
+
+    @Override
+    public void setAuth(String access_token, String refresh_token) {
+        _auth = new OAuthAuthorizationImpl(access_token,refresh_token);
     }
 
     @Override
@@ -70,7 +76,7 @@ public final class LocMessAPIClientImpl extends LocMessAPIClientBase implements 
     }
 
     @Override
-    public boolean login(String email, String password){
+    public String[] login(String email, String password){
         Map<String, String> post = new HashMap<>();
         post.put("user_id", email);
         post.put("password", password);
@@ -81,7 +87,7 @@ public final class LocMessAPIClientImpl extends LocMessAPIClientBase implements 
             }
             if (!response.has("status")) continue;
             if (response.getInt("status") == 401) {
-                return false;
+                return new String[] {"false"};
             }
             if (response.getInt("status") != 200) {
                 throw new APIException("HTTP Error: " +
@@ -98,7 +104,7 @@ public final class LocMessAPIClientImpl extends LocMessAPIClientBase implements 
                 _auth = new OAuthAuthorizationImpl(
                         response.getString("access_token"),
                         response.getString("refresh_token"));
-                return response.getInt("status") == 200;
+                return new String[] {response.getString("access_token") , response.getString("refresh_token") , "" + (response.getInt("status") == 200)};
             }
 //            return response.getBoolean("success");
         }
@@ -111,7 +117,7 @@ public final class LocMessAPIClientImpl extends LocMessAPIClientBase implements 
     }
 
     @Override
-    public JSONObject listLocations() {
+    public JSONObject  listLocations() {
         //        if (_auth == null) {
         //        }
         for (int i = 0; i < TRIES; i++) {
@@ -207,7 +213,38 @@ public final class LocMessAPIClientImpl extends LocMessAPIClientBase implements 
     }
 
     @Override
-    public Map<String, String> listProfileKeys(String userid) {
-        return null;
+    public JSONArray listKeywords() {
+        for (int i = 0; i < TRIES; i++) {
+
+            JSONObject response = invoke(Endpoint.LIST_KEYWORDS, _auth, null, null);
+            if (response == null) {
+                continue;
+            }
+            if (!response.has("status")) continue;
+            if (response.getInt("status") != 200) {
+                throw new APIException("HTTP Error: " +
+                        response.getInt("status") + " " +
+                        (response.has("description") ? response.getString("description") : ""));
+            }
+            if (response.getInt("status") == 200) {
+                if (!response.has("keywords")) {
+                    throw new APIException("Response is malformed. keywords missing");
+                }
+
+                return response.getJSONArray("keywords");
+
+            } else {
+                if (!response.has("error")) {
+                    throw new APIException("Response is malformed. error missing");
+                }
+                if (!response.has("description")) {
+                    throw new APIException("Response is malformed. error missing");
+                }
+                throw new APIException(
+                        response.getString("error"),
+                        response.getString("description"));
+            }
+        }
+        throw new APIException("Couldn't connect to server");
     }
 }

@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/scroll_view_new_message"
+    android:fadeScrollbars="false"
+    tools:context="cmu1617.andred.pt.locmess.ProfileActivity">
+    <LinearLayout
+        android:id="@+id/container_profile"
+        android:orientation="vertical"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+
+        android:layout_margin="20dip">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/profile_username_text_view"
+            android:gravity="center_horizontal"
+            android:textSize="20sp"
+            android:text="Username: Please Fix Me..."/>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:id="@+id/profile_list_keywords"
+            android:orientation="vertical"
+            android:layout_height="wrap_content"
+            tools:layout_editor_absoluteY="0dp"
+            tools:layout_editor_absoluteX="0dp" />
+
+        <android.support.design.widget.CoordinatorLayout
+            android:id="@+id/profile_add_constraint_box"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="10dp"
+            tools:layout_editor_absoluteY="0dp"
+            tools:layout_editor_absoluteX="8dp">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:layout_marginStart="40dp"
+                android:textSize="20sp"
+                android:text="Add Keyword"/>
+
+            <android.support.design.widget.FloatingActionButton
+                android:id="@+id/profile_add_constraint"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_gravity="end"
+                android:layout_marginEnd="50dp"
+                android:layout_marginTop="15dp"
+                android:layout_marginBottom="15dp"
+                android:backgroundTint="@color/colorAccent"
+                android:tint="@color/white"
+                app:srcCompat="@drawable/ic_add"/>
+
+        </android.support.design.widget.CoordinatorLayout >
+    </LinearLayout>
+</ScrollView>

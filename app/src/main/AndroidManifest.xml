@@ -36,12 +36,13 @@
         </activity>
         <activity
             android:name=".MainActivity"
-            android:label="@string/title_activity_main"></activity>
+            android:label="@string/title_activity_main" />
         <activity
             android:name=".ListMessagesActivity"
             android:label="@string/title_activity_location_messages"
             android:theme="@style/AppTheme.NoActionBar" />
-        <activity android:name=".NewMessageActivity"></activity>
+        <activity android:name=".NewMessageActivity" />
+        <activity android:name=".ProfileActivity"></activity>
     </application>
 
 </manifest>

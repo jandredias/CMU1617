@@ -29,7 +29,7 @@ public class SignUpActivity extends AppCompatActivity {
     /**
      * Keep track of the login task to ensure we can cancel it if requested.
      */
-    private UserLoginTask mAuthTask = null;
+    private UserSignUpTask mAuthTask = null;
 
     // UI references.
     private AutoCompleteTextView mEmailView;
@@ -140,7 +140,7 @@ public class SignUpActivity extends AppCompatActivity {
             // Show a progress spinner, and kick off a background task to
             // perform the user login attempt.
             showProgress(true);
-            mAuthTask = new UserLoginTask(email, password);
+            mAuthTask = new UserSignUpTask(email, password);
             mAuthTask.execute((Void) null);
         }
 
@@ -197,12 +197,12 @@ public class SignUpActivity extends AppCompatActivity {
      * Represents an asynchronous login/registration task used to authenticate
      * the user.
      */
-    public class UserLoginTask extends AsyncTask<Void, Void, Boolean> {
+    public class UserSignUpTask extends AsyncTask<Void, Void, Boolean> {
 
         private final String mEmail;
         private final String mPassword;
 
-        UserLoginTask(String email, String password) {
+        UserSignUpTask(String email, String password) {
             mEmail = email;
             mPassword = password;
         }
@@ -212,7 +212,11 @@ public class SignUpActivity extends AppCompatActivity {
 
             boolean result = LocMessAPIClientImpl.getInstance().signup(mEmail, mPassword);
             if(result) {
-                LocMessAPIClientImpl.getInstance().login(mEmail,mPassword); //Hopefully this will never fail
+                String[] loginResult = LocMessAPIClientImpl.getInstance().login(mEmail,mPassword); //Hopefully this will never fail
+                String last = loginResult [loginResult .length-1];
+                if(last .equals( "true")) {
+                    new Login(new SQLDataStoreHelper(getBaseContext())).registerLogin(mEmail,loginResult[0],loginResult[1]);
+                }
             }
             return result;
         }

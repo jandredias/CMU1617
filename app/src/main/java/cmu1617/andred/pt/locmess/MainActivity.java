@@ -50,12 +50,8 @@ public class MainActivity extends AppCompatActivity {
                      case R.id.profile:
                          Log.wtf("TAG", "profile pressed");
 
-//                         Intent intent = new Intent(this, SelfProfileActivity.class);
-//                         intent.putExtra("user_id", _profile.userid());
-//                         intent.putExtra("local", _profile.isLocal());
-//                         intent.putExtra("self", true);
-
-//                         startActivity(intent);
+                         Intent intent = new Intent(getBaseContext(), ProfileActivity.class);
+                         startActivity(intent);
                          break;
                      case R.id.logout:
                          Log.wtf("TAG", "logout pressed");

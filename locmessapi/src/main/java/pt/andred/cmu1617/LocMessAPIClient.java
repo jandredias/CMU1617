@@ -1,5 +1,6 @@
 package pt.andred.cmu1617;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.util.List;
@@ -9,11 +10,13 @@ public interface LocMessAPIClient {
 
     Authorization refreshAccessToken(Authorization oldAuthorization);
 
+    void setAuth(String access_token, String refresh_token);
+
 //    User getUserDetails();
 
     boolean signup(String email, String password);
 
-    boolean login(String userid, String password);
+    String[] login(String userid, String password);
 
     void logout();
 
@@ -35,5 +38,5 @@ public interface LocMessAPIClient {
 
     void removeProfileKeys(String name);
 
-    Map<String, String> listProfileKeys(String userid);
+    JSONArray listKeywords();
 }

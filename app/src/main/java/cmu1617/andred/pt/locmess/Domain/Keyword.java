@@ -7,52 +7,48 @@ import cmu1617.andred.pt.locmess.DataStore;
 import cmu1617.andred.pt.locmess.SQLDataStoreHelper;
 
 /**
- * Created by miguel on 07/04/17.
+ * Created by miguel on 10/04/17.
  */
 
-public class LocMessLocation {
-
-    protected String _id;
-    private String _name;
+public class Keyword {
     protected SQLDataStoreHelper _db;
+    protected String _id;
+    protected String _name;
 
-    public LocMessLocation(SQLDataStoreHelper dbHelper, String location_id) {
-        _db = dbHelper;
-        _id = location_id;
+    public Keyword  (SQLDataStoreHelper db, String id) {
+        _db = db;
+        _id = id;
+
         String[] selectionArgs = { _id };
         Cursor cursor = _db.getReadableDatabase().query(
-                DataStore.SQL_LOCATION, //table name
-                DataStore.SQL_LOCATION_COLUMNS, //columns to return
-                "location_id = ?",
+                DataStore.SQL_KEYWORDS, //table name
+                DataStore.SQL_KEYWORDS_COLUMNS, //columns to return
+                "keyword_id = ?",
                 selectionArgs,
                 null, null, null
         );
         if (cursor.getCount() == 0) {
             ContentValues values = new ContentValues();
-            values.put("location_id", _id);
-            _db.getWritableDatabase().insert(DataStore.SQL_LOCATION,
+            values.put("keyword_id", _id);
+            _db.getWritableDatabase().insert(DataStore.SQL_KEYWORDS,
                     null,
                     values);
         }
         cursor.close();
     }
 
-    protected void completeObject(String name) {
+    public void completeObject(String name) {
         this.name(name);
-    }
-
-    public String id(){
-        return _id;
     }
 
     public void name(String name) {
 
         String[] selectionArgs = {_id};
         ContentValues values = new ContentValues();
-        values.put("name", name);
-        _db.getWritableDatabase().update(DataStore.SQL_LOCATION,
+        values.put("keyword_name", name);
+        _db.getWritableDatabase().update(DataStore.SQL_KEYWORDS,
                 values,
-                "location_id = ?",
+                "keyword_id = ?",
                 selectionArgs);
         _name = name;
     }
@@ -60,9 +56,9 @@ public class LocMessLocation {
     public String name() {
         if (_name != null) return _name;
         String[] selectionArgs = { _id };
-        Cursor cursor = _db.getReadableDatabase().query(DataStore.SQL_LOCATION,
-                DataStore.SQL_LOCATION_COLUMNS,
-                "location_id = ?",
+        Cursor cursor = _db.getReadableDatabase().query(DataStore.SQL_KEYWORDS,
+                DataStore.SQL_KEYWORDS_COLUMNS,
+                "keyword_id = ?",
                 selectionArgs,
                 null, null, null);
 
@@ -70,8 +66,13 @@ public class LocMessLocation {
             return null;
         }
         cursor.moveToFirst();
-        _name = cursor.getString(1);
+        _name =cursor.getString(1);
         return _name;
     }
+
+    public String id(){
+        return _id;
+    }
+
 
 }

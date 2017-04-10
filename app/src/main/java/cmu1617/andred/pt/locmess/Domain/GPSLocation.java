@@ -41,7 +41,6 @@ public class GPSLocation extends LocMessLocation {
                 null,
                 values,
                 SQLiteDatabase.CONFLICT_REPLACE
-
         );
 
         _radius = radius;
@@ -98,7 +97,8 @@ public class GPSLocation extends LocMessLocation {
             return 0;
         }
         cursor.moveToFirst();
-        return cursor.getDouble(4);
+        _longitude =cursor.getDouble(4);
+        return _longitude;
     }
 
     public int radius() {
@@ -114,7 +114,8 @@ public class GPSLocation extends LocMessLocation {
             return 0;
         }
         cursor.moveToFirst();
-        return cursor.getInt(5);
+        _radius =cursor.getInt(5);
+        return _radius;
     }
 
     public double latitude() {
@@ -130,6 +131,7 @@ public class GPSLocation extends LocMessLocation {
             return 0;
         }
         cursor.moveToFirst();
-        return cursor.getDouble(3);
+        _latitude =cursor.getDouble(3);
+        return _latitude;
     }
 }

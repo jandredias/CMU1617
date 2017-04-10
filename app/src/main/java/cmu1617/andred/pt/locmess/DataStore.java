@@ -9,7 +9,9 @@ public interface DataStore {
     String SQL_LOCATION = "wifi_location";
     String SQL_WIFI_LOCATION_SSID = "wifi_location_ssid";
     String SQL_GPS_LOCATION = "gps_location";
-
+    String SQL_LOGIN = "sql_login";
+    String SQL_KEYWORDS = "sql_keywords";
+    String SQL_USER_KEYWORDS = "sql_keywords";
 
 
     String[] SQL_LOCATION_COLUMNS = {
@@ -26,6 +28,20 @@ public interface DataStore {
             "longitude",
             "radius"
     };
+    String[] SQL_LOGIN_COLUMNS = {
+            "username",
+            "access_token",
+            "refresh_token",
+            "valid"
+    };
+    String[] SQL_KEYWORDS_COLUMNS = {
+            "keyword_id",
+            "keyword_name"
+    };
+    String[] SQL_USER_KEYWORDS_COLUMNS = {
+            "keyword_id",
+            "keyword_value"
+    };
 
 
     String SQL_CREATE_LOCATION =
@@ -38,11 +54,32 @@ public interface DataStore {
             "ssid VARCHAR(255) )";
     String SQL_CREATE_GPS_LOCATION =
             "CREATE TABLE " + SQL_GPS_LOCATION + " (" +
-                    "location_id UNIQUE INT NOT NULL," +
+                    "location_id INT UNIQUE NOT NULL," +
                     "latitude DOUBLE PRECISION,"+
                     "longitude DOUBLE PRECISION,"+
                     "radius INT" +
                     ")";
+    String SQL_CREATE_LOGIN =
+            "CREATE TABLE " + SQL_LOGIN + " (" +
+                    "username VARCHAR(255) NOT NULL PRIMARY KEY," +
+                    "access_token VARCHAR(255) NOT NULL,"+
+                    "refresh_token VARCHAR(255) NOT NULL,"+
+                    "valid BOOLEAN NOT NULL"+
+                    ")";
+    String SQL_CREATE_KEYWORDS =
+            "CREATE TABLE " + SQL_KEYWORDS + " (" +
+                    "keyword_id INT NOT NULL" +
+                    "keyword_name VARCHAR(255)" +
+                    ")";
+    String SQL_CREATE_USER_KEYWORDS =
+            "CREATE TABLE " + SQL_USER_KEYWORDS+ " (" +
+                    "keyword_id INT NOT NULL PRIMARY KEY" +
+                    "keyword_value VARCHAR(255)" +
+                    ")";
+
+
+
+
 
 
     String SQL_POPULATE_WIFI_LOCATION =
@@ -71,6 +108,11 @@ public interface DataStore {
             "DROP TABLE IF EXISTS " + SQL_WIFI_LOCATION_SSID;
     String SQL_DELETE_GPS_LOCATION=
             "DROP TABLE IF EXISTS " + SQL_GPS_LOCATION;
-
+    String SQL_DELETE_LOGIN =
+            "DROP TABLE IF EXISTS " + SQL_LOGIN;
+    String SQL_DELETE_KEYWORDS=
+            "DROP TABLE IF EXISTS " + SQL_KEYWORDS;
+    String SQL_DELETE_USER_KEYWORDS=
+            "DROP TABLE IF EXISTS " + SQL_USER_KEYWORDS;
 
 }

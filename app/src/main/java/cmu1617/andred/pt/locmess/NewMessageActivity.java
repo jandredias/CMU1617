@@ -1,39 +1,28 @@
 package cmu1617.andred.pt.locmess;
 
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.List;
-
-import android.content.Intent;
-import android.os.Bundle;
 import android.app.DatePickerDialog;
 import android.app.Dialog;
 import android.app.TimePickerDialog;
+import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.DefaultItemAnimator;
-import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.format.DateFormat;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
-import android.view.ViewGroup;
-import android.view.animation.OvershootInterpolator;
 import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.LinearLayout;
-import android.widget.ScrollView;
-import android.widget.Scroller;
 import android.widget.Spinner;
 import android.widget.Switch;
-import android.widget.TextView;
 import android.widget.TimePicker;
-import android.widget.Toast;
 
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.List;
 
 import cmu1617.andred.pt.locmess.Domain.LocMessLocation;
 
@@ -94,6 +83,8 @@ public class NewMessageActivity extends AppCompatActivity {
 
 
         constraintsList = (LinearLayout) findViewById(R.id.list_constraints);
+
+
         sendMessageToServer.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

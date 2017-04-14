@@ -17,9 +17,10 @@ import android.widget.TextView;
 import java.util.ArrayList;
 import java.util.List;
 
+import cmu1617.andred.pt.locmess.AsyncTasks.GetKeyworksAsyncTask;
 import cmu1617.andred.pt.locmess.Domain.UserProfile;
 
-public class ProfileActivity extends AppCompatActivity {
+public class ProfileActivity extends AppCompatActivity implements OnTaskCompleted {
 
     private ArrayAdapter<String> _keywordListAdapter;
     private SQLDataStoreHelper _db;
@@ -29,6 +30,8 @@ public class ProfileActivity extends AppCompatActivity {
     private List<ViewHolder> _keywordsViewsList = new ArrayList<>();
     private FloatingActionButton _addKeywordButtom;
     private ArrayList<String> _keywordList = new ArrayList<>();
+    private GetKeyworksAsyncTask _task;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,9 +54,10 @@ public class ProfileActivity extends AppCompatActivity {
                 createNewKeywordView();
             }
         });
-        populateKeywordList();
         _keywordListAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, _keywordList);
-
+        populateKeywordList();
+        _task = new GetKeyworksAsyncTask(_db,this);
+        _task.execute();
 
 
     }
@@ -77,6 +81,11 @@ public class ProfileActivity extends AppCompatActivity {
         View vi = inflater.inflate(R.layout.keyword_profile_item, null);
         _keywordsListLayout.addView(vi);
         _keywordsViewsList.add(new ProfileActivity.ViewHolder(vi));
+    }
+
+    @Override
+    public void onTaskCompleted() {
+        populateKeywordList();
     }
 
     class ViewHolder extends RecyclerView.ViewHolder {

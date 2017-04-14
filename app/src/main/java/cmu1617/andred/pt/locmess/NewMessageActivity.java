@@ -44,7 +44,7 @@ public class NewMessageActivity extends AppCompatActivity implements OnTaskCompl
     private LinearLayout constraintsList;
     private List<ViewHolder> constraintsViewsList = new ArrayList<>();
     private GetKeyworksAsyncTask _task;
-    private List<String> _spinnerItems;
+    private List<String> _spinnerItems = new ArrayList<>();
     private ArrayAdapter<String> _adapter;
 
     @Override
@@ -106,6 +106,7 @@ public class NewMessageActivity extends AppCompatActivity implements OnTaskCompl
             }
         });
 
+        _adapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, _spinnerItems);
         populateSpinnerItems();
 
         _task = new GetKeyworksAsyncTask(dbHelper,this);
@@ -120,12 +121,10 @@ public class NewMessageActivity extends AppCompatActivity implements OnTaskCompl
                 null,
                 null, null, null
         );
-        _spinnerItems = new ArrayList<>();
+        _spinnerItems.clear();
         while (cursor.moveToNext()) {
             _spinnerItems.add(cursor.getString(1));
         }
-        _adapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, _spinnerItems);
-
     }
 
     private void addMessageToServer(){
@@ -181,8 +180,7 @@ public class NewMessageActivity extends AppCompatActivity implements OnTaskCompl
 
     @Override
     public void onTaskCompleted() {
-        _task.getList();
-
+        populateSpinnerItems();
     }
 
     class ViewHolder extends RecyclerView.ViewHolder {

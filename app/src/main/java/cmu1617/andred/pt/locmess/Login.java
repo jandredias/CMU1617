@@ -1,5 +1,6 @@
 package cmu1617.andred.pt.locmess;
 
+import android.content.ContentValues;
 import android.util.Log;
 
 import cmu1617.andred.pt.locmess.Domain.UserProfile;
@@ -30,7 +31,16 @@ public class Login {
         user.newLogin(username,accessToken,refreshToken);
     }
 
+    public void logout() {
+        String[] selectionArgs = {"1"};
+        ContentValues values = new ContentValues();
+        values.put("valid", 0);
+        _db.getWritableDatabase().update(DataStore.SQL_LOGIN,
+                values,
+                "valid = ?",
+                selectionArgs);
 
-
-
+        _db.getWritableDatabase().execSQL(DataStore.SQL_CREATE_USER_KEYWORDS);
+        _db.getWritableDatabase().execSQL(DataStore.SQL_DELETE_USER_KEYWORDS);
+    }
 }

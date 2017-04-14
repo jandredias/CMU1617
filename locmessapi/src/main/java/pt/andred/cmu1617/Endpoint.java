@@ -12,7 +12,7 @@ enum Endpoint {
     SIGN_UP("/user/signup", Scope.AUTH, HttpMethod.POST, MediaType.parse("application/json; charset=utf-8"), JSONObject.class),
     OAUTH_LOGIN("/oauth/login", Scope.AUTH, HttpMethod.POST, MediaType.parse("application/json; charset=utf-8"), JSONObject.class),
 
-    SET_KEYWORD("/dummy/dummy", Scope.AUTH, HttpMethod.POST, MediaType.parse("application/json; charset=utf-8"), JSONObject.class),
+    SET_KEYWORD("/user/keyword", Scope.AUTH, HttpMethod.POST, MediaType.parse("application/json; charset=utf-8"), JSONObject.class),
     DELETE_KEYWORD("/dummy/dummy", Scope.AUTH, HttpMethod.POST, MediaType.parse("application/json; charset=utf-8"), JSONObject.class),
     LIST_KEYWORDS("/keyword/list", Scope.AUTH, HttpMethod.POST, MediaType.parse("application/json; charset=utf-8"), JSONObject.class),
     LIST_LOCATIONS("/location/list", Scope.AUTH, HttpMethod.POST, MediaType.parse("application/json; charset=utf-8"), JSONObject.class),
@@ -20,7 +20,7 @@ enum Endpoint {
     DELETE_LOCATIONS("/dummy/dummy", Scope.AUTH, HttpMethod.POST, MediaType.parse("application/json; charset=utf-8"), JSONObject.class),
 
     GET_MESSAGES("/dummy/dummy", Scope.AUTH, HttpMethod.POST, MediaType.parse("application/json; charset=utf-8"), JSONObject.class),
-    PUT_MESSAGE("/dummy/dummy", Scope.AUTH, HttpMethod.POST, MediaType.parse("application/json; charset=utf-8"), JSONObject.class),
+    PUT_MESSAGE("/message/new", Scope.AUTH, HttpMethod.POST, MediaType.parse("application/json; charset=utf-8"), JSONObject.class),
 
     OAUTH_USER_DIALOG("/oauth/userdialog", Scope.AUTH, HttpMethod.GET, MediaType.parse("application/json; charset=utf-8"), JSONObject.class),
 

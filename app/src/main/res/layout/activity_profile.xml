@@ -1,64 +1,99 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/scroll_view_new_message"
-    android:fadeScrollbars="false"
-    tools:context="cmu1617.andred.pt.locmess.ProfileActivity">
-    <LinearLayout
-        android:id="@+id/container_profile"
-        android:orientation="vertical"
-        android:layout_width="fill_parent"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:gravity="center_horizontal"
+    android:orientation="vertical">
+    <!--android:paddingBottom="@dimen/activity_vertical_margin"-->
+    <!--android:paddingLeft="@dimen/activity_horizontal_margin"-->
+    <!--android:paddingRight="@dimen/activity_horizontal_margin"-->
+    <!--android:paddingTop="@dimen/activity_vertical_margin">-->
+    <include layout="@layout/progress_wheel"/>
+
+    <ScrollView
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-
-        android:layout_margin="20dip">
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/profile_username_text_view"
-            android:gravity="center_horizontal"
-            android:textSize="20sp"
-            android:text="Username: Please Fix Me..."/>
-
+        xmlns:tools="http://schemas.android.com/tools"
+        android:id="@+id/scroll_view_profile"
+        android:fadeScrollbars="false"
+        tools:context="cmu1617.andred.pt.locmess.ProfileActivity">
         <LinearLayout
-            android:layout_width="match_parent"
-            android:id="@+id/profile_list_keywords"
+            android:id="@+id/container_profile"
             android:orientation="vertical"
+            android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            tools:layout_editor_absoluteY="0dp"
-            tools:layout_editor_absoluteX="0dp" />
 
-        <android.support.design.widget.CoordinatorLayout
-            android:id="@+id/profile_add_constraint_box"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_margin="10dp"
-            tools:layout_editor_absoluteY="0dp"
-            tools:layout_editor_absoluteX="8dp">
+            android:layout_margin="20dip">
+
             <TextView
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical"
-                android:layout_marginStart="40dp"
+                android:id="@+id/profile_username_text_view"
+                android:gravity="center_horizontal"
                 android:textSize="20sp"
-                android:text="Add Keyword"/>
+                android:text="Username: Please Fix Me..."/>
 
-            <android.support.design.widget.FloatingActionButton
-                android:id="@+id/profile_add_keyword_buttom"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:layout_gravity="end"
-                android:layout_marginEnd="50dp"
-                android:layout_marginTop="15dp"
-                android:layout_marginBottom="15dp"
-                android:backgroundTint="@color/colorAccent"
-                android:tint="@color/white"
-                app:srcCompat="@drawable/ic_add"/>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:id="@+id/profile_list_keywords"
+                android:orientation="vertical"
+                android:layout_height="wrap_content"
+                tools:layout_editor_absoluteY="0dp"
+                tools:layout_editor_absoluteX="0dp" />
 
-        </android.support.design.widget.CoordinatorLayout >
-    </LinearLayout>
-</ScrollView>
+            <android.support.design.widget.CoordinatorLayout
+                android:id="@+id/profile_add_constraint_box"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="10dp"
+                tools:layout_editor_absoluteY="0dp"
+                tools:layout_editor_absoluteX="8dp">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginStart="40dp"
+                    android:textSize="20sp"
+                    android:text="Add Keyword"/>
+
+                <android.support.design.widget.FloatingActionButton
+                    android:id="@+id/profile_add_keyword_buttom"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:layout_gravity="end"
+                    android:layout_marginEnd="50dp"
+                    android:layout_marginTop="15dp"
+                    android:layout_marginBottom="15dp"
+                    android:backgroundTint="@color/colorAccent"
+                    android:tint="@color/white"
+                    app:srcCompat="@drawable/ic_add"/>
+
+            </android.support.design.widget.CoordinatorLayout >
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+                <Button
+                    android:id="@+id/cancel_button_profile"
+                    android:text="Cancel"
+                    android:layout_marginLeft="35dp"
+
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+                <Button
+                    android:id="@+id/save_button_profile"
+                    android:layout_alignParentRight="true"
+                    android:layout_marginRight="35dp"
+                    android:text="Save"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+
+
+            </RelativeLayout>
+        </LinearLayout>
+
+
+    </ScrollView>
+</LinearLayout>

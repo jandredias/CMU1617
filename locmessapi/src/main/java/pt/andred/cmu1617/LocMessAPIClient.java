@@ -30,13 +30,9 @@ public interface LocMessAPIClient {
 
     List<Map<String, Map<String, String>>> listMessages();
 
-    void putMessage(String message);
+    String addMessage(String location_id,String message, String dateBegin, String dateEnd, List<MessageConstraint> list);
 
-    void editProfile(String a);
-
-    void editProfileKeys(String name, String value);
-
-    void removeProfileKeys(String name);
+    String editProfileKeys(boolean add, String name, String value);
 
     JSONArray listKeywords();
 }

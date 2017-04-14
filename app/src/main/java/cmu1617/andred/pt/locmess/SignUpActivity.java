@@ -25,7 +25,6 @@ import pt.andred.cmu1617.LocMessAPIClientImpl;
  */
 public class SignUpActivity extends AppCompatActivity {
 
-
     /**
      * Keep track of the login task to ensure we can cancel it if requested.
      */

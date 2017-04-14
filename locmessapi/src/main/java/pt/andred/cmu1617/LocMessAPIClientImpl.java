@@ -192,24 +192,107 @@ public final class LocMessAPIClientImpl extends LocMessAPIClientBase implements 
         return null;
     }
 
-    @Override
-    public void putMessage(String message) {
+    private String convertToString(List<? extends Object> toConvert, String delimiter) {
 
+        StringBuilder builder = new StringBuilder();
+        // Append all Integers in StringBuilder to the StringBuilder.
+        for (Object obj : toConvert) {
+            builder.append(obj.toString());
+            builder.append(delimiter);
+        }
+        // Remove last delimiter with setLength.
+        if (toConvert.size() !=0) {
+            builder.setLength(builder.length() - delimiter.length());
+        }
+        return builder.toString();
     }
 
     @Override
-    public void editProfile(String a) {
+    public String addMessage(String location_id,String message, String dateBegin, String dateEnd, List<MessageConstraint> list) {
+        Map<String, String> post = new HashMap<>();
+        String listDelimiter = "><(((('>";
+        String restrictions = convertToString(list,listDelimiter);
 
+        post.put("location_id",location_id);
+        post.put("message_content",message);
+        post.put("time_start",dateBegin);
+        post.put("time_end",dateEnd);
+        post.put("restrictions",restrictions);
+        for (int i = 0; i < TRIES; i++) {
+
+            JSONObject response = invoke(Endpoint.PUT_MESSAGE, _auth, null, post);
+            if (response == null) {
+                continue;
+            }
+            if (!response.has("status")) continue;
+            if (response.getInt("status") != 200) {
+                throw new APIException("HTTP Error: " +
+                        response.getInt("status") + " " +
+                        (response.has("description") ? response.getString("description") : ""));
+            }
+            if (response.getInt("status") == 200) {
+                if (!response.has("message_id")) {
+                    throw new APIException("Response is malformed. keywords missing");
+                }
+
+                return response.getString("message_id");
+
+            } else {
+                if (!response.has("error")) {
+                    throw new APIException("Response is malformed. error missing");
+                }
+                if (!response.has("description")) {
+                    throw new APIException("Response is malformed. error missing");
+                }
+                throw new APIException(
+                        response.getString("error"),
+                        response.getString("description"));
+            }
+        }
+        throw new APIException("Couldn't connect to server");
     }
 
-    @Override
-    public void editProfileKeys(String name, String value) {
 
-    }
 
     @Override
-    public void removeProfileKeys(String name) {
+    public String editProfileKeys(boolean add, String name, String value) {
+        Map<String, String> post = new HashMap<>();
+        post.put("add",add+"");
+        post.put("keyword",name);
+        post.put("keyword_value",value);
 
+        for (int i = 0; i < TRIES; i++) {
+
+            JSONObject response = invoke(Endpoint.SET_KEYWORD, _auth, null, post);
+            if (response == null) {
+                continue;
+            }
+            if (!response.has("status")) continue;
+            if (response.getInt("status") != 200) {
+                throw new APIException("HTTP Error: " +
+                        response.getInt("status") + " " +
+                        (response.has("description") ? response.getString("description") : ""));
+            }
+            if (response.getInt("status") == 200) {
+                if (!response.has("keyword_id")) {
+                    throw new APIException("Response is malformed. message_id missing");
+                }
+
+                return response.getString("keyword_id");
+
+            } else {
+                if (!response.has("error")) {
+                    throw new APIException("Response is malformed. error missing");
+                }
+                if (!response.has("description")) {
+                    throw new APIException("Response is malformed. description missing");
+                }
+                throw new APIException(
+                        response.getString("error"),
+                        response.getString("description"));
+            }
+        }
+        throw new APIException("Couldn't connect to server");
     }
 
     @Override

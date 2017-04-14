@@ -21,6 +21,7 @@ import javax.crypto.KeyGenerator;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SecretKey;
 
+
 /**
  * Created by andre on 28/03/17.
  */
@@ -82,6 +83,8 @@ class LocMessAPIClientBase {
         if (authorization != null) {
             httpRequest.withAuthorization(authorization);
         }
+
+
 //        Map<String, String> getSecure = new HashMap<>();
 //        Map<String, String> postSecure = new HashMap<>();
 //        IvParameterSpec ivSpec = null;
@@ -132,7 +135,9 @@ class LocMessAPIClientBase {
 //            cipher.init(Cipher.DECRYPT_MODE, secretKey, ivSpec);
 
             ClientResponse clientResponse = client.handleHttpRequest(httpRequest);
-
+            if (clientResponse == null) {
+                throw new APIException("Couldn't connect to server");
+            }
             if (clientResponse.getStatusCode() == 401) {
                 JSONObject jsonResponse;
                 jsonResponse = new JSONObject(clientResponse.getResponse());

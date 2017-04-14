@@ -23,6 +23,7 @@ public class MainActivity extends AppCompatActivity {
 //    private TextView mTextMessage;
     ViewPager _mainViewPager;
     FragmentPagerAdapter _adapterViewPager;
+    private SQLDataStoreHelper _db;
     private Fragment _main_fragment;
     private FragmentManager _fragmentManager = getSupportFragmentManager();
 
@@ -30,6 +31,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        _db = new SQLDataStoreHelper(this);
         _main_fragment = new DualLocationsFragment();
         final FragmentTransaction transaction = _fragmentManager.beginTransaction();
         transaction.replace(R.id.main_container, _main_fragment).commit();
@@ -56,6 +58,7 @@ public class MainActivity extends AppCompatActivity {
                      case R.id.logout:
                          Log.wtf("TAG", "logout pressed");
                          LocMessAPIClientImpl.getInstance().logout();
+                         new Login(_db).logout();
                          startActivity(new Intent(MainActivity.this, LoginActivity.class));
                          break;
                  }

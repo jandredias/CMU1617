@@ -19,12 +19,12 @@ import pt.andred.cmu1617.LocMessAPIClientImpl;
  * Created by miguel on 10/04/17.
  */
 
-public class GetKeyworksAsyncTask extends AsyncTask<Void, Void, Boolean> {
-    private final String Tag = "GetKeyworksAsyncTask ";
+public class GetKeywordsAsyncTask extends AsyncTask<Void, Void, Boolean> {
+    private final String Tag = "GetKeywordsAsyncTask ";
     private final SQLDataStoreHelper _db;
     private List<Keyword> list = new ArrayList<>();
     private OnTaskCompleted _listener;
-    public GetKeyworksAsyncTask(SQLDataStoreHelper db, OnTaskCompleted listener) {
+    public GetKeywordsAsyncTask(SQLDataStoreHelper db, OnTaskCompleted listener) {
         _db = db;
         _listener = listener;
     }

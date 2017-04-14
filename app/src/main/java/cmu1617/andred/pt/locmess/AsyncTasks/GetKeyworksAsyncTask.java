@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import cmu1617.andred.pt.locmess.Domain.Keyword;
+import cmu1617.andred.pt.locmess.OnTaskCompleted;
 import cmu1617.andred.pt.locmess.SQLDataStoreHelper;
 import pt.andred.cmu1617.LocMessAPIClientImpl;
 
@@ -22,11 +23,17 @@ public class GetKeyworksAsyncTask extends AsyncTask<Void, Void, Boolean> {
     private final String Tag = "GetKeyworksAsyncTask ";
     private final SQLDataStoreHelper _db;
     private List<Keyword> list = new ArrayList<>();
-
-    public GetKeyworksAsyncTask(SQLDataStoreHelper db) {
+    private OnTaskCompleted _listener;
+    public GetKeyworksAsyncTask(SQLDataStoreHelper db, OnTaskCompleted listener) {
         _db = db;
+        _listener = listener;
     }
 
+
+    @Override
+    protected void onPreExecute() {
+        Log.wtf(Tag, "start");
+    }
     @Override
     protected Boolean doInBackground(Void... params) {
         try {
@@ -40,10 +47,24 @@ public class GetKeyworksAsyncTask extends AsyncTask<Void, Void, Boolean> {
                 keyword.completeObject(name);
                 list.add(keyword);
             }
+
         } catch (JSONException e) {
             e.printStackTrace();
         }
         return true;
     }
+
+    public List<Keyword> getList(){
+        return list;
+    }
+
+    @Override
+    protected void onPostExecute(Boolean bogus){
+        // your stuff
+        Log.wtf(Tag, "end");
+        _listener.onTaskCompleted();
+    }
+
+
 }
 

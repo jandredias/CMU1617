@@ -41,8 +41,8 @@
             android:name=".ListMessagesActivity"
             android:label="@string/title_activity_location_messages"
             android:theme="@style/AppTheme.NoActionBar" />
-        <activity android:name=".NewMessageActivity" />
-        <activity android:name=".ProfileActivity"></activity>
+        <activity android:name=".NewMessageActivity" android:windowSoftInputMode="stateHidden"/>
+        <activity android:name=".ProfileActivity" android:windowSoftInputMode="stateHidden"></activity>
     </application>
 
 </manifest>

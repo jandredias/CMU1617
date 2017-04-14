@@ -46,12 +46,18 @@ public class LoginActivity extends AppCompatActivity {
 
         setContentView(R.layout.activity_login);
         _db = new SQLDataStoreHelper(this);
+        mLoginFormView = findViewById(R.id.login_form);
+        mProgressView = findViewById(R.id.login_progress);
+
 
         //Automatic Login
         Login login = new Login(_db);
+        showProgress(true);
+
         if(!login.needNewLogin()) {
             startActivity(new Intent(this, MainActivity.class));
         }
+        showProgress(false);
 
         // Set up the login form.
         mEmailView = (AutoCompleteTextView) findViewById(R.id.email);
@@ -84,8 +90,7 @@ public class LoginActivity extends AppCompatActivity {
             }
         });
 
-        mLoginFormView = findViewById(R.id.login_form);
-        mProgressView = findViewById(R.id.login_progress);
+
     }
 
 

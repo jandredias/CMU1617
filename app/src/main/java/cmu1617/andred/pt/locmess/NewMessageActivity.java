@@ -3,6 +3,7 @@ package cmu1617.andred.pt.locmess;
 import android.app.DatePickerDialog;
 import android.app.Dialog;
 import android.app.TimePickerDialog;
+import android.database.Cursor;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.DialogFragment;
@@ -11,6 +12,7 @@ import android.support.v7.widget.RecyclerView;
 import android.text.format.DateFormat;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.DatePicker;
@@ -24,9 +26,10 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
+import cmu1617.andred.pt.locmess.AsyncTasks.GetKeyworksAsyncTask;
 import cmu1617.andred.pt.locmess.Domain.LocMessLocation;
 
-public class NewMessageActivity extends AppCompatActivity {
+public class NewMessageActivity extends AppCompatActivity implements OnTaskCompleted{
 
     private SQLDataStoreHelper dbHelper;
     private LocMessLocation mLocation;
@@ -40,7 +43,9 @@ public class NewMessageActivity extends AppCompatActivity {
     private Button sendMessageToServer;
     private LinearLayout constraintsList;
     private List<ViewHolder> constraintsViewsList = new ArrayList<>();
-
+    private GetKeyworksAsyncTask _task;
+    private List<String> _spinnerItems;
+    private ArrayAdapter<String> _adapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -100,7 +105,29 @@ public class NewMessageActivity extends AppCompatActivity {
                 createNewConstraintView();
             }
         });
+
+        populateSpinnerItems();
+
+        _task = new GetKeyworksAsyncTask(dbHelper,this);
+        _task.execute();
     }
+
+    private void populateSpinnerItems (){
+        Cursor cursor = dbHelper.getReadableDatabase().query(
+                DataStore.SQL_KEYWORDS, //table name
+                DataStore.SQL_KEYWORDS_COLUMNS, //columns to return
+                null,
+                null,
+                null, null, null
+        );
+        _spinnerItems = new ArrayList<>();
+        while (cursor.moveToNext()) {
+            _spinnerItems.add(cursor.getString(1));
+        }
+        _adapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, _spinnerItems);
+
+    }
+
     private void addMessageToServer(){
         boolean cancel = false;
         View focusView = null;
@@ -152,9 +179,15 @@ public class NewMessageActivity extends AppCompatActivity {
             constraintsViewsList.add(new ViewHolder(vi));
     }
 
+    @Override
+    public void onTaskCompleted() {
+        _task.getList();
+
+    }
+
     class ViewHolder extends RecyclerView.ViewHolder {
         Spinner _keyword;
-        Spinner _equalOrDiffernt;
+        Spinner _equalOrDifferent;
         EditText _value;
         View _holder;
 
@@ -162,9 +195,13 @@ public class NewMessageActivity extends AppCompatActivity {
             super(itemView);
                 _holder = itemView;
                 _keyword = (Spinner) itemView.findViewById(R.id.keyword_spinner);
-                _equalOrDiffernt = (Spinner) itemView.findViewById(R.id.equal_diff_spinner);
+                _adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                _keyword.setAdapter(_adapter);
+                _equalOrDifferent = (Spinner) itemView.findViewById(R.id.equal_diff_spinner);
                 _value = (EditText) itemView.findViewById(R.id.edit_text_keyword_item);
         }
+
+
     }
 
     public void showTruitonDatePickerDialog(View v) {

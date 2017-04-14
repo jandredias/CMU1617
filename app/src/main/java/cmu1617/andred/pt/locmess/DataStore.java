@@ -11,7 +11,7 @@ public interface DataStore {
     String SQL_GPS_LOCATION = "gps_location";
     String SQL_LOGIN = "sql_login";
     String SQL_KEYWORDS = "sql_keywords";
-    String SQL_USER_KEYWORDS = "sql_keywords";
+    String SQL_USER_KEYWORDS = "sql_user_keywords";
 
 
     String[] SQL_LOCATION_COLUMNS = {
@@ -68,12 +68,12 @@ public interface DataStore {
                     ")";
     String SQL_CREATE_KEYWORDS =
             "CREATE TABLE " + SQL_KEYWORDS + " (" +
-                    "keyword_id INT NOT NULL" +
+                    "keyword_id INT NOT NULL," +
                     "keyword_name VARCHAR(255)" +
                     ")";
     String SQL_CREATE_USER_KEYWORDS =
             "CREATE TABLE " + SQL_USER_KEYWORDS+ " (" +
-                    "keyword_id INT NOT NULL PRIMARY KEY" +
+                    "keyword_id INT NOT NULL PRIMARY KEY," +
                     "keyword_value VARCHAR(255)" +
                     ")";
 

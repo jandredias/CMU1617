@@ -6,6 +6,7 @@
         android:layout_height="wrap_content"
         xmlns:app="http://schemas.android.com/apk/res-auto"
         android:id="@+id/scroll_view_new_message"
+
         android:fadeScrollbars="false"
         tools:context="cmu1617.andred.pt.locmess.NewMessageActivity">
         <LinearLayout

@@ -227,6 +227,7 @@ public class SignUpActivity extends AppCompatActivity {
 
             if (success) {
                 startActivity(new Intent(getBaseContext(), MainActivity.class));
+                finish();
             } else {
                 mEmailView.setError(getString(R.string.username_already_exists));
                 mEmailView.requestFocus();

@@ -505,6 +505,7 @@ public class NewMessageActivity extends AppCompatActivity implements OnTaskCompl
             } else {
                 Intent intent = new Intent(getApplicationContext(),MainActivity.class);
                 startActivity(intent);
+                finish();
             }
         }
 

@@ -56,6 +56,7 @@ public class LoginActivity extends AppCompatActivity {
 
         if(!login.needNewLogin()) {
             startActivity(new Intent(this, MainActivity.class));
+            finish();
         }
         showProgress(false);
 
@@ -223,6 +224,7 @@ public class LoginActivity extends AppCompatActivity {
 
             if (success) {
                 startActivity(new Intent(getBaseContext(), MainActivity.class));
+                finish();
             } else {
                 mPasswordView.setError(getString(R.string.error_incorrect_password));
                 mPasswordView.requestFocus();

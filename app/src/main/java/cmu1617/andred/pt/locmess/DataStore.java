@@ -143,7 +143,7 @@ public interface DataStore {
             "(2,'small message','Big User Name, Its Big, Its Huge, Why am I doing this, it just hurts.. :(',1,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP),"+
             "(3,'small message','1',5,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP),"+
             "(4,'A really big message, the biggest of message, it must be good to shoot the mother of all bombs and then go on vacation to florida on a Thursday, at 4pm','1',1,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP),"+
-            "(5,'A really big message, the biggest of message, it must be good to shoot the mother of all bombs and then go on vacation to florida on a Thursday, at 4pm','Big User Name, Its Big, Its Huge, Why am I doing this, it just hurts.. :(',5,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP)";
+            "(5,'A really big message, the biggest of message, it must be good to shoot the mother of all bombs and then go on vacation to florida on a Thursday, at 4pm Aparently not big enough so we ought make it go out of the screen if really are testing for everything, at least I am not missing much, maybe save message as read in the database :D','Big User Name, Its Big, Its Huge, Why am I doing this, it just hurts.. :(',5,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP)";
 
 
     String SQL_DELETE_LOCATION=

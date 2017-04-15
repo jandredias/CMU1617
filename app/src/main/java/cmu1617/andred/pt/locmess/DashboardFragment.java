@@ -20,6 +20,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import cmu1617.andred.pt.locmess.Domain.LocMessMessage;
+import cmu1617.andred.pt.locmess.Domain.UserProfile;
 
 /**
  * Created by miguel on 06/04/17.
@@ -60,9 +61,6 @@ public class DashboardFragment extends Fragment {
         mLayoutManager = new LinearLayoutManager(getActivity());
         mRecyclerView.setLayoutManager(mLayoutManager);
 
-        // specify an adapter (see also next example)
-        mAdapter = new RecyclerViewAdapter();
-        mRecyclerView.setAdapter(mAdapter);
         mRecyclerView.addItemDecoration(new DividerItemDecoration(getContext(), LinearLayoutManager.VERTICAL));
         mRecyclerView.setItemAnimator(new DefaultItemAnimator());
 
@@ -82,8 +80,17 @@ public class DashboardFragment extends Fragment {
             }
         }));
 
-        treatEmptyView();
         return view;
+    }
+
+    @Override
+    public void onStart(){
+        super.onStart();
+        // specify an adapter (see also next example)
+        mAdapter = new RecyclerViewAdapter();
+        mRecyclerView.setAdapter(mAdapter);
+        treatEmptyView();
+
     }
 
     private void treatEmptyView(){
@@ -203,12 +210,13 @@ public class DashboardFragment extends Fragment {
 
         @Override
         public int getItemCount() {
+            String[] selectionArgs = { new UserProfile(_dbHelper).userName() };
             Cursor cursor = _dbHelper.getReadableDatabase().query(
                     true, //distinct
                     DataStore.SQL_MESSAGES, //table name
                     DataStore.SQL_MESSAGES_COLUMNS, //columns to return
-                    null, //selection string
-                    null, //selection args
+                    "message_id NOT IN (SELECT message_id FROM "+DataStore.SQL_READ_MESSAGES+" WHERE reader_id = ? )", //selection string
+                    selectionArgs, //selection args
                     null, //groupBy
                     null, //having
                     null, //orderBy
@@ -221,12 +229,13 @@ public class DashboardFragment extends Fragment {
         }
 
         public LocMessMessage getItem(int position) {
+            String[] selectionArgs = { new UserProfile(_dbHelper).userName() };
             Cursor cursor = _dbHelper.getReadableDatabase().query(
                     true, //distinct
                     DataStore.SQL_MESSAGES, //table name
                     DataStore.SQL_MESSAGES_COLUMNS, //columns to return
-                    null, //selection string
-                    null, //selection args
+                    "message_id NOT IN (SELECT message_id FROM "+DataStore.SQL_READ_MESSAGES+" WHERE reader_id = ? )", //selection string
+                    selectionArgs, //selection args
                     null, //groupBy
                     null, //having
                     null, //orderBy

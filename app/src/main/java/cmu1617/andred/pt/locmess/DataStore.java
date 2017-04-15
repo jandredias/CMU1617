@@ -12,7 +12,8 @@ public interface DataStore {
     String SQL_LOGIN = "sql_login";
     String SQL_KEYWORDS = "sql_keywords";
     String SQL_USER_KEYWORDS = "sql_user_keywords";
-
+    String SQL_MESSAGES = "sql_messages";
+    String SQL_READ_MESSAGES = "sql_read_messages";
 
     String[] SQL_LOCATION_COLUMNS = {
             "location_id",
@@ -41,6 +42,21 @@ public interface DataStore {
     String[] SQL_USER_KEYWORDS_COLUMNS = {
             "keyword_id",
             "keyword_value"
+    };
+    String[] SQL_MESSAGES_COLUMNS = {
+            "message_id",
+            "content",
+            "author_id",
+            "location_id",
+            "time_start",
+            "time_end"
+    };
+    String[] SQL_READ_MESSAGES_COLUMNS = {
+            "message_id",
+            "content",
+            "author_id",
+            "reader_id",
+            "location_id"
     };
 
 
@@ -76,7 +92,24 @@ public interface DataStore {
                     "keyword_id INT NOT NULL PRIMARY KEY," +
                     "keyword_value VARCHAR(255)" +
                     ")";
+    String SQL_CREATE_MESSAGES =
+            "CREATE TABLE " + SQL_MESSAGES+ " (" +
+                    "message_id INT NOT NULL PRIMARY KEY,"+
+                    "content VARCHAR (20000),"+
+                    "author_id VARCHAR(255)," +
+                    "location_id INT ,"+
+                    "time_start DATETIME ,"+
+                    "time_end DATETIME"+
+                    ")";
 
+    String SQL_CREATE_READ_MESSAGES =
+            "CREATE TABLE " + SQL_READ_MESSAGES+ " (" +
+                    "message_id INT NOT NULL PRIMARY KEY,"+
+                    "content VARCHAR (20000),"+
+                    "author_id VARCHAR(255)," +
+                    "reader_id VARCHAR(255)," +
+                    "location_id INT "+
+                    ")";
 
 
 
@@ -101,6 +134,17 @@ public interface DataStore {
                     "(5,'SSID 5')," +
                     "(6,'SSID 6')";
 
+    String SQL_POPULATE_MESSAGES =
+            "INSERT INTO " + SQL_MESSAGES+ " (message_id, content, author_id, location_id, time_start, time_end ) VALUES " +
+            "(1,'small message','1',1,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP),"+
+            "(6,'small message','1',1,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP),"+
+            "(7,'small message','1',1,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP),"+
+            "(8,'small message','1',1,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP),"+
+            "(2,'small message','Big User Name, Its Big, Its Huge, Why am I doing this, it just hurts.. :(',1,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP),"+
+            "(3,'small message','1',5,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP),"+
+            "(4,'A really big message, the biggest of message, it must be good to shoot the mother of all bombs and then go on vacation to florida on a Thursday, at 4pm','1',1,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP),"+
+            "(5,'A really big message, the biggest of message, it must be good to shoot the mother of all bombs and then go on vacation to florida on a Thursday, at 4pm','Big User Name, Its Big, Its Huge, Why am I doing this, it just hurts.. :(',5,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP)";
+
 
     String SQL_DELETE_LOCATION=
             "DROP TABLE IF EXISTS " + SQL_LOCATION;
@@ -114,5 +158,9 @@ public interface DataStore {
             "DROP TABLE IF EXISTS " + SQL_KEYWORDS;
     String SQL_DELETE_USER_KEYWORDS=
             "DROP TABLE IF EXISTS " + SQL_USER_KEYWORDS;
+    String SQL_DELETE_MESSAGES=
+            "DROP TABLE IF EXISTS " + SQL_MESSAGES;
+    String SQL_DELETE_READ_MESSAGES=
+            "DROP TABLE IF EXISTS " + SQL_READ_MESSAGES;
 
 }

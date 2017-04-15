@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_margin="@dimen/AppMargin"
+    tools:context="cmu1617.andred.pt.locmess.ShowMessageActivity">
+
+    <TextView
+        android:layout_width="368dp"
+        android:layout_height="wrap_content"
+        android:id="@+id/show_message_location"
+        android:text="In: Arco do Cego"
+        android:textSize="30sp" />
+    <TextView
+        android:layout_marginTop="15dp"
+        android:layout_below="@id/show_message_location"
+        android:id="@+id/show_message_message_body"
+        android:textSize="25sp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="post Message very big i dont really care how big it is, but it kinda should resemble an message." />
+
+    <TextView
+        android:layout_below="@id/show_message_message_body"
+        android:textSize="20sp"
+        android:gravity="end"
+        android:id="@+id/show_message_author"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="By: fakas95" />
+
+    <RelativeLayout
+        android:layout_marginTop="15dp"
+        android:layout_below="@id/show_message_author"
+        android:layout_width="match_parent"
+        android:visibility="gone"
+        android:layout_height="wrap_content">
+        <Button
+            android:id="@+id/delete_button_show_message"
+            android:text="Delete"
+            android:layout_marginLeft="35dp"
+
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+        <Button
+            android:id="@+id/save_button_show_message"
+            android:layout_alignParentRight="true"
+            android:layout_marginRight="35dp"
+            android:text="Back"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+
+    </RelativeLayout>
+
+
+</RelativeLayout>

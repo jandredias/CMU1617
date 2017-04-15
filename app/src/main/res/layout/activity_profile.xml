@@ -14,11 +14,12 @@
     <ScrollView
         xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:app="http://schemas.android.com/apk/res-auto"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
         xmlns:tools="http://schemas.android.com/tools"
         android:id="@+id/scroll_view_profile"
         android:fadeScrollbars="false"
+        android:fillViewport="true"
         tools:context="cmu1617.andred.pt.locmess.ProfileActivity">
         <LinearLayout
             android:id="@+id/container_profile"
@@ -90,10 +91,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content" />
 
-
             </RelativeLayout>
         </LinearLayout>
-
-
     </ScrollView>
 </LinearLayout>

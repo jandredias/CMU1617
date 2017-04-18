@@ -2,6 +2,7 @@ package cmu1617.andred.pt.locmess;
 
 import android.database.Cursor;
 import android.util.Log;
+import android.view.View;
 
 import cmu1617.andred.pt.locmess.Domain.LocMessLocation;
 import cmu1617.andred.pt.locmess.Domain.WIFILocation;
@@ -16,6 +17,11 @@ public class WifiLocationsFragment extends ListLocationsFragment {
     @Override
     public RecyclerViewAdapter createNewAdapter() {
         return new WIFIRecycleViewAdapter();
+    }
+
+    @Override
+    public void onClick(View v) {
+        
     }
 
 

@@ -49,4 +49,6 @@
         <item>profession</item>
         <item>damn</item>
     </string-array>
+    <string name="title_activity_new_gpslocation">Map</string>
+    <string name="title_activity_dummy_maps">Map</string>
 </resources>

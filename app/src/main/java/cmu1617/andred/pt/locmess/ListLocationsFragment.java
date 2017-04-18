@@ -39,7 +39,7 @@ import pt.andred.cmu1617.LocMessAPIClientImpl;
  * Created by miguel on 07/04/17.
  */
 
-public abstract class ListLocationsFragment extends Fragment {
+public abstract class ListLocationsFragment extends Fragment implements View.OnClickListener{
     private String Tag = "Location Fragment";
     private RecyclerView mRecyclerView;
     private RecyclerView.LayoutManager mLayoutManager;
@@ -99,13 +99,15 @@ public abstract class ListLocationsFragment extends Fragment {
         }));
 
         FloatingActionButton fab = (FloatingActionButton) view.findViewById(R.id.add_location);
-        fab.setOnClickListener(new View.OnClickListener() {
+        fab.setOnClickListener(this);
+
+                /*new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show();
             }
-        });
+        });*/
 
         _emptyView = view.findViewById(R.id.empty_locations);
         _refreshLayout = (SwipeRefreshLayout) view;

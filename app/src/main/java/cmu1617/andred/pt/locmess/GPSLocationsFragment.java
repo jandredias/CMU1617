@@ -1,7 +1,12 @@
 package cmu1617.andred.pt.locmess;
 
+import android.content.Intent;
 import android.database.Cursor;
+import android.os.Bundle;
 import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
 
 import cmu1617.andred.pt.locmess.Domain.GPSLocation;
 import cmu1617.andred.pt.locmess.Domain.LocMessLocation;
@@ -13,8 +18,25 @@ import cmu1617.andred.pt.locmess.Domain.LocMessLocation;
 public class GPSLocationsFragment extends ListLocationsFragment {
 
     @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+
+
+
+        return super.onCreateView(inflater, container, savedInstanceState);
+    }
+
+    @Override
     public RecyclerViewAdapter createNewAdapter() {
         return new GPSRecycleViewAdapter();
+    }
+
+    @Override
+    public void onClick(View v) {
+       switch(v.getId()){
+           case R.id.add_location:
+               startActivity(new Intent(getActivity(), NewGPSLocation.class));
+       }
+
     }
 
 
@@ -61,6 +83,12 @@ public class GPSLocationsFragment extends ListLocationsFragment {
             return c;
         }
 
+
+
     }
+
+
+
+
 
 }

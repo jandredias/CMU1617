@@ -76,7 +76,10 @@
 
         <activity
             android:name=".NewGPSLocation"
-            android:label="@string/title_activity_new_gpslocation2"></activity>
+            android:label="@string/title_activity_new_gpslocation2" />
+        <activity
+            android:name=".ShowLocation"
+            android:label="@string/title_activity_show_location"></activity>
     </application>
 
 </manifest>

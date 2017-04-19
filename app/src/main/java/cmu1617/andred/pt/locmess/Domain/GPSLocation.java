@@ -97,7 +97,7 @@ public class GPSLocation extends LocMessLocation {
             return 0;
         }
         cursor.moveToFirst();
-        _longitude =cursor.getDouble(4);
+        _longitude = cursor.getDouble(4);
         return _longitude;
     }
 

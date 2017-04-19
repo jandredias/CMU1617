@@ -61,4 +61,5 @@
     <string name="new_location_wifi_1">Do you want to save "</string>
     <string name="name_of_the_location">Name of the location:</string>
     <string name="radius">Radius:</string>
+    <string name="title_activity_show_location">Map</string>
 </resources>

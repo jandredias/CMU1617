@@ -9,7 +9,6 @@ import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.DefaultItemAnimator;
@@ -20,7 +19,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -241,6 +239,21 @@ public abstract class ListLocationsFragment extends Fragment implements View.OnC
             ViewHolder v = holder;
 
             v._name.setText(location.name());
+            if(location instanceof GPSLocation){
+                v.itemView.findViewById(R.id.location_map).setVisibility(View.VISIBLE);
+                v.itemView.findViewById(R.id.location_map).setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        Intent i = new Intent(getActivity(), ShowLocation.class);
+                        i.putExtra("name", ((GPSLocation) location).name());
+                        i.putExtra("latitude", ((GPSLocation) location).latitude());
+                        i.putExtra("longitude", ((GPSLocation) location).longitude());
+                        i.putExtra("radius", ((GPSLocation) location).radius());
+
+                        startActivity(i);
+                    }
+                });
+            }
             v._button.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {

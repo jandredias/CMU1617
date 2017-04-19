@@ -21,15 +21,33 @@
         android:layout_centerVertical="true"
         app:srcCompat="@drawable/ic_add"/>
 
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/location_map"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_gravity="center_vertical"
+        android:layout_alignParentRight="true"
+        android:layout_marginRight="10dp"
+        android:backgroundTint="@color/colorPrimary"
+        android:tint="@color/white"
+        android:layout_centerVertical="true"
+        android:visibility="gone"
+        app:srcCompat="@drawable/circle"/>
+
     <TextView
         android:id="@+id/location_name"
         android:layout_width="fill_parent"
         android:layout_toRightOf="@id/location_add_mesage_button"
+        android:layout_toLeftOf="@id/location_map"
         android:layout_height="wrap_content"
         android:gravity="center_vertical"
         android:layout_centerVertical="true"
         android:textSize="18sp"
         android:text="so big so big so big so big so big so big so big so big so big so big so big so big so big so big  on  lalalalalala" />
+
+
+
+
 
 
 </RelativeLayout>

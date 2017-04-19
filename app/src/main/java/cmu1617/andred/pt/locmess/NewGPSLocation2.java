@@ -7,6 +7,7 @@ import android.content.DialogInterface;
 import android.content.IntentSender;
 import android.content.pm.PackageManager;
 import android.location.Location;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
@@ -38,7 +39,7 @@ public class NewGPSLocation2 extends FragmentActivity implements
         GoogleApiClient.OnConnectionFailedListener,
         LocationListener,
         OnMapReadyCallback,
-        GoogleMap.OnMapClickListener{
+        GoogleMap.OnMapClickListener {
 
     private final String TAG = "NewGPSLocation2";
 
@@ -46,8 +47,8 @@ public class NewGPSLocation2 extends FragmentActivity implements
     private double currentLatitude; //lat of user
     private double currentLongitude; //long of user
 
-    private double latitudeLisbon= 38.736946;
-    private double longitudeLisbon= -9.142685;
+    private double latitudeLisbon = 38.736946;
+    private double longitudeLisbon = -9.142685;
 
 
     private static final int PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 1;
@@ -55,7 +56,7 @@ public class NewGPSLocation2 extends FragmentActivity implements
     private LatLng position_pressed;
 
 
-   // public static final String TAG = MapsActivity.class.getSimpleName();
+    // public static final String TAG = MapsActivity.class.getSimpleName();
 
     private final static int CONNECTION_FAILURE_RESOLUTION_REQUEST = 9000;
 
@@ -86,6 +87,7 @@ public class NewGPSLocation2 extends FragmentActivity implements
                 .setInterval(10 * 1000)        // 10 seconds, in milliseconds
                 .setFastestInterval(1 * 1000); // 1 second, in milliseconds
     }
+
     /*These methods all have to do with the map and wht happens if the activity is paused etc*/
     //contains lat and lon of another marker
     private void setUpMap() {
@@ -152,7 +154,7 @@ public class NewGPSLocation2 extends FragmentActivity implements
                     new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION},
                     PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION);
         }
-        if(mLocationPermissionGranted) {
+        if (mLocationPermissionGranted) {
             Location location = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
             if (location == null) {
                 LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
@@ -215,7 +217,10 @@ public class NewGPSLocation2 extends FragmentActivity implements
 
     protected void setName(String name, boolean exists) {
         if (exists) {
-            LocMessAPIClientImpl.getInstance().newGPSLocation(name, String.valueOf(position_pressed.latitude), String.valueOf(position_pressed.longitude), "10");
+            Log.d(TAG, "setName //name= " + name + " //latitude= " + String.valueOf(position_pressed.latitude) + " //longitude= " + String.valueOf(position_pressed.longitude) +
+            " //radius= " + "10");
+            new NewGPSLocationAsync().execute(name, String.valueOf(position_pressed.latitude), String.valueOf(position_pressed.longitude), "10");
+            //LocMessAPIClientImpl.getInstance().newGPSLocation(name, String.valueOf(position_pressed.latitude), String.valueOf(position_pressed.longitude), "10");
             Log.d(TAG, "setName: " + name);
         } else
             Toast.makeText(getBaseContext(), R.string.give_name_location, Toast.LENGTH_LONG).show();
@@ -228,7 +233,7 @@ public class NewGPSLocation2 extends FragmentActivity implements
         private NewGPSLocation2 _n;
 
         public NameDialog(NewGPSLocation2 n) {
-            _n=n;
+            _n = n;
         }
 
         @NonNull
@@ -248,7 +253,7 @@ public class NewGPSLocation2 extends FragmentActivity implements
                         public void onClick(DialogInterface dialog, int id) {
                             getDialog().cancel();
                             String text = editText.getText().toString();
-                            if(text.isEmpty() || text.contentEquals(" "))
+                            if (text.isEmpty() || text.contentEquals(" "))
                                 _n.setName(null, false);
                             else
                                 _n.setName(text, true);
@@ -263,6 +268,16 @@ public class NewGPSLocation2 extends FragmentActivity implements
                     });
             return builder.create();
 
+        }
+    }
+
+    public static class NewGPSLocationAsync extends AsyncTask<String, String, String> {
+
+
+        @Override
+        protected String doInBackground(String... params) {
+            LocMessAPIClientImpl.getInstance().newGPSLocation(params[0], params[1], params[2], params[3]);
+            return null;
         }
     }
 }

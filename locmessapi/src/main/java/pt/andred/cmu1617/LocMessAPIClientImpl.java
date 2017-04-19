@@ -7,7 +7,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-;import static com.sun.corba.se.spi.activation.IIOP_CLEAR_TEXT.value;
 
 /**
  * Created by andre on 28/03/17.
@@ -15,12 +14,14 @@ import java.util.Map;
 
 public final class LocMessAPIClientImpl extends LocMessAPIClientBase implements LocMessAPIClient {
 
+    private static final String TAG = "SnapCityClientImpl";
     private static final int TRIES = 5;
     private static LocMessAPIClient _instance;
     private OAuthAuthorization _auth;
 
     LocMessAPIClientImpl(ApplicationConfiguration config) {
         super(config);
+
         _auth = null;
     }
 
@@ -334,11 +335,11 @@ public final class LocMessAPIClientImpl extends LocMessAPIClientBase implements 
     @Override
     public JSONObject newGPSLocation(String name, String latitude, String longitude, String radius){
         Map<String, String> post = new HashMap<>();
-        post.put("location_name ",name);
-        post.put("location_type","coordinates");
-        post.put("latitude",latitude);
-        post.put("longitude",longitude);
-        post.put("radius",radius);
+        post.put("location_name ",name); //Log.d(TAG, "newGPSLocation location_name: " + name);
+        post.put("location_type","coordinates");// Log.d(TAG, "newGPSLocation location_type: " + "coordinates");
+        post.put("latitude",latitude); //Log.d(TAG, "newGPSLocation latitude: " + latitude);
+        post.put("longitude",longitude); //Log.d(TAG, "newGPSLocation longitude: " + longitude);
+        post.put("radius",radius); //Log.d(TAG, "newGPSLocation radius: " + radius);
         return  invoke(Endpoint.NEW_LOCATION, _auth, null, post);
     }
     @Override

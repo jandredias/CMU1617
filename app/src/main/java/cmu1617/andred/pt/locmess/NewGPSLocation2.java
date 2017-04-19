@@ -18,6 +18,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.NumberPicker;
 import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -30,18 +31,22 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 import pt.andred.cmu1617.LocMessAPIClientImpl;
+
+import static cmu1617.andred.pt.locmess.R.id.map;
 
 public class NewGPSLocation2 extends FragmentActivity implements
         GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener,
         LocationListener,
         OnMapReadyCallback,
-        GoogleMap.OnMapClickListener {
+        GoogleMap.OnMapClickListener,
+        GoogleMap.OnMarkerClickListener{
 
-    private final String TAG = "NewGPSLocation2";
+    private final static String TAG = "NewGPSLocation2";
 
     //These variable are initalized here as they need to be used in more than one methid
     private double currentLatitude; //lat of user
@@ -78,7 +83,7 @@ public class NewGPSLocation2 extends FragmentActivity implements
                 .build();
 
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
-                .findFragmentById(R.id.map);
+                .findFragmentById(map);
         mapFragment.getMapAsync(this);
 
         // Create the LocationRequest object
@@ -103,13 +108,13 @@ public class NewGPSLocation2 extends FragmentActivity implements
         currentLatitude = location.getLatitude();
         currentLongitude = location.getLongitude();
 
-        LatLng latLng = new LatLng(currentLatitude, currentLongitude);
+        position_pressed = new LatLng(currentLatitude, currentLongitude);
 
         MarkerOptions options = new MarkerOptions()
-                .position(latLng)
+                .position(position_pressed)
                 .title("You are here");
         mMap.addMarker(options);
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom((latLng), 11.0F));
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom((position_pressed), 11.0F));
     }
 
     @Override
@@ -133,7 +138,7 @@ public class NewGPSLocation2 extends FragmentActivity implements
         // Do a null check to confirm that we have not already instantiated the map.
         if (mMap == null) {
             // Try to obtain the map from the SupportMapFragment.
-            ((SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map)).getMapAsync(this);
+            ((SupportMapFragment) getSupportFragmentManager().findFragmentById(map)).getMapAsync(this);
 
             // Check if we were successful in obtaining the map.
            /* if (mMap != null) {
@@ -200,6 +205,13 @@ public class NewGPSLocation2 extends FragmentActivity implements
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
         mMap.setOnMapClickListener(this);
+        mMap.setOnMarkerClickListener(this);
+        mMap.setOnMapLongClickListener(new GoogleMap.OnMapLongClickListener() {
+            @Override
+            public void onMapLongClick(LatLng latLng) {
+                onMapClick(latLng);
+            }
+        });
         /*if(!mLocationPermissionGranted) {
             MarkerOptions marker = new MarkerOptions().position(new LatLng(latitudeLisbon, longitudeLisbon)).title("1"); //create marker
             mMap.addMarker(marker); // adding marker
@@ -210,21 +222,35 @@ public class NewGPSLocation2 extends FragmentActivity implements
     public void onMapClick(LatLng latLng) {
         Log.d(TAG, "pressed on: " + latLng.latitude + " " + latLng.longitude);
         position_pressed = latLng;
-        new NameDialog(this).show(getSupportFragmentManager(), TAG);
+        mMap.clear();
+        MarkerOptions marker = new MarkerOptions()
+                .position(latLng)
+                .title(getString(R.string.selected_city));
+
+        mMap.addMarker(marker);
+
 
     }
 
 
-    protected void setName(String name, boolean exists) {
+
+
+    protected void setName(String name, boolean exists, int r) {
         if (exists) {
             Log.d(TAG, "setName //name= " + name + " //latitude= " + String.valueOf(position_pressed.latitude) + " //longitude= " + String.valueOf(position_pressed.longitude) +
-            " //radius= " + "10");
-            new NewGPSLocationAsync().execute(name, String.valueOf(position_pressed.latitude), String.valueOf(position_pressed.longitude), "10");
+            " //radius= " + r);
+            new NewGPSLocationAsync().execute(name, String.valueOf(position_pressed.latitude), String.valueOf(position_pressed.longitude), String.valueOf(r));
             //LocMessAPIClientImpl.getInstance().newGPSLocation(name, String.valueOf(position_pressed.latitude), String.valueOf(position_pressed.longitude), "10");
-            Log.d(TAG, "setName: " + name);
         } else
             Toast.makeText(getBaseContext(), R.string.give_name_location, Toast.LENGTH_LONG).show();
 
+    }
+
+    @Override
+    public boolean onMarkerClick(Marker marker) {
+        Log.d(TAG, "Clicked on marker");
+        new NameDialog(this).show(getSupportFragmentManager(), TAG);
+        return false;
     }
 
     @SuppressLint("ValidFragment")
@@ -245,6 +271,12 @@ public class NewGPSLocation2 extends FragmentActivity implements
             View v = inflater.inflate(R.layout.name_location_dialog, null);
 
             final EditText editText = (EditText) v.findViewById(R.id.written_text);
+            v.findViewById(R.id.radius1).setVisibility(View.VISIBLE);
+            v.findViewById(R.id.radius2).setVisibility(View.VISIBLE);
+            final NumberPicker picker = (NumberPicker) v.findViewById(R.id.picker);
+            picker.setMaxValue(100);
+            picker.setMinValue(1);
+            picker.setVisibility(View.VISIBLE);
 
             builder.setView(v)
                     // Add action buttons
@@ -254,15 +286,15 @@ public class NewGPSLocation2 extends FragmentActivity implements
                             getDialog().cancel();
                             String text = editText.getText().toString();
                             if (text.isEmpty() || text.contentEquals(" "))
-                                _n.setName(null, false);
+                                _n.setName(null, false, 0);
                             else
-                                _n.setName(text, true);
+                                _n.setName(text, true, picker.getValue());
 
                         }
                     })
                     .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int id) {
-                            _n.setName(null, false);
+                            _n.setName(null, false, 0);
                             getDialog().cancel();
                         }
                     });
@@ -276,7 +308,12 @@ public class NewGPSLocation2 extends FragmentActivity implements
 
         @Override
         protected String doInBackground(String... params) {
-            LocMessAPIClientImpl.getInstance().newGPSLocation(params[0], params[1], params[2], params[3]);
+            try {
+                LocMessAPIClientImpl.getInstance().newGPSLocation(params[0], params[1], params[2], params[3]);
+            }catch (Exception e){
+                e.printStackTrace();
+                Log.e(TAG, "not sent to server");
+            }
             return null;
         }
     }

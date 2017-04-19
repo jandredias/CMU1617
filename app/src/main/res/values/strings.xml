@@ -56,4 +56,9 @@
     <string name="give_name_location">You need to give a name to the location</string>
     <string name="ok">ok</string>
     <string name="cancel">Cancel</string>
+    <string name="selected_city">Seleted city</string>
+    <string name="new_location_wifi_2">" as a new location?</string>
+    <string name="new_location_wifi_1">Do you want to save "</string>
+    <string name="name_of_the_location">Name of the location:</string>
+    <string name="radius">Radius:</string>
 </resources>

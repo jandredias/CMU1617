@@ -4,13 +4,22 @@
     android:layout_height="match_parent">
 
     <TextView
-        android:text="Name of the location:"
         android:paddingLeft="20dp"
         android:paddingRight="10dp"
         android:textSize="20sp"
         android:layout_width="wrap_content"
-        android:id="@+id/name"
+        android:id="@+id/initial"
+        android:visibility="gone"
         android:layout_height="wrap_content" />
+
+    <TextView
+    android:text="@string/name_of_the_location"
+    android:paddingLeft="20dp"
+    android:paddingRight="10dp"
+    android:textSize="20sp"
+    android:layout_width="wrap_content"
+    android:id="@+id/name"
+    android:layout_height="wrap_content" />
 
 
     <android.support.design.widget.TextInputLayout
@@ -24,6 +33,32 @@
             android:maxLines="1" />
 
     </android.support.design.widget.TextInputLayout>
+
+    <TextView
+        android:text="@string/radius"
+        android:paddingLeft="20dp"
+        android:paddingRight="10dp"
+        android:textSize="20sp"
+        android:layout_width="wrap_content"
+        android:visibility="gone"
+        android:id="@+id/radius1"
+        android:layout_height="wrap_content" />
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/radius2"
+        android:visibility="gone"
+        android:layout_gravity="center">
+
+    <NumberPicker
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/picker"
+        />
+    </LinearLayout>
+
+
+
    <!-- <EditText
         android:inputType="text"
         android:id="@+id/written_text"

@@ -335,7 +335,7 @@ public final class LocMessAPIClientImpl extends LocMessAPIClientBase implements 
     @Override
     public JSONObject newGPSLocation(String name, String latitude, String longitude, String radius){
         Map<String, String> post = new HashMap<>();
-        post.put("location_name ",name); //Log.d(TAG, "newGPSLocation location_name: " + name);
+        post.put("location_name", name); //Log.d(TAG, "newGPSLocation location_name: " + name);
         post.put("location_type","coordinates");// Log.d(TAG, "newGPSLocation location_type: " + "coordinates");
         post.put("latitude",latitude); //Log.d(TAG, "newGPSLocation latitude: " + latitude);
         post.put("longitude",longitude); //Log.d(TAG, "newGPSLocation longitude: " + longitude);

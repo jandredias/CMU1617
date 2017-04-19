@@ -1,27 +1,35 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="horizontal"
-    android:layout_width="match_parent"
+<RelativeLayout android:id="@+id/InnerRelativeLayout"
+    android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:padding="10dp" >
+    android:minHeight="50dp"
+    android:padding="@dimen/AppMargin"
+    android:orientation="vertical"
+    android:layout_alignParentBottom="true"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <TextView
-        android:layout_alignParentRight="true"
-        android:id="@+id/location_number_questions"
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/location_add_mesage_button"
         android:layout_width="50dp"
         android:layout_height="50dp"
-        android:gravity="center"
-        android:textColor="@color/white"
-        android:background="@drawable/circle"
-        android:text="5"/>
+        android:layout_gravity="center_vertical"
+        android:layout_alignParentLeft="true"
+        android:layout_marginRight="10dp"
+        android:backgroundTint="@color/colorAccent"
+        android:tint="@color/white"
+        android:layout_centerVertical="true"
+        app:srcCompat="@drawable/ic_add"/>
+
     <TextView
         android:id="@+id/location_name"
-        android:layout_toLeftOf="@id/location_number_questions"
-        android:layout_marginRight="20dp"
-        android:layout_width="match_parent"
+        android:layout_width="fill_parent"
+        android:layout_toRightOf="@id/location_add_mesage_button"
+        android:layout_height="wrap_content"
         android:gravity="center_vertical"
-        android:paddingLeft="20dp"
+        android:layout_centerVertical="true"
         android:textSize="18sp"
-        android:layout_height="50dp"
-        android:text="location_name"/>
+        android:text="so big so big so big so big so big so big so big so big so big so big so big so big so big so big  on  lalalalalala" />
+
+
 </RelativeLayout>

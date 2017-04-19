@@ -7,7 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-;
+;import static com.sun.corba.se.spi.activation.IIOP_CLEAR_TEXT.value;
 
 /**
  * Created by andre on 28/03/17.
@@ -329,5 +329,24 @@ public final class LocMessAPIClientImpl extends LocMessAPIClientBase implements 
             }
         }
         throw new APIException("Couldn't connect to server");
+    }
+
+    @Override
+    public JSONObject newGPSLocation(String name, String latitude, String longitude, String radius){
+        Map<String, String> post = new HashMap<>();
+        post.put("location_name ",name);
+        post.put("location_type","coordinates");
+        post.put("latitude",latitude);
+        post.put("longitude",longitude);
+        post.put("radius",radius);
+        return  invoke(Endpoint.NEW_LOCATION, _auth, null, post);
+    }
+    @Override
+    public JSONObject newWIFILocation(String name, String ssid_list){
+        Map<String, String> post = new HashMap<>();
+        post.put("location_name ",name);
+        post.put("location_type","wifi");
+        post.put("ssid_list",ssid_list);
+        return  invoke(Endpoint.NEW_LOCATION, _auth, null, post);
     }
 }

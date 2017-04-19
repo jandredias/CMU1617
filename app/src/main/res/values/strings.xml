@@ -51,4 +51,9 @@
     </string-array>
     <string name="title_activity_new_gpslocation">Map</string>
     <string name="title_activity_dummy_maps">Map</string>
+    <string name="title_activity_new_gpslocation2">Map</string>
+    <string name="arco_do_cego">Arco do Cego</string>
+    <string name="give_name_location">You need to give a name to the location</string>
+    <string name="ok">ok</string>
+    <string name="cancel">Cancel</string>
 </resources>

@@ -84,12 +84,12 @@ public abstract class ListLocationsFragment extends Fragment implements View.OnC
         mRecyclerView.addOnItemTouchListener(new RecyclerTouchListener(getContext(), mRecyclerView, new ClickListener() {
             @Override
             public void onClick(View view, int position) {
-                LocMessLocation location = mAdapter.getItem(position);
-                Toast.makeText(getContext(), location.name() + " is selected!", Toast.LENGTH_SHORT).show();
+//                LocMessLocation location = mAdapter.getItem(position);
+//                Toast.makeText(getContext(), location.name() + " is selected!", Toast.LENGTH_SHORT).show();
 
-                Intent intent = new Intent(getContext(),ListMessagesActivity.class);
-                intent.putExtra("location_id",location.id());
-                startActivity(intent);
+//                Intent intent = new Intent(getContext(),NewMessageActivity.class);
+//                intent.putExtra("location_id",location.id());
+//                startActivity(intent);
             }
 
             @Override
@@ -237,10 +237,18 @@ public abstract class ListLocationsFragment extends Fragment implements View.OnC
 
         @Override
         public void onBindViewHolder(ViewHolder holder, int position) {
-            LocMessLocation location = getItem(position);
+            final LocMessLocation location = getItem(position);
             ViewHolder v = holder;
 
             v._name.setText(location.name());
+            v._button.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent intent = new Intent(getContext(),NewMessageActivity.class);
+                    intent.putExtra("location_id",location.id());
+                    startActivity(intent);
+                }
+            });
         }
 
 
@@ -248,6 +256,7 @@ public abstract class ListLocationsFragment extends Fragment implements View.OnC
         class ViewHolder extends RecyclerView.ViewHolder {
             View _holder;
             TextView _name;
+            View _button;
 
 
 
@@ -255,6 +264,7 @@ public abstract class ListLocationsFragment extends Fragment implements View.OnC
                 super(itemView);
                 _holder = itemView;
                 _name = (TextView) itemView.findViewById(R.id.location_name);
+                _button = itemView.findViewById(R.id.location_add_mesage_button);
             }
         }
     }
@@ -331,10 +341,7 @@ public abstract class ListLocationsFragment extends Fragment implements View.OnC
             if (_refreshLayout != null) {
                 _refreshLayout.setRefreshing(false);
             }
-            treatEmptyView();
-
-
-        }
+            treatEmptyView();        }
     }
 
 }

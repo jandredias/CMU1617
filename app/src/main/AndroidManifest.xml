@@ -49,15 +49,18 @@
             android:name=".MainActivity"
             android:label="@string/title_activity_main" />
         <activity
-            android:name=".ListMessagesActivity"
-            android:label="@string/title_activity_location_messages"
-            android:theme="@style/AppTheme.NoActionBar" />
-        <activity
             android:name=".NewMessageActivity"
             android:windowSoftInputMode="stateHidden" />
         <activity
             android:name=".ProfileActivity"
             android:windowSoftInputMode="stateHidden" />
+        <activity android:name=".ShowMessageActivity" />
+        <!--
+            <activity
+            android:name=".ListMessagesActivity"
+            android:label="@string/title_activity_location_messages"
+            android:theme="@style/AppTheme.NoActionBar" />
+        -->
         <!--
              The API key for Google Maps-based APIs is defined as a string resource.
              (See the file "res/values/google_maps_api.xml").
@@ -73,6 +76,9 @@
         <activity
             android:name=".NewGPSLocation"
             android:label="@string/title_activity_new_gpslocation" />
+        <activity
+            android:name=".NewGPSLocation2"
+            android:label="@string/title_activity_new_gpslocation2"></activity>
     </application>
 
 </manifest>

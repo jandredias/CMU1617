@@ -34,7 +34,7 @@ public class GPSLocationsFragment extends ListLocationsFragment {
     public void onClick(View v) {
        switch(v.getId()){
            case R.id.add_location:
-               startActivity(new Intent(getActivity(), NewGPSLocation.class));
+               startActivity(new Intent(getActivity(), NewGPSLocation2.class));
        }
 
     }

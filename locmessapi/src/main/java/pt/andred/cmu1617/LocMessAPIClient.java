@@ -35,4 +35,7 @@ public interface LocMessAPIClient {
     String editProfileKeys(boolean add, String name, String value);
 
     JSONArray listKeywords();
+
+    JSONObject newGPSLocation(String name, String latitude, String longitude, String radius);
+    JSONObject newWIFILocation(String name, String ssid_list);
 }

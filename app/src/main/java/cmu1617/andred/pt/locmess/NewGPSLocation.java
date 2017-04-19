@@ -22,6 +22,8 @@ import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 
+
+
 public class NewGPSLocation extends FragmentActivity implements OnMapReadyCallback, LocationListener, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
 
     private final String TAG = "NewGPSLocation";
@@ -46,12 +48,30 @@ public class NewGPSLocation extends FragmentActivity implements OnMapReadyCallba
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
+        Log.d(TAG, "onCreate");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_new_gpslocation);
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
+
+        // Build the Play services client for use by the Fused Location Provider and the Places API.
+        // Use the addApi() method to request the Google Places API and the Fused Location Provider.
+        /*mGoogleApiClient = new GoogleApiClient.Builder(this)
+                .enableAutoManage(this *//* FragmentActivity *//*,
+                        this *//* OnConnectionFailedListener *//*)
+                .addConnectionCallbacks(this)
+                .addApi(LocationServices.API)
+                .addApi(Places.GEO_DATA_API)
+                .addApi(Places.PLACE_DETECTION_API)
+                .build();
+        mGoogleApiClient.connect();*/
+
+        Log.d(TAG, "onCreate finished");
+
+
 
     }
 
@@ -68,14 +88,16 @@ public class NewGPSLocation extends FragmentActivity implements OnMapReadyCallba
     @Override
     public void onMapReady(GoogleMap googleMap) {
 
-
+        Log.d(TAG, "onMapReady finished");
         mMap = googleMap;
 
         // Turn on the My Location layer and the related control on the map.
         updateLocationUI();
+        Log.d(TAG, "onMapReady updateLocationUI");
 
         // Get the current location of the device and set the position of the map.
         getDeviceLocation();
+        Log.d(TAG, "onMapReady getDeviceLocation");
     }
 
 

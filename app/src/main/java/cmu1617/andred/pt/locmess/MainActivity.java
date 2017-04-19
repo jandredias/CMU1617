@@ -19,7 +19,7 @@ import android.view.MenuItem;
 import pt.andred.cmu1617.LocMessAPIClientImpl;
 
 public class MainActivity extends AppCompatActivity {
-
+    private final String TAG = "MainActivity";
 //    private TextView mTextMessage;
     ViewPager _mainViewPager;
     FragmentPagerAdapter _adapterViewPager;
@@ -30,6 +30,8 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        Log.d(TAG, "onCreate");
         setContentView(R.layout.activity_main);
         _db = new SQLDataStoreHelper(this);
         _main_fragment = new DualLocationsFragment();
@@ -46,17 +48,17 @@ public class MainActivity extends AppCompatActivity {
 
                  switch (item.getItemId()) {
                      case R.id.settings:
-                         Log.wtf("TAG", "settings pressed");
+                         Log.wtf(TAG, "settings pressed");
 //                                                                         startActivity(new Intent(this, SettingsActivity.class));
                          break;
                      case R.id.profile:
-                         Log.wtf("TAG", "profile pressed");
+                         Log.wtf(TAG, "profile pressed");
 
                          Intent intent = new Intent(getBaseContext(), ProfileActivity.class);
                          startActivity(intent);
                          break;
                      case R.id.logout:
-                         Log.wtf("TAG", "logout pressed");
+                         Log.wtf(TAG, "logout pressed");
                          LocMessAPIClientImpl.getInstance().logout();
                          new Login(_db).logout();
                          startActivity(new Intent(MainActivity.this, LoginActivity.class));

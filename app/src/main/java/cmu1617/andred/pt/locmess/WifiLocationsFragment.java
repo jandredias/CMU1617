@@ -18,6 +18,8 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import org.json.JSONObject;
+
 import cmu1617.andred.pt.locmess.Domain.LocMessLocation;
 import cmu1617.andred.pt.locmess.Domain.WIFILocation;
 import pt.andred.cmu1617.LocMessAPIClientImpl;
@@ -154,12 +156,18 @@ public static class NewWIFILocationAsync extends AsyncTask<String, String, Strin
 
     @Override
     protected String doInBackground(String... params) {
+
+        JSONObject result;
         try {
-            LocMessAPIClientImpl.getInstance().newWIFILocation(params[0], params[1]);
+            result = LocMessAPIClientImpl.getInstance().newWIFILocation(params[0], params[1]);
+            if(result.getInt("status") != 200){
+                Log.e(TAG, "Error in sending to server, status= " + result.getInt("status"));
+            }
         }catch (Exception e){
             e.printStackTrace();
-            Log.e(TAG, "not sent to server");
+            Log.e(TAG, "not sent to server, there was an exception");
         }
+        Log.d(TAG, "Sent to server and everything is fine");
         return null;
     }
 }

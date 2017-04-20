@@ -4,7 +4,6 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.util.List;
-import java.util.Map;
 
 public interface LocMessAPIClient {
 
@@ -28,7 +27,7 @@ public interface LocMessAPIClient {
 
     void deleteLocation(String locationId);
 
-    List<Map<String, Map<String, String>>> listMessages();
+    JSONArray getMessages(String latitude, String longitude, List<String> ssid_list, String last_message_id);
 
     String addMessage(String location_id,String message, String dateBegin, String dateEnd, List<MessageConstraint> list);
 

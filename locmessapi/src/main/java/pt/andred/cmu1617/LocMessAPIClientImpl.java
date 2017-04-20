@@ -189,8 +189,40 @@ public final class LocMessAPIClientImpl extends LocMessAPIClientBase implements 
     }
 
     @Override
-    public List<Map<String, Map<String, String>>> listMessages() {
-        return null;
+    public JSONArray getMessages(String latitude, String longitude, List<String> ssid_list, String last_message_id) {
+        String wifi_list = convertToString(ssid_list,"><(((('>");
+        for (int i = 0; i < TRIES; i++) {
+
+            JSONObject response = invoke(Endpoint.LIST_LOCATIONS, _auth, null, null);
+            if (response == null) {
+                continue;
+            }
+            if (!response.has("status")) continue;
+            if (response.getInt("status") != 200) {
+                throw new APIException("HTTP Error: " +
+                        response.getInt("status") + " " +
+                        (response.has("description") ? response.getString("description") : ""));
+            }
+            if (response.getInt("status") == 200) {
+                if (!response.has("messages")) {
+                    throw new APIException("Response is malformed. messages missing");
+                }
+
+                return response.getJSONArray("messages");
+
+            } else {
+                if (!response.has("error")) {
+                    throw new APIException("Response is malformed. error missing");
+                }
+                if (!response.has("description")) {
+                    throw new APIException("Response is malformed. error missing");
+                }
+                throw new APIException(
+                        response.getString("error"),
+                        response.getString("description"));
+            }
+        }
+        throw new APIException("Couldn't connect to server");
     }
 
     private String convertToString(List<? extends Object> toConvert, String delimiter) {

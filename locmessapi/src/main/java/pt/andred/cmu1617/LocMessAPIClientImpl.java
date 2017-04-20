@@ -191,9 +191,14 @@ public final class LocMessAPIClientImpl extends LocMessAPIClientBase implements 
     @Override
     public JSONArray getMessages(String latitude, String longitude, List<String> ssid_list, String last_message_id) {
         String wifi_list = convertToString(ssid_list,"><(((('>");
+        Map<String, String> post = new HashMap<>();
+        post.put("latitude", latitude);
+        post.put("longitude", longitude);
+        post.put("ssid_list", wifi_list);
+        post.put("last_message_id", last_message_id);
         for (int i = 0; i < TRIES; i++) {
 
-            JSONObject response = invoke(Endpoint.LIST_LOCATIONS, _auth, null, null);
+            JSONObject response = invoke(Endpoint.GET_MESSAGES, _auth, null, post);
             if (response == null) {
                 continue;
             }

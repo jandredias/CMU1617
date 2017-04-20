@@ -91,6 +91,8 @@ public class MainActivity extends AppCompatActivity {
                 return true;
             }
         });
+        Log.wtf(TAG,"Calling service next");
         startService(new Intent(this, LocMessMainService.class));
+        Log.wtf(TAG,"Called service ");
     }
 }

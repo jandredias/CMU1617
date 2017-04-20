@@ -10,6 +10,7 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.List;
 
+import cmu1617.andred.pt.locmess.Domain.LocMessLocation;
 import cmu1617.andred.pt.locmess.Domain.LocMessMessage;
 import cmu1617.andred.pt.locmess.SQLDataStoreHelper;
 import pt.andred.cmu1617.LocMessAPIClientImpl;
@@ -21,10 +22,14 @@ import pt.andred.cmu1617.LocMessAPIClientImpl;
 public class GetMessagesAsyncTask extends AsyncTask<Void, Void, Boolean> {
     private final String Tag = "GetMessagesAsyncTask ";
     private final SQLDataStoreHelper _db;
+    private List<String> _ssid_list;
+    private int _last_message_id = 0;
+    private String _longitude;
+    private String _latitude;
+
     public GetMessagesAsyncTask(SQLDataStoreHelper db) {
         _db = db;
     }
-
 
     @Override
     protected void onPreExecute() {
@@ -32,24 +37,29 @@ public class GetMessagesAsyncTask extends AsyncTask<Void, Void, Boolean> {
     }
     @Override
     protected Boolean doInBackground(Void... params) {
-        String latitude = "0";
-        String longitude= "0";
-        String last_message_id = "0";
-        List<String> ssid_list = new ArrayList<>();
+        _latitude = "0";
+        _longitude= "0";
+        _ssid_list = new ArrayList<>();
         try {
-            JSONArray messagesMap = LocMessAPIClientImpl.getInstance().getMessages(latitude,longitude,ssid_list,last_message_id);
+            JSONArray messagesMap = LocMessAPIClientImpl.getInstance().getMessages(_latitude,_longitude,_ssid_list,_last_message_id+"");
             for (int i = 0; i < messagesMap.length(); i++) {
                 JSONObject message_json = messagesMap.getJSONObject(i);
-                String name = message_json.getString("name");
+                String location_name = message_json.getString("name");
                 String location_id = message_json.getString("location_id");
                 String message_id = message_json.getString("message_id");
                 String content = message_json.getString("content");
                 String author = message_json.getString("author");
                 String time_start = message_json.getString("time_start");
                 String time_end = message_json.getString("time_end");
+
+                new LocMessLocation(_db,location_id).name(location_name);
+
                 LocMessMessage message = new LocMessMessage(_db, message_id);
                 message.completeObject(location_id,author,content,time_start,time_end);
                 Log.d(Tag, "new message");
+                if(message_json.getInt("message_id") > _last_message_id ) {
+                    _last_message_id = message_json.getInt("message_id");
+                }
             }
         } catch (JSONException e) {
             e.printStackTrace();
@@ -61,6 +71,14 @@ public class GetMessagesAsyncTask extends AsyncTask<Void, Void, Boolean> {
     protected void onPostExecute(Boolean bogus){
         // your stuff
         Log.wtf(Tag, "end");
+    }
+
+    private void updateGpsPosition() {
+
+    }
+
+    private void updateWifiList() {
+
     }
 
 

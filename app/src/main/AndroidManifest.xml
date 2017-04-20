@@ -81,6 +81,7 @@
             android:name=".ShowLocation"
             android:label="@string/title_activity_show_location" />
         <service android:name=".LocMessMainService" android:enabled="true" android:exported="false"/>
+        <activity android:name=".NewWIFILocation" />
     </application>
 
 </manifest>

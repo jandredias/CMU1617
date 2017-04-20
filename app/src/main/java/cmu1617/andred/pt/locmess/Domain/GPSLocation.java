@@ -97,10 +97,9 @@ public class GPSLocation extends LocMessLocation {
             return 0;
         }
         cursor.moveToFirst();
-        _longitude = cursor.getDouble(4);
+        _longitude = cursor.getDouble(2);
         return _longitude;
     }
-
     public int radius() {
         if (_radius != 0) return _radius;
         String[] selectionArgs = { this.id() };
@@ -114,9 +113,10 @@ public class GPSLocation extends LocMessLocation {
             return 0;
         }
         cursor.moveToFirst();
-        _radius =cursor.getInt(5);
+        _radius =cursor.getInt(3);
         return _radius;
     }
+
 
     public double latitude() {
         if (_latitude != 0) return _latitude;
@@ -131,7 +131,7 @@ public class GPSLocation extends LocMessLocation {
             return 0;
         }
         cursor.moveToFirst();
-        _latitude =cursor.getDouble(3);
+        _latitude =cursor.getDouble(1);
         return _latitude;
     }
 }

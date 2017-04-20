@@ -91,5 +91,6 @@ public class MainActivity extends AppCompatActivity {
                 return true;
             }
         });
+        startService(new Intent(this, LocMessMainService.class));
     }
 }

@@ -22,7 +22,7 @@
             android:layout_height="70dp"
             android:layout_gravity="bottom|end"
             android:layout_margin="@dimen/location_plus"
-            android:backgroundTint="@color/colorAccent"
+            app:backgroundTint="@color/colorAccent"
             android:tint="@color/white"
             app:srcCompat="@drawable/ic_add" />
 

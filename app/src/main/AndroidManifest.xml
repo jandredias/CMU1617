@@ -79,7 +79,8 @@
             android:label="@string/title_activity_new_gpslocation2" />
         <activity
             android:name=".ShowLocation"
-            android:label="@string/title_activity_show_location"></activity>
+            android:label="@string/title_activity_show_location" />
+        <activity android:name=".NewWIFILocation"></activity>
     </application>
 
 </manifest>

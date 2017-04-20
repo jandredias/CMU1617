@@ -240,8 +240,7 @@ public abstract class ListLocationsFragment extends Fragment implements View.OnC
 
             v._name.setText(location.name());
             if(location instanceof GPSLocation){
-                v.itemView.findViewById(R.id.location_map).setVisibility(View.VISIBLE);
-                v.itemView.findViewById(R.id.location_map).setOnClickListener(new View.OnClickListener() {
+                v.itemView.findViewById(R.id.location_name).setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
                         Intent i = new Intent(getActivity(), ShowLocation.class);
@@ -358,4 +357,3 @@ public abstract class ListLocationsFragment extends Fragment implements View.OnC
     }
 
 }
-

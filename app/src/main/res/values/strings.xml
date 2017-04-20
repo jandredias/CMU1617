@@ -62,4 +62,10 @@
     <string name="name_of_the_location">Name of the location:</string>
     <string name="radius">Radius:</string>
     <string name="title_activity_show_location">Map</string>
+    <string name="your_location">Your location</string>
+    <string name="save">Save</string>
+    <string name="add_keyword">Add Keyword</string>
+    <string name="add_network_id">Add Network ID</string>
+    <string name="no_wi_fi_connection">No Wi-fi connection</string>
+    <string name="name_of_location">Name of location:</string>
 </resources>

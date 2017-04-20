@@ -3,11 +3,9 @@ package cmu1617.andred.pt.locmess;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.app.Dialog;
-import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.database.Cursor;
-import android.net.wifi.WifiInfo;
-import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -47,10 +45,11 @@ public class WifiLocationsFragment extends ListLocationsFragment {
                 /*if (WifiManager.NETWORK_STATE_CHANGED_ACTION.equals (action)) {
                     NetworkInfo netInfo = intent.getParcelableExtra(WifiManager.EXTRA_NETWORK_INFO);
                     if (ConnectivityManager.TYPE_WIFI == netInfo.getType()) {*/
-                        WifiManager wifiManager = (WifiManager) getActivity().getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+                    startActivity(new Intent(getActivity(), NewWIFILocation.class));
+                        /*WifiManager wifiManager = (WifiManager) getActivity().getApplicationContext().getSystemService(Context.WIFI_SERVICE);
                         WifiInfo info = wifiManager.getConnectionInfo();
                         ssid = info.getSSID();
-                        new SimpleDialog(this, ssid).show(getFragmentManager(), TAG);
+                        new SimpleDialog(this, ssid).show(getFragmentManager(), TAG);*/
                    /* }
                 }*/
         }

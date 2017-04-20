@@ -124,11 +124,11 @@ public class NewGPSLocation extends FragmentActivity implements
 
         position_pressed = new LatLng(currentLatitude, currentLongitude);
 
-        MarkerOptions options = new MarkerOptions()
+       /* MarkerOptions options = new MarkerOptions()
                 .position(position_pressed)
                 .title("You are here");
-        mMap.addMarker(options);
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom((position_pressed), 11.0F));
+        mMap.addMarker(options);*/
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom((position_pressed), 15.0F));
     }
 
     @Override
@@ -174,13 +174,16 @@ public class NewGPSLocation extends FragmentActivity implements
                     PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION);
         }
         if (mLocationPermissionGranted) {
+            mMap.setMyLocationEnabled(true);
             Location location = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
             if (location == null) {
                 LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
             } else {
                 handleNewLocation(location);
+                Log.e(TAG, "passed here!");
             }
         }
+        Log.d(TAG, "Permission is " + mLocationPermissionGranted);
     }
 
     @Override
@@ -212,7 +215,7 @@ public class NewGPSLocation extends FragmentActivity implements
 
     @Override
     public void onLocationChanged(Location location) {
-        handleNewLocation(location);
+       // handleNewLocation(location);
     }
 
     @Override
@@ -226,6 +229,12 @@ public class NewGPSLocation extends FragmentActivity implements
                 onMapClick(latLng);
             }
         });
+       /* if (ContextCompat.checkSelfPermission(this.getApplicationContext(),
+                android.Manifest.permission.ACCESS_FINE_LOCATION)
+                == PackageManager.PERMISSION_GRANTED) {
+            Location location = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
+            handleNewLocation(location);
+        }*/
         /*if(!mLocationPermissionGranted) {
             MarkerOptions marker = new MarkerOptions().position(new LatLng(latitudeLisbon, longitudeLisbon)).title("1"); //create marker
             mMap.addMarker(marker); // adding marker

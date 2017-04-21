@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">LocMess</string>
+    <string name="app_name">ALocMess</string>
 
     <!-- Strings related to login -->
     <string name="prompt_email">Email</string>

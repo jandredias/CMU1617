@@ -3,6 +3,7 @@ package cmu1617.andred.pt.locmess;
 import android.content.ContentValues;
 import android.util.Log;
 
+import cmu1617.andred.pt.locmess.Domain.Settings;
 import cmu1617.andred.pt.locmess.Domain.UserProfile;
 import pt.andred.cmu1617.LocMessAPIClientImpl;
 
@@ -40,7 +41,8 @@ public class Login {
                 "valid = ?",
                 selectionArgs);
 
-        _db.getWritableDatabase().execSQL(DataStore.SQL_CREATE_USER_KEYWORDS);
         _db.getWritableDatabase().execSQL(DataStore.SQL_DELETE_USER_KEYWORDS);
+        _db.getWritableDatabase().execSQL(DataStore.SQL_CREATE_USER_KEYWORDS);
+        Settings.logout();
     }
 }

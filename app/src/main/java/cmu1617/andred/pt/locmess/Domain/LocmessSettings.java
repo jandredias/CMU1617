@@ -4,7 +4,7 @@ package cmu1617.andred.pt.locmess.Domain;
  * Created by miguel on 21/04/17.
  */
 
-public class Settings {
+public class LocmessSettings {
     private static boolean _trueIfAskedUserAlready = false;
     private static int _periodicity_seconds = 10;
     private static int _periodicity_milli_seconds = 10000;

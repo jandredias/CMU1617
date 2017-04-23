@@ -1,5 +1,7 @@
 package cmu1617.andred.pt.locmess;
 
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -7,13 +9,18 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.location.Location;
+import android.location.LocationManager;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.IBinder;
+import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.NotificationCompat;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -26,7 +33,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import cmu1617.andred.pt.locmess.AsyncTasks.GetMessagesAsyncTask;
-import cmu1617.andred.pt.locmess.Domain.Settings;
+import cmu1617.andred.pt.locmess.Domain.LocmessSettings;
 
 import static android.R.attr.value;
 
@@ -39,20 +46,21 @@ public class LocMessMainService extends Service implements GoogleApiClient.Conne
     private LocationRequest mLocationRequest;
     private boolean mRequestingLocationUpdates = false;
     private boolean mReadyToLaunchNewTask = true;
-    private boolean mNewLocation;
-    private double _latitude;
-    private double _longitude;
+    private Double _latitude;
+    private Double _longitude;
     private WifiManager mWifiManager ;
     private WifiReceiver mWifiScanReceiver;
     private List<ScanResult> wifiList;
     private List<String> _ssidList = new ArrayList<>();
+    private int delay; //milliseconds
+    private Handler alarmHandler;
+    private LocationManager locationManager;
 
-    public LocMessMainService() {
-    }
+    public LocMessMainService() {}
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        Log.d(TAG, "Service Started + " + value);
+        Log.wtf(TAG, "Service Started + " + value);
 
         // Create an instance of GoogleAPIClient.
         if (mGoogleApiClient == null) {
@@ -63,12 +71,58 @@ public class LocMessMainService extends Service implements GoogleApiClient.Conne
                     .build();
         }
         mGoogleApiClient.connect();
+        alarmHandler = new Handler();
+        locationManager =  (LocationManager) getSystemService( Context.LOCATION_SERVICE );
+        registerWifiReceiver();
+        createLocationRequest();
+        setAlarm();
+
+        return START_STICKY;
+    }
+
+    private void registerWifiReceiver() {
         mWifiManager = (WifiManager) getSystemService(Context.WIFI_SERVICE);
         mWifiScanReceiver = new WifiReceiver();
         registerReceiver(mWifiScanReceiver,new IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION));
 
-        createLocationRequest();
-        return START_STICKY;
+    }
+
+    private void setAlarm() {
+        checkSettings();
+
+        delay = LocmessSettings.getPeriodicityMilliSeconds(); //milliseconds
+        Log.wtf(TAG, "Setting new alarm in " + delay + " milli seconds");
+
+        alarmHandler.postDelayed(new Runnable(){
+            public void run(){
+                //do something
+                executeNewTask();
+            }
+        }, delay);
+    }
+
+    private void checkSettings() {
+
+        if ( !gpsIsOn() ) {            disableGPSMessages();        }
+        requestWifiScan();
+    }
+
+    private boolean gpsIsOn() {
+        int locationMode;
+        try {
+            locationMode = Settings.Secure.getInt(getApplicationContext().getContentResolver(), Settings.Secure.LOCATION_MODE);
+        } catch (Settings.SettingNotFoundException e) {
+            e.printStackTrace();
+            return false;
+        }
+        return locationMode != Settings.Secure.LOCATION_MODE_OFF;
+    }
+
+
+    private void disableGPSMessages() {
+        Log.wtf(TAG,"no gps..");
+        _latitude = null;
+        _longitude = null;
     }
 
     @Override
@@ -80,16 +134,19 @@ public class LocMessMainService extends Service implements GoogleApiClient.Conne
 
     protected void startLocationUpdates(){
         startGPSUpdates();
-        startWifiUpdates();
+        requestWifiScan();
     }
 
-    private void startWifiUpdates() {
+    private void requestWifiScan() {
         // Check for wifi is disabled
-        if (mWifiManager.isWifiEnabled() == false) {
-
-            mWifiManager.setWifiEnabled(true);
+        if (mWifiManager.isWifiEnabled()) {
+            mWifiManager.startScan();
+        }else if(mWifiManager.isScanAlwaysAvailable()) {
+            mWifiManager.startScan();
+        } else {
+            Log.wtf(TAG,"no wifi list..");
+            _ssidList = new ArrayList<>(); //state cleaning
         }
-        mWifiManager.startScan();
     }
 
     protected void startGPSUpdates() {
@@ -124,8 +181,8 @@ public class LocMessMainService extends Service implements GoogleApiClient.Conne
 
     protected void createLocationRequest() {
         mLocationRequest = new LocationRequest();
-        mLocationRequest.setInterval(Settings.getPeriodicitySeconds()*1000);
-        mLocationRequest.setFastestInterval(Settings.getPeriodicitySeconds()*1000);
+        mLocationRequest.setInterval(LocmessSettings.getPeriodicityMilliSeconds());
+        mLocationRequest.setFastestInterval(0);
         mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
         mRequestingLocationUpdates = true;
     }
@@ -134,24 +191,42 @@ public class LocMessMainService extends Service implements GoogleApiClient.Conne
     public void onLocationChanged(Location location) {
         _latitude = location.getLatitude();
         _longitude = location.getLongitude();
-        mNewLocation = true;
-        executeNewTask();
     }
     protected void stopLocationUpdates() {
         LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, this);
     }
 
     @Override
-    public void onTaskCompleted() {
+    public void onTaskCompleted(Object... args) {
         mReadyToLaunchNewTask = true;
-        if(mNewLocation) {
-            executeNewTask();
+
+        if((int) args[0] > 0 ) {
+            buildNotification();
         }
+
+        Intent intent = new Intent();
+        intent.setAction(getString(R.string.intent_broadcast_new_messages));
+        LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(intent);
+
+        setAlarm();
+    }
+
+    private void buildNotification() {
+        NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(this)
+                        .setSmallIcon(R.mipmap.ic_launcher)
+                        .setAutoCancel(true) // clear notification after click
+//                        .setContentText("Hello World!")
+                        .setContentTitle("Messages Available");
+        Intent intent = new Intent(this, MainActivity.class);
+        PendingIntent pi = PendingIntent.getActivity(this,0,intent,Intent.FLAG_ACTIVITY_NEW_TASK);
+        mBuilder.setContentIntent(pi);
+        NotificationManager mNotificationManager =
+                (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        mNotificationManager.notify(0, mBuilder.build());
     }
 
     private void executeNewTask() {
         if(mReadyToLaunchNewTask) {
-            mNewLocation = false;
             mReadyToLaunchNewTask = false;
             task = new GetMessagesAsyncTask(new SQLDataStoreHelper(getBaseContext()),this);
             task.setLatitude(_latitude);
@@ -168,6 +243,7 @@ public class LocMessMainService extends Service implements GoogleApiClient.Conne
             _ssidList = new ArrayList<>();
 
             wifiList = mWifiManager.getScanResults();
+            Log.d(TAG,"Received Wifi List: " + wifiList.size() + " elements");
 
             for(int i = 0; i < wifiList.size(); i++){
                 _ssidList.add(wifiList.get(i).SSID);

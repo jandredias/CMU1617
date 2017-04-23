@@ -3,7 +3,6 @@ package cmu1617.andred.pt.locmess;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
-import android.content.Intent;
 import android.database.Cursor;
 import android.os.AsyncTask;
 import android.os.Build;
@@ -34,7 +33,6 @@ import cmu1617.andred.pt.locmess.Domain.UserKeywordsDifference;
 import cmu1617.andred.pt.locmess.Domain.UserProfile;
 import pt.andred.cmu1617.APIException;
 import pt.andred.cmu1617.LocMessAPIClientImpl;
-import pt.andred.cmu1617.MessageConstraint;
 
 public class ProfileActivity extends AppCompatActivity implements OnTaskCompleted {
 
@@ -144,7 +142,7 @@ public class ProfileActivity extends AppCompatActivity implements OnTaskComplete
     }
 
     @Override
-    public void onTaskCompleted() {
+    public void onTaskCompleted(Object... args) {
         populateKeywordList();
     }
 

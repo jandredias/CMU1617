@@ -1,5 +1,6 @@
 package cmu1617.andred.pt.locmess;
 
+import android.Manifest;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.IntentSender;
@@ -13,6 +14,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
@@ -33,7 +35,10 @@ import com.google.android.gms.location.LocationSettingsResult;
 import com.google.android.gms.location.LocationSettingsStates;
 import com.google.android.gms.location.LocationSettingsStatusCodes;
 
-import cmu1617.andred.pt.locmess.Domain.Settings;
+import java.util.ArrayList;
+import java.util.List;
+
+import cmu1617.andred.pt.locmess.Domain.LocmessSettings;
 import pt.andred.cmu1617.LocMessAPIClientImpl;
 
 public class MainActivity extends AppCompatActivity implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
@@ -41,6 +46,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 //    private TextView mTextMessage;
     private final int REQUEST_LOCATION = 200;
     private final int REQUEST_CHECK_SETTINGS = 300;
+    final private int REQUEST_CODE_ASK_MULTIPLE_PERMISSIONS = 124;
     ViewPager _mainViewPager;
     FragmentPagerAdapter _adapterViewPager;
     private SQLDataStoreHelper _db;
@@ -54,7 +60,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         Log.d(TAG, "onCreate");
         setContentView(R.layout.activity_main);
         _db = new SQLDataStoreHelper(this);
-        _main_fragment = new DualLocationsFragment();
+        _main_fragment = new DashboardFragment();
         final FragmentTransaction transaction = _fragmentManager.beginTransaction();
         transaction.replace(R.id.main_container, _main_fragment).commit();
 
@@ -112,17 +118,16 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                 return true;
             }
         });
+        bottomNavigation.setSelectedItemId(R.id.navigation_dashboard);
 
         enableLocation();
 
 
-        Log.wtf(TAG,"Calling service next");
         startService(new Intent(this, LocMessMainService.class));
-        Log.wtf(TAG,"Called service ");
     }
 
     private void enableLocation() {
-        if(Settings.trueIfAskedUserAlready()) { return; }
+        if(LocmessSettings.trueIfAskedUserAlready()) { return; }
 
         if (mGoogleApiClient == null) {
             mGoogleApiClient = new GoogleApiClient.Builder(this)
@@ -136,6 +141,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
     @Override
     public void onConnected(Bundle bundle) {
+        requestPermissions();
         LocationRequest mLocationRequest = new LocationRequest();
         LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder().addLocationRequest(mLocationRequest);
         PendingResult<LocationSettingsResult> result = LocationServices.SettingsApi.checkLocationSettings(mGoogleApiClient,builder.build());
@@ -148,7 +154,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                     case LocationSettingsStatusCodes.SUCCESS:
                         // All location settings are satisfied. The client can
                         // initialize location requests here.
-                        Toast.makeText(MainActivity.this, "SUCCESS", Toast.LENGTH_LONG).show();
+                        //Toast.makeText(MainActivity.this, "SUCCESS", Toast.LENGTH_LONG).show();
                         break;
                     case LocationSettingsStatusCodes.RESOLUTION_REQUIRED:
                         // Location settings are not satisfied, but this can be fixed
@@ -173,6 +179,29 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         });
     }
 
+    private void requestPermissions() {
+        List<String> permissionsList = new ArrayList<String>();
+
+        if (ContextCompat.checkSelfPermission(getApplicationContext(), android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            permissionsList.add(android.Manifest.permission.ACCESS_FINE_LOCATION);
+        }
+        if (ContextCompat.checkSelfPermission(getApplicationContext(), android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            permissionsList.add(android.Manifest.permission.ACCESS_COARSE_LOCATION);
+        }
+        if (ContextCompat.checkSelfPermission(getApplicationContext(), android.Manifest.permission.ACCESS_WIFI_STATE) != PackageManager.PERMISSION_GRANTED) {
+            permissionsList.add(Manifest.permission.ACCESS_WIFI_STATE);
+        }
+        if (ContextCompat.checkSelfPermission(getApplicationContext(), android.Manifest.permission.CHANGE_WIFI_STATE) != PackageManager.PERMISSION_GRANTED) {
+            permissionsList.add(Manifest.permission.CHANGE_WIFI_STATE);
+        }
+
+        if (permissionsList.size() > 0) {
+            ActivityCompat.requestPermissions(MainActivity.this, permissionsList.toArray(new String[permissionsList.size()]),REQUEST_CODE_ASK_MULTIPLE_PERMISSIONS);
+        }
+//        if(ActivityCompat.checkSelfPermission(MainActivity.this, android.Manifest.permission.)
+//            ACCESS_WIFI_STATE
+    }
+
     @Override
     public void onConnectionSuspended(int i) {
 
@@ -184,7 +213,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     }
     @Override
     protected void onStop() {
-        mGoogleApiClient.disconnect();
+        if(mGoogleApiClient != null) mGoogleApiClient.disconnect();
         super.onStop();
     }
     @Override
@@ -193,11 +222,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
             case REQUEST_CHECK_SETTINGS:
                 switch (resultCode) {
                     case Activity.RESULT_OK:
-                        if (ActivityCompat.checkSelfPermission(MainActivity.this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(MainActivity.this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                            ActivityCompat.requestPermissions(MainActivity.this, new String[]{android.Manifest.permission.ACCESS_COARSE_LOCATION, android.Manifest.permission.ACCESS_FINE_LOCATION}, REQUEST_LOCATION);
-                        } else {
-                            //Already has permission
-                        }
+                        //location is on
                         break;
                     case Activity.RESULT_CANCELED:
                         // user does not want to update setting. Handle it in a way that it will to affect your app functionality

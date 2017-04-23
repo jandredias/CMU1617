@@ -3,11 +3,14 @@ package cmu1617.andred.pt.locmess;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.TypedArray;
-import android.database.Cursor;
 import android.graphics.Canvas;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
+import android.icu.text.SimpleDateFormat;
+import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
+import android.support.annotation.RequiresApi;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
@@ -18,6 +21,9 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+
+import java.text.ParseException;
+import java.util.Date;
 
 import cmu1617.andred.pt.locmess.Domain.LocMessMessage;
 import cmu1617.andred.pt.locmess.Domain.UserProfile;
@@ -66,13 +72,32 @@ public abstract class ListMessagesFragment extends Fragment {
         mRecyclerView.setItemAnimator(new DefaultItemAnimator());
 
         mRecyclerView.addOnItemTouchListener(new RecyclerTouchListener(getContext(), mRecyclerView, new ClickListener() {
+            @RequiresApi(api = Build.VERSION_CODES.N)
             @Override
             public void onClick(View view, int position) {
                 LocMessMessage message = mAdapter.getItem(position);
 
                 Intent intent = new Intent(getContext(),ShowMessageActivity.class);
                 intent.putExtra("message_id",message.id());
-                startActivity(intent);
+                intent.putExtra("author",message.authorId());
+                intent.putExtra("location_id",message.location().id());
+                intent.putExtra("content",message.content());
+
+                String timeEnd = message.timeEnd();
+                SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                Date endDate = null;
+                try {
+                    endDate = dateFormat.parse(timeEnd);
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                }
+                Date now = new Date();
+                if(now.after(endDate)) {
+                    new cleanExpiredMessages().execute();
+                    new SimpleOkMessage(getContext(),"Message has expired");
+                } else {
+                    startActivity(intent);
+                }
             }
 
             @Override
@@ -92,6 +117,14 @@ public abstract class ListMessagesFragment extends Fragment {
         mRecyclerView.setAdapter(mAdapter);
         treatEmptyView();
 
+    }
+
+    public void restartListView() {
+        ListMessagesRecyclerViewAdapter adapter = createNewAdapter();
+        mRecyclerView.swapAdapter(adapter,false);
+
+        mAdapter = adapter;
+        treatEmptyView();
     }
 
 
@@ -206,6 +239,7 @@ public abstract class ListMessagesFragment extends Fragment {
 
     protected abstract class ListMessagesRecyclerViewAdapter extends RecyclerView.Adapter<ListMessagesRecyclerViewAdapter.ViewHolder> {
 
+
         @Override
         public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
             View l = LayoutInflater.from(parent.getContext()).inflate(R.layout.message_item, parent, false);
@@ -223,7 +257,13 @@ public abstract class ListMessagesFragment extends Fragment {
             v._message.setText(message.content());
             v._author.setText("By: " + message.authorId());
             v._location.setText(message.location().name());
-//            v._name.setText(location.name());
+
+//            v._content_text = message.content();
+//            v._author_text = message.authorId()
+//            v._location_id_text = message.location().id();
+//            v._message_id = message.id();
+//            v._expire_date = message.timeEnd();
+
         }
 
 
@@ -233,6 +273,12 @@ public abstract class ListMessagesFragment extends Fragment {
             TextView _location;
             TextView _author;
             TextView _message;
+//
+//            String _content_text;
+//            String _author_text;
+//            String _location_id_text;
+//            String _message_id;
+//            String _expire_date;
 
             ViewHolder(View itemView) {
                 super(itemView);
@@ -244,4 +290,33 @@ public abstract class ListMessagesFragment extends Fragment {
         }
     }
 
+    protected class cleanExpiredMessages extends AsyncTask<Void, Void, Boolean> {
+        private String Tag = "cleanExpiredMessages";
+
+
+        @Override
+        protected void onPreExecute() {
+            Log.d(Tag,"start");
+        }
+
+
+        @Override
+        protected Boolean doInBackground(Void... params) {
+            _dbHelper.getWritableDatabase().delete(DataStore.SQL_MESSAGES,"time_end < datetime()",null);
+            return true;
+        }
+
+        @Override
+        protected void onPostExecute(final Boolean success) {
+            Log.d(Tag,"end");
+
+
+        }
+
+
+        @Override
+        protected void onCancelled() {
+            Log.d(Tag,"cancelled");
+        }
+    }
 }

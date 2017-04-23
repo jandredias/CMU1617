@@ -68,4 +68,5 @@
     <string name="add_network_id">Add Network ID</string>
     <string name="no_wi_fi_connection">No Wi-fi connection</string>
     <string name="name_of_location">Name of location:</string>
+    <string name="intent_broadcast_new_messages">cmu1617.andred.pt.locmess.NEWMESSAGES</string>
 </resources>

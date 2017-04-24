@@ -6,8 +6,8 @@ package cmu1617.andred.pt.locmess.Domain;
 
 public class LocmessSettings {
     private static boolean _trueIfAskedUserAlready = false;
-    private static int _periodicity_seconds = 10;
-    private static int _periodicity_milli_seconds = 10000;
+    private static int _periodicity_seconds = 60;
+    private static int _periodicity_milli_seconds = 60000;
 
     public static boolean trueIfAskedUserAlready() {
         if(!_trueIfAskedUserAlready) {

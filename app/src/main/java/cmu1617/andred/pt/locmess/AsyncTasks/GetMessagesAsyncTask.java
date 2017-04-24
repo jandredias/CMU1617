@@ -61,7 +61,13 @@ public class GetMessagesAsyncTask extends AsyncTask<Void, Void, Boolean> {
             Log.d(Tag,"latitude: "+_latitude);
             Log.d(Tag,"longitude: "+_longitude);
             Log.d(Tag,"ssid_list: "+_ssid_list.toString() + " :size: " + _ssid_list.size());
-            JSONArray messagesMap = LocMessAPIClientImpl.getInstance().getMessages(_latitude,_longitude,_ssid_list);
+
+            JSONArray messagesMap = new JSONArray();
+            if((_latitude != null && _latitude != "" && _longitude  != null && _longitude != "") || _ssid_list.size() > 0){
+                messagesMap = LocMessAPIClientImpl.getInstance().getMessages(_latitude,_longitude,_ssid_list);
+
+            }
+
 
             disableAllMessages();
 //            _db.getWritableDatabase().execSQL(DataStore.SQL_DELETE_MESSAGES);

@@ -228,11 +228,13 @@ public class LocMessMainService extends Service implements GoogleApiClient.Conne
     private void executeNewTask() {
         if(mReadyToLaunchNewTask) {
             mReadyToLaunchNewTask = false;
-            task = new GetMessagesAsyncTask(new SQLDataStoreHelper(getBaseContext()),this);
+
+            task = new GetMessagesAsyncTask(new SQLDataStoreHelper(getBaseContext()), this);
             task.setLatitude(_latitude);
             task.setLongitude(_longitude);
             task.setSsidList(_ssidList);
             task.execute();
+
         }
     }
 

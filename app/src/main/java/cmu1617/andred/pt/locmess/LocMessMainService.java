@@ -12,6 +12,7 @@ import android.location.Location;
 import android.location.LocationManager;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiManager;
+import android.net.wifi.p2p.WifiP2pManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -55,6 +56,12 @@ public class LocMessMainService extends Service implements GoogleApiClient.Conne
     private int delay; //milliseconds
     private Handler alarmHandler;
     private LocationManager locationManager;
+    //WiFi Direct
+    private final IntentFilter mIntentFilter = new IntentFilter();
+    WifiP2pManager.Channel mChannel;
+    WiFiDirectBroadcastReceiver mReceiver;
+
+
 
     public LocMessMainService() {}
 
@@ -77,11 +84,30 @@ public class LocMessMainService extends Service implements GoogleApiClient.Conne
         createLocationRequest();
         setAlarm();
 
+        //WiFi Direct
+        //  Indicates a change in the Wi-Fi P2P status.
+        mIntentFilter.addAction(WifiP2pManager.WIFI_P2P_STATE_CHANGED_ACTION);
+
+        // Indicates a change in the list of available peers.
+        mIntentFilter.addAction(WifiP2pManager.WIFI_P2P_PEERS_CHANGED_ACTION);
+
+        // Indicates the state of Wi-Fi P2P connectivity has changed.
+        mIntentFilter.addAction(WifiP2pManager.WIFI_P2P_CONNECTION_CHANGED_ACTION);
+
+        // Indicates this device's details have changed.
+        mIntentFilter.addAction(WifiP2pManager.WIFI_P2P_THIS_DEVICE_CHANGED_ACTION);
+        WifiP2pManager mManager = (WifiP2pManager) getSystemService(Context.WIFI_P2P_SERVICE);
+        mChannel = mManager.initialize(this, getMainLooper(), null);
+        mReceiver = new WiFiDirectBroadcastReceiver(mManager, mChannel, this, new SQLDataStoreHelper(this));
+
+
         return START_STICKY;
     }
 
+
     private void registerWifiReceiver() {
-        mWifiManager = (WifiManager) getSystemService(Context.WIFI_SERVICE);
+        registerReceiver(mReceiver, mIntentFilter);
+        mWifiManager = (WifiManager) getApplicationContext().getApplicationContext().getSystemService(Context.WIFI_SERVICE);
         mWifiScanReceiver = new WifiReceiver();
         registerReceiver(mWifiScanReceiver,new IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION));
 
@@ -191,6 +217,8 @@ public class LocMessMainService extends Service implements GoogleApiClient.Conne
     public void onLocationChanged(Location location) {
         _latitude = location.getLatitude();
         _longitude = location.getLongitude();
+        mReceiver.set_latitude(_latitude);
+        mReceiver.set_logintude(_longitude);
     }
     protected void stopLocationUpdates() {
         LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, this);

@@ -14,6 +14,7 @@ public class LocMessLocation {
 
     protected String _id;
     private String _name;
+    private boolean _gps = false;
     protected SQLDataStoreHelper _db;
 
     public LocMessLocation(SQLDataStoreHelper dbHelper, String location_id) {
@@ -35,6 +36,15 @@ public class LocMessLocation {
                     values);
         }
         cursor.close();
+       /* Cursor cursor2 = _db.getReadableDatabase().query(
+                DataStore.SQL_GPS_LOCATION, //table name
+                DataStore.SQL_LOCATION_COLUMNS, //columns to return
+                "location_id = ?",
+                selectionArgs,
+                null, null, null
+        );*/
+
+
     }
 
     protected void completeObject(String name) {

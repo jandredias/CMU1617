@@ -6,14 +6,18 @@ import android.annotation.TargetApi;
 import android.app.DatePickerDialog;
 import android.app.Dialog;
 import android.app.TimePickerDialog;
+import android.content.ContentValues;
+import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
+import android.net.wifi.p2p.WifiP2pManager;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.DialogFragment;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
 import android.text.format.DateFormat;
@@ -39,9 +43,12 @@ import java.util.List;
 
 import cmu1617.andred.pt.locmess.AsyncTasks.GetKeywordsAsyncTask;
 import cmu1617.andred.pt.locmess.Domain.LocMessLocation;
+import cmu1617.andred.pt.locmess.Domain.LocMessWIFIMessage;
 import pt.andred.cmu1617.APIException;
 import pt.andred.cmu1617.LocMessAPIClientImpl;
 import pt.andred.cmu1617.MessageConstraint;
+
+import static android.icu.lang.UCharacter.GraphemeClusterBreak.L;
 
 public class NewMessageActivity extends AppCompatActivity implements OnTaskCompleted{
 
@@ -315,9 +322,16 @@ public class NewMessageActivity extends AppCompatActivity implements OnTaskCompl
         if(cancel) {
             focusView.requestFocus();
         } else {
-            AddMessageToServerAsyncTask task = new AddMessageToServerAsyncTask(begin,end,text,messageConstraints);
+            if(serverMode) {
+                AddMessageToServerAsyncTask task = new AddMessageToServerAsyncTask(begin, end, text, messageConstraints);
+                task.execute();
+            }
+            else{
+                LocMessWIFIMessage message = new LocMessWIFIMessage(dbHelper);
+                message.completeObject(mLocation.id(), text, begin, end, "0");
+                LocalBroadcastManager.getInstance(getBaseContext()).sendBroadcast(new Intent(LocMessIntent.CREATED_NEW_WIFI_MESSAGE_REQUEST));
+            }
 
-            task.execute();
 
         }
     }
@@ -516,4 +530,5 @@ public class NewMessageActivity extends AppCompatActivity implements OnTaskCompl
             showProgress(false);
         }
     }
+
 }

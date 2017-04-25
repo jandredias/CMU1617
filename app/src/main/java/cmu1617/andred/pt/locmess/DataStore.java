@@ -14,6 +14,18 @@ public interface DataStore {
     String SQL_USER_KEYWORDS = "sql_user_keywords";
     String SQL_MESSAGES = "sql_messages";
     String SQL_READ_MESSAGES = "sql_read_messages";
+    String SQL_WIFI_MESSAGES="sql_wifi_messages";
+
+    String[] SQL_WIFI_MESSAGES_COLUMNS = {
+            "message_id",
+            "content",
+            "author_id",
+            "location_id",
+            "time_start",
+            "time_end",
+            "jumped"
+
+    };
 
     String[] SQL_LOCATION_COLUMNS = {
             "location_id",
@@ -63,6 +75,16 @@ public interface DataStore {
     };
 
 
+    String SQL_CREATE_WIFI_MESSAGES =
+            "CREATE TABLE " + SQL_WIFI_MESSAGES+ " (" +
+                    "message_id VARCHAR(255) NOT NULL PRIMARY KEY,"+
+                    "content VARCHAR (20000),"+
+                    "author_id VARCHAR(255)," +
+                    "location_id INT ,"+
+                    "time_start DATETIME ,"+
+                    "time_end DATETIME,"+
+                    "jumped INT DEFAULT 0"+
+                    ")";
     String SQL_CREATE_LOCATION =
             "CREATE TABLE " + SQL_LOCATION + " (" +
             "location_id INT NOT NULL," +
@@ -100,7 +122,7 @@ public interface DataStore {
                     ")";
     String SQL_CREATE_MESSAGES =
             "CREATE TABLE " + SQL_MESSAGES+ " (" +
-                    "message_id INT NOT NULL PRIMARY KEY,"+
+                    "message_id VARCHAR(255) NOT NULL PRIMARY KEY,"+
                     "content VARCHAR (20000),"+
                     "author_id VARCHAR(255)," +
                     "location_id INT ,"+
@@ -169,5 +191,7 @@ public interface DataStore {
             "DROP TABLE IF EXISTS " + SQL_MESSAGES;
     String SQL_DELETE_READ_MESSAGES=
             "DROP TABLE IF EXISTS " + SQL_READ_MESSAGES;
+    String SQL_DELETE_WIFI_MESSAGES=
+            "DROP TABLE IF EXISTS " + SQL_WIFI_MESSAGES;
 
 }

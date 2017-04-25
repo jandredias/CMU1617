@@ -1,5 +1,6 @@
 package cmu1617.andred.pt.locmess;
 
+import android.content.ContentValues;
 import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
@@ -47,7 +48,7 @@ public class GPSLocationsFragment extends ListLocationsFragment {
                     true, //distinct
                     DataStore.SQL_GPS_LOCATION, //table name
                     columns, //columns to return
-                    null, //selection string
+                    "enabled = 1", //selection string
                     null, //selection args
                     null, //groupBy
                     null, //having
@@ -70,7 +71,7 @@ public class GPSLocationsFragment extends ListLocationsFragment {
                     true, //distinct
                     DataStore.SQL_GPS_LOCATION, //table name
                     columns, //columns to return
-                    null, //selection string
+                    "enabled = 1", //selection string
                     null, //selection args
                     null, //groupBy
                     null, //having
@@ -86,7 +87,12 @@ public class GPSLocationsFragment extends ListLocationsFragment {
 
 
     }
-
+    @Override
+    protected void disableLocation(String location_id) {
+        ContentValues values = new ContentValues();
+        values.put("enabled",0);
+        _dbHelper.getWritableDatabase().update(DataStore.SQL_GPS_LOCATION,values,"location_id = ?",new String[]{location_id});
+    }
 
 
 

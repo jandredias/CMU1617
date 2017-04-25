@@ -5,5 +5,5 @@ package cmu1617.andred.pt.locmess;
  */
 
 public interface OnTaskCompleted{
-    void onTaskCompleted();
+    void onTaskCompleted(Object... args);
 }

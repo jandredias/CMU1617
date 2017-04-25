@@ -330,7 +330,7 @@ public class NewMessageActivity extends AppCompatActivity implements OnTaskCompl
     }
 
     @Override
-    public void onTaskCompleted() {
+    public void onTaskCompleted(Object... args) {
         populateSpinnerItems();
     }
 

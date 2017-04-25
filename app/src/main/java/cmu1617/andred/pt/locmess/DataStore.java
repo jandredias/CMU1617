@@ -49,7 +49,8 @@ public interface DataStore {
             "author_id",
             "location_id",
             "time_start",
-            "time_end"
+            "time_end",
+            "enabled"
     };
     String[] SQL_READ_MESSAGES_COLUMNS = {
             "message_id",
@@ -99,7 +100,8 @@ public interface DataStore {
                     "author_id VARCHAR(255)," +
                     "location_id INT ,"+
                     "time_start DATETIME ,"+
-                    "time_end DATETIME"+
+                    "time_end DATETIME,"+
+                    "enabled boolean"+
                     ")";
 
     String SQL_CREATE_READ_MESSAGES =

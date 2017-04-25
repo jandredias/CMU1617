@@ -1,20 +1,17 @@
 package cmu1617.andred.pt.locmess;
 
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.text.Html;
-import android.util.Log;
 import android.widget.TextView;
 
-import cmu1617.andred.pt.locmess.Domain.LocMessLocation;
-import cmu1617.andred.pt.locmess.Domain.LocMessMessage;
 import cmu1617.andred.pt.locmess.Domain.LocMessReadMessage;
 import cmu1617.andred.pt.locmess.Domain.UserProfile;
 
 public class ShowMessageActivity extends AppCompatActivity {
 
     private SQLDataStoreHelper _db;
-    private LocMessMessage mMessage;
+    private LocMessReadMessage mMessage;
     private TextView _message;
     private TextView _location;
     private TextView _author;
@@ -25,8 +22,11 @@ public class ShowMessageActivity extends AppCompatActivity {
         setContentView(R.layout.activity_show_message);
         _db = new SQLDataStoreHelper(this);
         String message_id = getIntent().getStringExtra("message_id");
-        mMessage = new LocMessMessage(_db,message_id);
-        registerMessageAsRead(mMessage);
+        String content = getIntent().getStringExtra("content");
+        String author_id = getIntent().getStringExtra("author");
+        String location_id = getIntent().getStringExtra("location_id");
+
+        registerMessageAsRead(message_id,content,author_id,location_id);
 
 
 
@@ -42,9 +42,9 @@ public class ShowMessageActivity extends AppCompatActivity {
         _location .setText(Html.fromHtml(openBracket+"In: "+closeBracket+mMessage.location().name()));
     }
 
-    private void registerMessageAsRead(LocMessMessage message) {
+    private void registerMessageAsRead(String message_id, String content, String author_id, String location_id) {
         String readerId = new UserProfile(_db).userName();
-        LocMessReadMessage readMessage = new LocMessReadMessage(_db,message.id());
-        readMessage.completeObject(message.location().id(),message.authorId(),message.content(),readerId);
+        mMessage = new LocMessReadMessage(_db,message_id);
+        mMessage.completeObject(location_id,author_id,content,readerId);
     }
 }

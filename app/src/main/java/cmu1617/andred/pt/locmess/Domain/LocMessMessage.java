@@ -41,12 +41,13 @@ public class LocMessMessage {
         cursor.close();
     }
 
-    public void completeObject(String locationId,String authorId, String content, String timeStart, String timeEnd) {
+    public void completeObject(String locationId,String authorId, String content, String timeStart, String timeEnd, String enabled) {
         this.location(locationId);
         this.authorId(authorId);
         this.content(content);
         this.timeStart(timeStart);
         this.timeEnd(timeEnd);
+        this.enabled(enabled);
     }
 
     public String id() {
@@ -191,5 +192,31 @@ public class LocMessMessage {
         cursor.moveToFirst();
         _location  = new LocMessLocation(_db,cursor.getString(3));
         return _location;
+    }
+
+    public boolean enabled(){
+        String[] selectionArgs = { _id };
+        Cursor cursor = _db.getReadableDatabase().query(
+                DataStore.SQL_MESSAGES,
+                DataStore.SQL_MESSAGES_COLUMNS,
+                "message_id = ?",
+                selectionArgs,
+                null, null, null);
+
+        if (cursor.getCount() == 0) {
+            return false;
+        }
+        cursor.moveToFirst();
+        return cursor.getInt(6) == 1;
+    }
+
+    public void enabled(String enabled) {
+        String[] selectionArgs = {_id};
+        ContentValues values = new ContentValues();
+        values.put("enabled", enabled);
+        _db.getWritableDatabase().update(DataStore.SQL_MESSAGES,
+                values,
+                "message_id = ?",
+                selectionArgs);
     }
 }

@@ -27,7 +27,7 @@ public interface LocMessAPIClient {
 
     void deleteLocation(String locationId);
 
-    JSONArray getMessages(String latitude, String longitude, List<String> ssid_list, String last_message_id);
+    JSONArray getMessages(String latitude, String longitude, List<String> ssid_list);
 
     String addMessage(String location_id,String message, String dateBegin, String dateEnd, List<MessageConstraint> list);
 

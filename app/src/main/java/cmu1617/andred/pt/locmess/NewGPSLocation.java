@@ -6,6 +6,7 @@ import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.IntentSender;
 import android.content.pm.PackageManager;
+import android.graphics.Point;
 import android.location.Location;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -82,6 +83,7 @@ public class NewGPSLocation extends FragmentActivity implements
 
     private GoogleApiClient mGoogleApiClient;
     private LocationRequest mLocationRequest;
+    private int mFillColorArgb = 0x79CDCD00;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -241,26 +243,100 @@ public class NewGPSLocation extends FragmentActivity implements
         }*/
     }
 
+    private double pointsDistance(Point p1, Point p2) {
+        int dx = p1.x - p2.x;
+        int dy = p1.y - p2.y;
+
+        double distance = Math.sqrt((dx * dx) + (dy * dy));
+        return distance ;
+    }
+
+    private LatLng getRadiusPoint(LatLng center) {
+        View view = getSupportFragmentManager().findFragmentById(R.id.map).getView();
+
+        Point center_point = mMap.getProjection().toScreenLocation(center);
+        int x = center_point .x;
+        int y = center_point .y;
+
+        Log.d(TAG,"x: "+ x+"");
+        Log.d(TAG,"y: " +y+"");
+        Log.d(TAG,"alto h: " + view.getHeight() * 24 / 25 + "");
+        Log.d(TAG,"baixo h: " +view.getHeight() * 1 / 25 + "");
+        Log.d(TAG,"alto w: "+view.getWidth() * 49 / 50 + "");
+        Log.d(TAG,"baixo w:" +view.getWidth() * 1 / 50 + "");
+
+
+        int posicao = 0;
+        double distancia;
+        double distancia_min;
+
+
+
+
+//        LatLng cima     = mMap.getProjection().fromScreenLocation(new Point(x, view.getHeight() * 1 / 25));
+//        distancia_min = calculationByDistance(center,cima);
+
+
+        LatLng direita  = mMap.getProjection().fromScreenLocation(new Point(view.getWidth() * 49 / 50,y));
+        distancia = calculationByDistance(center,direita);
+        distancia_min = distancia;
+        if(distancia < distancia_min) {
+            distancia_min = distancia;
+            posicao = 1;
+        }
+
+//        LatLng baixo    = mMap.getProjection().fromScreenLocation(new Point(x, view.getHeight() * 24 / 25));
+//        distancia = calculationByDistance(center,baixo);
+//        if(distancia < distancia_min) {
+//            distancia_min = distancia;
+//            posicao = 2;
+//        }
+        LatLng esquerda = mMap.getProjection().fromScreenLocation(new Point(view.getWidth() * 1 / 50,y));
+        distancia = calculationByDistance(center,esquerda);
+        if(distancia < distancia_min) {
+            distancia_min = distancia;
+            posicao = 3;
+        }
+        Log.wtf(TAG,posicao+"");
+        switch (posicao) {
+//            case 0: return   cima;
+            case 1: return  direita;
+//            case 2: return  baixo;
+            case 3: return  esquerda;
+
+        }
+        return direita;
+
+    }
+
     @Override
     public void onMapClick(LatLng latLng) {
         Log.d(TAG, "pressed on: " + latLng.latitude + " " + latLng.longitude);
-        if(marker_on_map){
-            float a = calculationByDistance(position_pressed, latLng);
-            drawCircle(position_pressed, (double) a);
-            radius = a;
-            marker_on_map=false;
-            return;
-        }
-        position_pressed = latLng;
+
         mMap.clear();
+        position_pressed = latLng;
         MarkerOptions marker = new MarkerOptions()
                 .position(latLng)
                 .title(getString(R.string.selected_city));
-
         mMap.addMarker(marker);
-        marker_on_map=true;
 
 
+        LatLng radiusLatLng = getRadiusPoint(position_pressed);
+        radius = (float) toRadiusMeters(position_pressed, radiusLatLng);
+        drawCircle(position_pressed, radius);
+        marker_on_map=false;
+//        if(marker_on_map){
+//            float a = calculationByDistance(position_pressed, latLng);
+//
+//            radius = a;
+//            return;
+//        }
+    }
+    private static double toRadiusMeters(LatLng center, LatLng radius) {
+        float[] result = new float[1];
+        Location.distanceBetween(center.latitude, center.longitude,
+                radius.latitude, radius.longitude, result);
+        return result[0];
     }
     protected void setName(String name, boolean exists){
         setName(name, exists, Math.round(radius));
@@ -302,12 +378,12 @@ public class NewGPSLocation extends FragmentActivity implements
 
         // Generate the points
         List<LatLng> points = new ArrayList<>();
-        int totalPonts = 30; // number of corners of the pseudo-circle
+        int totalPonts = 40; // number of corners of the pseudo-circle
         for (int i = 0; i < totalPonts; i++) {
             points.add(getPoint(center, radius, i*2*Math.PI/totalPonts));
         }
         // Create and return the polygon
-        return mMap.addPolygon(new PolygonOptions().addAll(points).strokeWidth(2).strokeColor(0x700a420b));
+        return mMap.addPolygon(new PolygonOptions().addAll(points).strokeWidth(5).strokeColor(0x700a420b).fillColor(mFillColorArgb));
     }
 
     private LatLng getPoint(LatLng center, double radius, double angle) {

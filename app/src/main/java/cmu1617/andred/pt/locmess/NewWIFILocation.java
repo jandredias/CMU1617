@@ -105,4 +105,64 @@ public class NewWIFILocation extends AppCompatActivity {
                 new IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION));
         mWifiManager.startScan();*/
     }
+
+   /* protected class NewWIFILocationAsync extends AsyncTask<Void, Void, Boolean> {
+        private String Tag = "NewWIFILocationAsync";
+        private Map<String,String> _ssids;
+
+
+        @Override
+        protected void onPreExecute() {
+            Log.d(Tag,"start");
+           // showProgress(true);
+            _endUserValues = new HashMap<>();
+
+            for ( ViewHolder vh : _keywordsViewsList) {
+                _endUserValues.put(vh._keyword.getText().toString(),vh._value.getText().toString());
+            }
+        }
+
+
+        @Override
+        protected Boolean doInBackground(Void... params) {
+            try {
+
+
+                List<UserKeywordsDifference.Action> actions = new UserKeywordsDifference(_startUserValues,_endUserValues).getDifferences();
+                for (UserKeywordsDifference.Action action : actions) {
+                    String keyword_id = LocMessAPIClientImpl.getInstance().editProfileKeys(action._add,action._keywordName, action._keywordValue);
+                    new UserKeyword(_db,keyword_id).completeObject(action._keywordName,action._keywordValue);
+                }
+            } catch (APIException e) {
+                e.printStackTrace();
+                return false;
+            }
+            return true;
+        }
+
+        @Override
+        protected void onPostExecute(final Boolean success) {
+            Log.d(Tag,"end");
+            showProgress(false);
+            if(!success) {
+                final Snackbar snackbar = Snackbar.make(mainView, "Could not connect to server", Snackbar.LENGTH_LONG);
+                snackbar.show();
+                snackbar.setAction("Dismiss", new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        snackbar.dismiss();
+                    }
+                });
+            } else {
+                onBackPressed();
+            }
+        }
+
+
+        @Override
+        protected void onCancelled() {
+            Log.d(Tag,"cancelled");
+            showProgress(false);
+        }
+    }*/
 }

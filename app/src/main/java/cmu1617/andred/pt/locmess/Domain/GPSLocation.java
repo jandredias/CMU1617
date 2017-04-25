@@ -26,7 +26,7 @@ public class GPSLocation extends LocMessLocation {
      * @param longitude
      * @param radius
      */
-    public void completeObject(String name,double latitude,double longitude, int radius) {
+    public void completeObject(String name,double latitude,double longitude, int radius, String enabled) {
         super.completeObject(name);
 
 
@@ -36,6 +36,7 @@ public class GPSLocation extends LocMessLocation {
         values.put("radius", radius);
         values.put("latitude", latitude);
         values.put("longitude", longitude);
+        values.put("enabled",enabled);
 
         _db.getWritableDatabase().insertWithOnConflict(DataStore.SQL_GPS_LOCATION,
                 null,
@@ -133,5 +134,31 @@ public class GPSLocation extends LocMessLocation {
         cursor.moveToFirst();
         _latitude =cursor.getDouble(1);
         return _latitude;
+    }
+
+    public boolean enabled(){
+        String[] selectionArgs = { _id };
+        Cursor cursor = _db.getReadableDatabase().query(
+                DataStore.SQL_GPS_LOCATION,
+                DataStore.SQL_GPS_LOCATION_COLUMNS,
+                "location_id = ?",
+                selectionArgs,
+                null, null, null);
+
+        if (cursor.getCount() == 0) {
+            return false;
+        }
+        cursor.moveToFirst();
+        return cursor.getInt(2) == 1;
+    }
+
+    public void enabled(String enabled) {
+        String[] selectionArgs = {_id};
+        ContentValues values = new ContentValues();
+        values.put("enabled", enabled);
+        _db.getWritableDatabase().update(DataStore.SQL_GPS_LOCATION,
+                values,
+                "location_id = ?",
+                selectionArgs);
     }
 }

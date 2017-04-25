@@ -21,13 +21,15 @@ public interface DataStore {
     };
     String[] SQL_WIFI_LOCATION_SSID_COLUMNS = {
             "location_id",
-            "ssid"
+            "ssid",
+            "enabled"
     };
     String[] SQL_GPS_LOCATION_COLUMNS = {
             "location_id",
             "latitude",
             "longitude",
-            "radius"
+            "radius",
+            "enabled"
     };
     String[] SQL_LOGIN_COLUMNS = {
             "username",
@@ -67,14 +69,17 @@ public interface DataStore {
             "name VARCHAR(255) )";
     String SQL_CREATE_WIFI_LOCATION_SSID =
             "CREATE TABLE " + SQL_WIFI_LOCATION_SSID + " (" +
-            "location_id INT NOT NULL," +
-            "ssid VARCHAR(255) )";
+                    "location_id INT NOT NULL," +
+                    "ssid VARCHAR(255), " +
+                    "enabled BOOLEAN" +
+                    ")";
     String SQL_CREATE_GPS_LOCATION =
             "CREATE TABLE " + SQL_GPS_LOCATION + " (" +
                     "location_id INT UNIQUE NOT NULL," +
                     "latitude DOUBLE PRECISION,"+
                     "longitude DOUBLE PRECISION,"+
-                    "radius INT" +
+                    "radius INT," +
+                    "enabled BOOLEAN" +
                     ")";
     String SQL_CREATE_LOGIN =
             "CREATE TABLE " + SQL_LOGIN + " (" +

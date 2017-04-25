@@ -1,5 +1,9 @@
 package cmu1617.andred.pt.locmess;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
+import android.annotation.TargetApi;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.TypedArray;
@@ -7,8 +11,10 @@ import android.graphics.Canvas;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.DefaultItemAnimator;
@@ -31,6 +37,7 @@ import java.util.List;
 import cmu1617.andred.pt.locmess.Domain.GPSLocation;
 import cmu1617.andred.pt.locmess.Domain.LocMessLocation;
 import cmu1617.andred.pt.locmess.Domain.WIFILocation;
+import pt.andred.cmu1617.APIException;
 import pt.andred.cmu1617.LocMessAPIClientImpl;
 
 /**
@@ -43,7 +50,8 @@ public abstract class ListLocationsFragment extends Fragment implements View.OnC
     private RecyclerView.LayoutManager mLayoutManager;
     private SwipeRefreshLayout _refreshLayout;
     private View _emptyView;
-
+    private View _mainView;
+    private View _progressView;
     protected RecyclerViewAdapter mAdapter;
     protected SQLDataStoreHelper _dbHelper;
 
@@ -108,7 +116,9 @@ public abstract class ListLocationsFragment extends Fragment implements View.OnC
         });*/
 
         _emptyView = view.findViewById(R.id.empty_locations);
-        _refreshLayout = (SwipeRefreshLayout) view;
+        _mainView = view.findViewById(R.id.main_view_list_locations);
+        _progressView = view.findViewById(R.id.delete_location_progress);
+        _refreshLayout = (SwipeRefreshLayout) view.findViewById(R.id.main_view_list_locations);
         final SwipeRefreshLayout.OnRefreshListener onRefreshListener = new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
@@ -127,6 +137,42 @@ public abstract class ListLocationsFragment extends Fragment implements View.OnC
         treatEmptyView();
 
         return view;
+    }
+
+    /**
+     * Shows the progress UI and hides the login form.
+     */
+    @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR2)
+    private void showProgress(final boolean show) {
+        // On Honeycomb MR2 we have the ViewPropertyAnimator APIs, which allow
+        // for very easy animations. If available, use these APIs to fade-in
+        // the progress spinner.
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB_MR2) {
+            int shortAnimTime = getResources().getInteger(android.R.integer.config_shortAnimTime);
+
+            _mainView.setVisibility(show ? View.GONE : View.VISIBLE);
+            _mainView.animate().setDuration(shortAnimTime).alpha(
+                    show ? 0 : 1).setListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    _mainView.setVisibility(show ? View.GONE : View.VISIBLE);
+                }
+            });
+
+            _progressView.setVisibility(show ? View.VISIBLE : View.GONE);
+            _progressView.animate().setDuration(shortAnimTime).alpha(
+                    show ? 1 : 0).setListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    _progressView.setVisibility(show ? View.VISIBLE : View.GONE);
+                }
+            });
+        } else {
+            // The ViewPropertyAnimator APIs are not available, so simply show
+            // and hide the relevant UI components.
+            _progressView.setVisibility(show ? View.VISIBLE : View.GONE);
+            _mainView.setVisibility(show ? View.GONE : View.VISIBLE);
+        }
     }
 
     public abstract RecyclerViewAdapter createNewAdapter();
@@ -253,12 +299,19 @@ public abstract class ListLocationsFragment extends Fragment implements View.OnC
                     }
                 });
             }
-            v._button.setOnClickListener(new View.OnClickListener() {
+            v._add_message_button.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     Intent intent = new Intent(getContext(),NewMessageActivity.class);
                     intent.putExtra("location_id",location.id());
                     startActivity(intent);
+                }
+            });
+            v._delete_location_button.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    String location_id = location.id();
+                    new DeleteLocationTask().execute(location_id);
                 }
             });
         }
@@ -268,7 +321,8 @@ public abstract class ListLocationsFragment extends Fragment implements View.OnC
         class ViewHolder extends RecyclerView.ViewHolder {
             View _holder;
             TextView _name;
-            View _button;
+            View _add_message_button;
+            View _delete_location_button;
 
 
 
@@ -276,7 +330,8 @@ public abstract class ListLocationsFragment extends Fragment implements View.OnC
                 super(itemView);
                 _holder = itemView;
                 _name = (TextView) itemView.findViewById(R.id.location_name);
-                _button = itemView.findViewById(R.id.location_add_mesage_button);
+                _add_message_button = itemView.findViewById(R.id.location_add_mesage_button);
+                _delete_location_button = itemView.findViewById(R.id.delete_location_item);
             }
         }
     }
@@ -295,15 +350,29 @@ public abstract class ListLocationsFragment extends Fragment implements View.OnC
             }
         }
 
+        private void disableAllLocations() {
+            ContentValues values = new ContentValues();
+            values.put("enabled", "0");
+            _dbHelper.getWritableDatabase().update(DataStore.SQL_GPS_LOCATION, values, null, null);
+            _dbHelper.getWritableDatabase().update(DataStore.SQL_WIFI_LOCATION_SSID, values, null, null);
+        }
+
         @Override
         protected Boolean doInBackground(Object... params) {
-            JSONObject result = LocMessAPIClientImpl.getInstance().listLocations();
+            JSONObject result;
+            try {
+                result = LocMessAPIClientImpl.getInstance().listLocations();
+            } catch (APIException e) {
+                return false;
+            }
             try {
                 JSONArray wifiMap = null;
                 JSONArray gpsMap = null;
 
                 wifiMap = result.getJSONArray("wifi");
                 gpsMap = result.getJSONArray("coordinates");
+
+                disableAllLocations();
 
                 for (int i = 0; i < wifiMap.length(); i++) {
                     JSONObject location = wifiMap.getJSONObject(i);
@@ -312,7 +381,7 @@ public abstract class ListLocationsFragment extends Fragment implements View.OnC
                     List<String> ssidList = new ArrayList<String>(Arrays.asList(location.getString("list").split(",")));
                     Log.d(Tag,"new WIFI location");
                     WIFILocation loc = new WIFILocation(_dbHelper, location_id);
-                    loc.completeObject(name,ssidList);
+                    loc.completeObject(name,ssidList,"1");
                 }
                 for (int i = 0; i < gpsMap.length(); i++) {
                     JSONObject location = gpsMap.getJSONObject(i);
@@ -323,7 +392,7 @@ public abstract class ListLocationsFragment extends Fragment implements View.OnC
                     int radius = location.getInt("radius");
                     Log.d(Tag,"new GPS location");
                     GPSLocation loc = new GPSLocation(_dbHelper, location_id);
-                    loc.completeObject(name, latitude, longitude, radius);
+                    loc.completeObject(name, latitude, longitude, radius,"1");
 //                    LocMessLocation loc = new LocMessLocation(_dbHelper, location_id);
                 }
             } catch (JSONException e) {
@@ -333,18 +402,30 @@ public abstract class ListLocationsFragment extends Fragment implements View.OnC
         }
 
         @Override
-        protected void onPostExecute(Boolean bool) {
+        protected void onPostExecute(Boolean success) {
             Log.wtf(Tag,"Post execute");
             if (_refreshLayout != null) {
                 _refreshLayout.setRefreshing(false);
             }
-            RecyclerViewAdapter newA = createNewAdapter();
+
+            if(!success) {
+                final Snackbar snackbar = Snackbar.make(_mainView, "Could not connect to server", Snackbar.LENGTH_LONG);
+                snackbar.show();
+                snackbar.setAction("Dismiss", new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        snackbar.dismiss();
+                    }
+                });
+            } else {
+
+                RecyclerViewAdapter newA = createNewAdapter();
 
 
-            mRecyclerView.swapAdapter(newA,true);
-            mAdapter = newA;
-            treatEmptyView();
-
+                mRecyclerView.swapAdapter(newA, true);
+                mAdapter = newA;
+                treatEmptyView();
+            }
 
         }
 
@@ -355,5 +436,61 @@ public abstract class ListLocationsFragment extends Fragment implements View.OnC
             }
             treatEmptyView();        }
     }
+
+    /**
+     * Represents an asynchronous login/registration task used to authenticate
+     * the user.
+     */
+    private class DeleteLocationTask extends AsyncTask<String, Object, Boolean> {
+        private String location_id;
+        @Override
+        protected Boolean doInBackground(String... params) {
+            try {
+                location_id = params[0];
+                LocMessAPIClientImpl.getInstance().deleteLocation(location_id);
+            } catch (APIException e) {
+                return false;
+            }
+            return true;
+        }
+
+        @Override
+        protected  void onPreExecute() {
+            Log.wtf(Tag,"Pre execute");
+            showProgress(true);
+        }
+
+        @Override
+        protected void onPostExecute(Boolean success) {
+            Log.wtf(Tag,"Post execute");
+            showProgress(false);
+            RecyclerViewAdapter newA = createNewAdapter();
+
+            if(!success) {
+                final Snackbar snackbar = Snackbar.make(_mainView, "Could not connect to server", Snackbar.LENGTH_LONG);
+                snackbar.show();
+                snackbar.setAction("Dismiss", new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        snackbar.dismiss();
+                    }
+                });
+            } else {
+                disableLocation(location_id);
+                mRecyclerView.swapAdapter(newA,true);
+                mAdapter = newA;
+                treatEmptyView();
+            }
+
+        }
+
+        @Override
+        protected void onCancelled() {
+            showProgress(false);
+            treatEmptyView();
+        }
+    }
+
+    protected abstract void disableLocation(String location_id);
 
 }

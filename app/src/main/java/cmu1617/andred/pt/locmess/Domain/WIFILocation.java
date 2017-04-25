@@ -21,9 +21,10 @@ public class WIFILocation extends LocMessLocation {
         super(dbHelper,location_id);
     }
 
-    public void completeObject(String name,List<String> ssidList) {
+    public void completeObject(String name,List<String> ssidList, String enabled) {
         super.completeObject(name);
         this.ssidList(ssidList);
+        this.enabled(enabled);
     }
 
     public void ssidList(List<String> ssidList) {
@@ -62,6 +63,31 @@ public class WIFILocation extends LocMessLocation {
         _ssidList = ssidList;
         return ssidList;
 
+    }
+    public boolean enabled(){
+        String[] selectionArgs = { _id };
+        Cursor cursor = _db.getReadableDatabase().query(
+                DataStore.SQL_WIFI_LOCATION_SSID,
+                DataStore.SQL_WIFI_LOCATION_SSID_COLUMNS,
+                "location_id = ?",
+                selectionArgs,
+                null, null, null);
+
+        if (cursor.getCount() == 0) {
+            return false;
+        }
+        cursor.moveToFirst();
+        return cursor.getInt(2) == 1;
+    }
+
+    public void enabled(String enabled) {
+        String[] selectionArgs = {_id};
+        ContentValues values = new ContentValues();
+        values.put("enabled", enabled);
+        _db.getWritableDatabase().update(DataStore.SQL_WIFI_LOCATION_SSID,
+                values,
+                "location_id = ?",
+                selectionArgs);
     }
 
 }

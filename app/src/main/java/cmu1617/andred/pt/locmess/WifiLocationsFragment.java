@@ -3,6 +3,7 @@ package cmu1617.andred.pt.locmess;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.content.ContentValues;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
@@ -39,6 +40,13 @@ public class WifiLocationsFragment extends ListLocationsFragment {
     }
 
     @Override
+    protected void disableLocation(String location_id) {
+        ContentValues values = new ContentValues();
+        values.put("enabled",0);
+        _dbHelper.getWritableDatabase().update(DataStore.SQL_WIFI_LOCATION_SSID,values,"location_id = ?",new String[]{location_id});
+    }
+
+    @Override
     public void onClick(View v) {
         switch(v.getId()){
             case R.id.add_location:
@@ -64,7 +72,7 @@ public class WifiLocationsFragment extends ListLocationsFragment {
                     true, //distinct
                     DataStore.SQL_WIFI_LOCATION_SSID, //table name
                     columns, //columns to return
-                    null, //selection string
+                    "enabled = 1", //selection string
                     null, //selection args
                     null, //groupBy
                     null, //having
@@ -87,7 +95,7 @@ public class WifiLocationsFragment extends ListLocationsFragment {
                     true, //distinct
                     DataStore.SQL_WIFI_LOCATION_SSID, //table name
                     columns, //columns to return
-                    null, //selection string
+                    "enabled = 1", //selection string
                     null, //selection args
                     null, //groupBy
                     null, //having

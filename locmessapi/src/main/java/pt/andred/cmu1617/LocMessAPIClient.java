@@ -21,9 +21,9 @@ public interface LocMessAPIClient {
 
     JSONObject listLocations();
 
-    void addLocation(String name, String latitude, String longitude, int radius);
+    String addLocation(String name, String latitude, String longitude, String radius);
 
-    void addLocation(String name, String... sddid);
+    String addLocation(String name, List<String> sddid);
 
     void deleteLocation(String locationId);
 
@@ -35,6 +35,6 @@ public interface LocMessAPIClient {
 
     JSONArray listKeywords();
 
-    JSONObject newGPSLocation(String name, String latitude, String longitude, String radius);
-    JSONObject newWIFILocation(String name, String ssid_list);
+//    JSONObject newGPSLocation(String name, String latitude, String longitude, String radius);
+//    JSONObject newWIFILocation(String name, String ssid_list);
 }

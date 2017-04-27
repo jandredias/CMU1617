@@ -128,7 +128,7 @@ public class DashboardFragment extends ListMessagesFragment {
 //                cursor.close();
 //                return null;
 //            }
-//            cursor.moveToPosition(cursor.getCount() - position - 1);
+//            cursor.moveToPosition(cursor.getCount() - _position - 1);
 
 
             return messages.get(position);/*new LocMessMessage(_dbHelper, cursor.getString(0));*/

@@ -1,21 +1,40 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:gravity="center"
     android:layout_width="match_parent">
 
-<fragment xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:map="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/map"
-    android:name="com.google.android.gms.maps.SupportMapFragment"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context="cmu1617.andred.pt.locmess.NewGPSLocation" />
+    <ProgressBar
+        android:id="@+id/add_gps_location_progress"
+        style="?android:attr/progressBarStyleLarge"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:layout_centerInParent="true"
+        android:layout_centerHorizontal="true"
+        android:visibility="gone" />
+
+    <RelativeLayout
+        android:id="@+id/main_view_add_gps_location"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+        <fragment xmlns:android="http://schemas.android.com/apk/res/android"
+            xmlns:map="http://schemas.android.com/apk/res-auto"
+            xmlns:tools="http://schemas.android.com/tools"
+            android:id="@+id/map"
+            android:name="com.google.android.gms.maps.SupportMapFragment"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            tools:context="cmu1617.andred.pt.locmess.NewGPSLocation"
+            android:visibility="visible"/>
 
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/add_location"
+
         android:layout_width="70dp"
         android:layout_height="70dp"
+
         android:layout_gravity="bottom|end"
         android:backgroundTint="@color/colorAccent"
         android:tint="@color/white"
@@ -25,5 +44,7 @@
         android:layout_marginBottom="38dp"
         android:layout_alignParentBottom="true"
         android:layout_alignParentEnd="true"
-        android:layout_marginEnd="28dp" />
+        android:layout_marginEnd="28dp"
+        android:visibility="visible"/>
+    </RelativeLayout>
 </RelativeLayout>

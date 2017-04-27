@@ -1,6 +1,9 @@
 package cmu1617.andred.pt.locmess;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
 import android.annotation.SuppressLint;
+import android.annotation.TargetApi;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
@@ -9,9 +12,11 @@ import android.content.pm.PackageManager;
 import android.graphics.Point;
 import android.location.Location;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.FragmentActivity;
@@ -36,8 +41,6 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polygon;
 import com.google.android.gms.maps.model.PolygonOptions;
-
-import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -74,6 +77,8 @@ public class NewGPSLocation extends FragmentActivity implements
     private boolean marker_on_map = false;
     private float radius;
 
+    private View _mainView;
+    private View mProgressView;
 
     // public static final String TAG = MapsActivity.class.getSimpleName();
 
@@ -102,11 +107,21 @@ public class NewGPSLocation extends FragmentActivity implements
         mapFragment.getMapAsync(this);
 
         // Create the LocationRequest object
+        View plusButton = findViewById(R.id.add_location);
         mLocationRequest = LocationRequest.create()
                 .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY)
                 .setInterval(10 * 1000)        // 10 seconds, in milliseconds
                 .setFastestInterval(1 * 1000); // 1 second, in milliseconds
-        ((FloatingActionButton) findViewById(R.id.add_location)).setOnClickListener(this);
+        ((FloatingActionButton) plusButton).setOnClickListener(this);
+
+        View google_maps = findViewById(R.id.map);
+
+        _mainView = findViewById(R.id.main_view_add_gps_location);
+
+        mProgressView = findViewById(R.id.add_gps_location_progress);
+
+
+
     }
 
     /*These methods all have to do with the map and wht happens if the activity is paused etc*/
@@ -127,7 +142,7 @@ public class NewGPSLocation extends FragmentActivity implements
         position_pressed = new LatLng(currentLatitude, currentLongitude);
 
        /* MarkerOptions options = new MarkerOptions()
-                .position(position_pressed)
+                ._position(position_pressed)
                 .title("You are here");
         mMap.addMarker(options);*/
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom((position_pressed), 15.0F));
@@ -238,7 +253,7 @@ public class NewGPSLocation extends FragmentActivity implements
             handleNewLocation(location);
         }*/
         /*if(!mLocationPermissionGranted) {
-            MarkerOptions marker = new MarkerOptions().position(new LatLng(latitudeLisbon, longitudeLisbon)).title("1"); //create marker
+            MarkerOptions marker = new MarkerOptions()._position(new LatLng(latitudeLisbon, longitudeLisbon)).title("1"); //create marker
             mMap.addMarker(marker); // adding marker
         }*/
     }
@@ -495,24 +510,81 @@ public class NewGPSLocation extends FragmentActivity implements
         }
     }
 
-    public static class NewGPSLocationAsync extends AsyncTask<String, String, String> {
+    @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR2)
+    private void showProgress(final boolean show) {
+        // On Honeycomb MR2 we have the ViewPropertyAnimator APIs, which allow
+        // for very easy animations. If available, use these APIs to fade-in
+        // the progress spinner.
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB_MR2) {
+            int shortAnimTime = getResources().getInteger(android.R.integer.config_shortAnimTime);
 
+            _mainView.setVisibility(show ? View.GONE : View.VISIBLE);
+            _mainView.animate().setDuration(shortAnimTime).alpha(
+                    show ? 0 : 1).setListener(new AnimatorListenerAdapter() {
+                    @Override
+                    public void onAnimationEnd(Animator animation) {
+                    _mainView.setVisibility(show ? View.GONE : View.VISIBLE);
+            }
+                });
+
+            mProgressView.setVisibility(show ? View.VISIBLE : View.GONE);
+            mProgressView.animate().setDuration(shortAnimTime).alpha(
+                    show ? 1 : 0).setListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    mProgressView.setVisibility(show ? View.VISIBLE : View.GONE);
+                }
+            });
+        } else {
+            // The ViewPropertyAnimator APIs are not available, so simply show
+            // and hide the relevant UI components.
+            mProgressView.setVisibility(show ? View.VISIBLE : View.GONE);
+            _mainView.setVisibility(show ? View.GONE : View.VISIBLE);
+        }
+    }
+
+    class NewGPSLocationAsync extends AsyncTask<String, String, Boolean> {
 
         @Override
-        protected String doInBackground(String... params) {
-            JSONObject result;
-            try {
-                result = LocMessAPIClientImpl.getInstance().newGPSLocation(params[0], params[1], params[2], params[3]);
+        protected void onPreExecute() {
+            showProgress(true);
+        }
 
-                if(result.getInt("status") != 200){
-                    Log.e(TAG, "Error in sending to server, status= " + result.getInt("status"));
-                }
+        @Override
+        protected void onPostExecute(final Boolean success) {
+            showProgress(false);
+
+            if (success) {
+                onBackPressed();
+            } else {
+                final Snackbar snackbar = Snackbar.make(_mainView, "Could not connect to server", Snackbar.LENGTH_LONG);
+                snackbar.show();
+                snackbar.setAction("Dismiss", new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        snackbar.dismiss();
+                    }
+                });
+            }
+        }
+
+        @Override
+        protected void onCancelled() {
+            showProgress(false);
+        }
+
+        @Override
+        protected Boolean doInBackground(String... params) {
+            String location_id;
+            try {
+                location_id = LocMessAPIClientImpl.getInstance().addLocation(params[0], params[1], params[2], params[3]);
+
+                return true;
             }catch (Exception e) {
                 e.printStackTrace();
                 Log.e(TAG, "not sent to server, there was an exception");
+                return false;
             }
-            Log.d(TAG, "Sent to server and everything is fine");
-            return null;
         }
     }
 }

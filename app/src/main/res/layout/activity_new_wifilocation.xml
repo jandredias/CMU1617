@@ -17,7 +17,7 @@
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
         xmlns:tools="http://schemas.android.com/tools"
-        android:id="@+id/scroll_view_profile"
+        android:id="@+id/scroll_view_add_wifi_location"
         android:fadeScrollbars="false"
         android:fillViewport="true"
         tools:context="cmu1617.andred.pt.locmess.ProfileActivity">
@@ -37,14 +37,6 @@
                 android:textSize="20sp"
                 android:text="@string/no_wi_fi_connection"/>
 
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:id="@+id/profile_list_keywords"
-                android:orientation="vertical"
-                android:layout_height="wrap_content"
-                tools:layout_editor_absoluteY="0dp"
-                tools:layout_editor_absoluteX="0dp" />
-
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -54,15 +46,26 @@
 
             <android.support.design.widget.TextInputLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content">
+                android:layout_height="wrap_content"
+                app:errorEnabled="true"
+                android:layout_marginBottom="@dimen/AppMargin">
 
                 <EditText
-                    android:id="@+id/written_text"
+                    android:id="@+id/new_wifi_location_name"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:hint="Location name"
                     android:maxLines="1" />
 
+
             </android.support.design.widget.TextInputLayout>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:id="@+id/ssid_list_layout"
+                android:orientation="vertical"
+                android:layout_height="wrap_content"
+                tools:layout_editor_absoluteY="0dp"
+                tools:layout_editor_absoluteX="0dp" />
 
             <android.support.design.widget.CoordinatorLayout
                 android:id="@+id/profile_add_constraint_box"
@@ -80,7 +83,7 @@
                     android:text="@string/add_network_id"/>
 
                 <android.support.design.widget.FloatingActionButton
-                    android:id="@+id/profile_add_keyword_buttom"
+                    android:id="@+id/add_wifi_ssid_button"
                     android:layout_width="40dp"
                     android:layout_height="40dp"
                     android:layout_gravity="end"
@@ -96,17 +99,17 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
                 <Button
-                    android:id="@+id/cancel_button_profile"
                     android:text="@string/cancel"
                     android:layout_marginLeft="35dp"
+                    android:visibility="invisible"
 
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content" />
                 <Button
-                    android:id="@+id/save_button_profile"
+                    android:id="@+id/add_wifi_location_to_server_button"
                     android:layout_alignParentRight="true"
                     android:layout_marginRight="35dp"
-                    android:text="@string/save"
+                    android:text="Add"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content" />
 

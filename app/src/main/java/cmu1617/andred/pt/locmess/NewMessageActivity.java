@@ -103,7 +103,7 @@ public class NewMessageActivity extends AppCompatActivity implements OnTaskCompl
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 serverMode = !isChecked;
                 // do something, the isChecked will be
-                // true if the switch is in the On position
+                // true if the switch is in the On _position
             }
         });
 

@@ -157,30 +157,64 @@ public final class LocMessAPIClientImpl extends LocMessAPIClientBase implements 
         throw new APIException("Couldn't connect to server");
     }
 
-    public void addLocation(Map<String, String> post){
+    private String addLocation(Map<String, String> post){
         for (int i = 0; i < TRIES; i++) {
+            JSONObject response = invoke(Endpoint.NEW_LOCATION, _auth, null, post);
+            if (response == null) {
+                continue;
+            }
+            if (!response.has("status")) continue;
+            if (response.getInt("status") != 200) {
+                throw new APIException("HTTP Error: " +
+                        response.getInt("status") + " " +
+                        (response.has("details") ? response.getString("details") : ""));
+            }
+            if (response.getInt("status") == 200) {
+                if (!response.has("location_id")) {
+                    throw new APIException("Response is malformed. location_id missing");
+                }
 
+                return response.getString("location_id");
+
+            } else {
+                if (!response.has("error")) {
+                    throw new APIException("Response is malformed. error missing");
+                }
+                if (!response.has("details")) {
+                    throw new APIException("Response is malformed. error missing");
+                }
+                throw new APIException(
+                        response.getString("error"),
+                        response.getString("details"));
+            }
         }
         throw new APIException("Couldn't connect to server");
     }
     @Override
-    public void addLocation(String name, String latitude, String longitude, int radius) {
+    public String addLocation(String name, String latitude, String longitude, String radius) {
         Map<String, String> post = new HashMap<>();
         post.put("location_type", "coordinates");
-        post.put("name", name);
+        post.put("location_name", name);
         post.put("latitude", latitude);
         post.put("longitude", longitude);
         post.put("radius", radius + "");
-        addLocation(post);
+//        post.put("location_name", name); //Log.d(TAG, "newGPSLocation location_name: " + name);
+//        post.put("location_type","coordinates");// Log.d(TAG, "newGPSLocation location_type: " + "coordinates");
+//        post.put("latitude",latitude); //Log.d(TAG, "newGPSLocation latitude: " + latitude);
+//        post.put("longitude",longitude); //Log.d(TAG, "newGPSLocation longitude: " + longitude);
+//        post.put("radius",radius); //Log.d(TAG, "newGPSLocation radius: " + radius);
+        return addLocation(post);
     }
 
     @Override
-    public void addLocation(String name, String... sddid) {
+    public String addLocation(String name, List<String> sddid) {
         Map<String, String> post = new HashMap<>();
         post.put("location_type", "wifi");
-        post.put("name", name);
-        post.put("ssid_list", String.join(" ", sddid));
-        addLocation(post);
+        post.put("location_name", name);
+        String wifi_list = convertToString(sddid," ><(((('> ");
+        post.put("ssid_list", wifi_list);
+
+        return addLocation(post);
     }
 
     @Override
@@ -398,22 +432,22 @@ public final class LocMessAPIClientImpl extends LocMessAPIClientBase implements 
         throw new APIException("Couldn't connect to server");
     }
 
-    @Override
-    public JSONObject newGPSLocation(String name, String latitude, String longitude, String radius){
-        Map<String, String> post = new HashMap<>();
-        post.put("location_name", name); //Log.d(TAG, "newGPSLocation location_name: " + name);
-        post.put("location_type","coordinates");// Log.d(TAG, "newGPSLocation location_type: " + "coordinates");
-        post.put("latitude",latitude); //Log.d(TAG, "newGPSLocation latitude: " + latitude);
-        post.put("longitude",longitude); //Log.d(TAG, "newGPSLocation longitude: " + longitude);
-        post.put("radius",radius); //Log.d(TAG, "newGPSLocation radius: " + radius);
-        return  invoke(Endpoint.NEW_LOCATION, _auth, null, post);
-    }
-    @Override
-    public JSONObject newWIFILocation(String name, String ssid_list){
-        Map<String, String> post = new HashMap<>();
-        post.put("location_name ",name);
-        post.put("location_type","wifi");
-        post.put("ssid_list",ssid_list);
-        return  invoke(Endpoint.NEW_LOCATION, _auth, null, post);
-    }
+//    @Override
+//    public JSONObject newGPSLocation(String name, String latitude, String longitude, String radius){
+//        Map<String, String> post = new HashMap<>();
+//        post.put("location_name", name); //Log.d(TAG, "newGPSLocation location_name: " + name);
+//        post.put("location_type","coordinates");// Log.d(TAG, "newGPSLocation location_type: " + "coordinates");
+//        post.put("latitude",latitude); //Log.d(TAG, "newGPSLocation latitude: " + latitude);
+//        post.put("longitude",longitude); //Log.d(TAG, "newGPSLocation longitude: " + longitude);
+//        post.put("radius",radius); //Log.d(TAG, "newGPSLocation radius: " + radius);
+//        return  invoke(Endpoint.NEW_LOCATION, _auth, null, post);
+//    }
+//    @Override
+//    public JSONObject newWIFILocation(String name, String ssid_list){
+//        Map<String, String> post = new HashMap<>();
+//        post.put("location_name ",name);
+//        post.put("location_type","wifi");
+//        post.put("ssid_list",ssid_list);
+//        return  invoke(Endpoint.NEW_LOCATION, _auth, null, post);
+//    }
 }

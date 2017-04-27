@@ -90,7 +90,7 @@ public abstract class ListLocationsFragment extends Fragment implements View.OnC
         mRecyclerView.addOnItemTouchListener(new RecyclerTouchListener(getContext(), mRecyclerView, new ClickListener() {
             @Override
             public void onClick(View view, int position) {
-//                LocMessLocation location = mAdapter.getItem(position);
+//                LocMessLocation location = mAdapter.getItem(_position);
 //                Toast.makeText(getContext(), location.name() + " is selected!", Toast.LENGTH_SHORT).show();
 
 //                Intent intent = new Intent(getContext(),NewMessageActivity.class);
@@ -137,6 +137,16 @@ public abstract class ListLocationsFragment extends Fragment implements View.OnC
         treatEmptyView();
 
         return view;
+    }
+
+    @Override
+    public void onStart(){
+        mAdapter = createNewAdapter();
+        mRecyclerView.setAdapter(mAdapter);
+        treatEmptyView();
+
+        super.onStart();
+
     }
 
     /**

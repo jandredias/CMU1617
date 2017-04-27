@@ -37,6 +37,7 @@ import cmu1617.andred.pt.locmess.AsyncTasks.GetMessagesAsyncTask;
 import cmu1617.andred.pt.locmess.Domain.LocmessSettings;
 
 import static android.R.attr.value;
+import static android.os.Build.VERSION_CODES.M;
 
 public class LocMessMainService extends Service implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener, OnTaskCompleted {
     private static final String TAG = "LocMessMainService";
@@ -61,13 +62,22 @@ public class LocMessMainService extends Service implements GoogleApiClient.Conne
     WifiP2pManager.Channel mChannel;
     WiFiDirectBroadcastReceiver mReceiver;
 
+    private static LocMessMainService _instance;
 
+    public static LocMessMainService getInstance() {
+        if(_instance != null){
+            _instance = new LocMessMainService();
+        }
+        return _instance;
+    }
 
-    public LocMessMainService() {}
+    private LocMessMainService() {}
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         Log.wtf(TAG, "Service Started + " + value);
+
+        _instance = this;
 
         // Create an instance of GoogleAPIClient.
         if (mGoogleApiClient == null) {
@@ -264,6 +274,10 @@ public class LocMessMainService extends Service implements GoogleApiClient.Conne
             task.execute();
 
         }
+    }
+
+    public List<String> getSsidList() {
+        return _ssidList;
     }
 
     class WifiReceiver extends BroadcastReceiver {

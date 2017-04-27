@@ -45,6 +45,7 @@ import com.google.android.gms.maps.model.PolygonOptions;
 import java.util.ArrayList;
 import java.util.List;
 
+import cmu1617.andred.pt.locmess.Domain.GPSLocation;
 import pt.andred.cmu1617.LocMessAPIClientImpl;
 
 import static cmu1617.andred.pt.locmess.R.id.map;
@@ -89,6 +90,7 @@ public class NewGPSLocation extends FragmentActivity implements
     private GoogleApiClient mGoogleApiClient;
     private LocationRequest mLocationRequest;
     private int mFillColorArgb = 0x79CDCD00;
+    private SQLDataStoreHelper _db;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -120,7 +122,7 @@ public class NewGPSLocation extends FragmentActivity implements
 
         mProgressView = findViewById(R.id.add_gps_location_progress);
 
-
+        _db = new SQLDataStoreHelper(getApplicationContext());
 
     }
 
@@ -578,6 +580,7 @@ public class NewGPSLocation extends FragmentActivity implements
             String location_id;
             try {
                 location_id = LocMessAPIClientImpl.getInstance().addLocation(params[0], params[1], params[2], params[3]);
+                new GPSLocation(_db,location_id).completeObject(params[0], Double.parseDouble(params[1]), Double.parseDouble(params[2]), Integer.parseInt(params[3]),"1");
 
                 return true;
             }catch (Exception e) {

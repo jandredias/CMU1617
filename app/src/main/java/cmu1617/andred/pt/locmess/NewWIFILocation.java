@@ -38,7 +38,7 @@ public class NewWIFILocation extends AppCompatActivity {
     private LinearLayout _ssidListLayout;
     private TextView location_name_view;
     private List<ViewHolder> _ssidsViewsList = new ArrayList<>();
-    private ArrayList<String> _ssidListForAutoComplete = new ArrayList<>(); //for autocomplete
+    private List<String> _ssidListForAutoComplete = new ArrayList<>(); //for autocomplete
     private Button _addToServerButton;
     private View mMainView;
     private View mProgressView;
@@ -155,7 +155,10 @@ public class NewWIFILocation extends AppCompatActivity {
     }
 
     private void populateSsidList(){
-        //goToService
+        _ssidListForAutoComplete = LocMessMainService.getInstance().getSsidList();
+        if(_ssidListForAutoComplete == null) {
+            _ssidListForAutoComplete = new ArrayList<>();
+        }
     }
 
     private Boolean validateAllSSIDs() {

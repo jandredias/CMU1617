@@ -2,6 +2,7 @@ package cmu1617.andred.pt.locmess.Domain;
 
 import android.content.ContentValues;
 import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -36,9 +37,10 @@ public class WIFILocation extends LocMessLocation {
                 values.remove("ssid");
             }
             values.put("ssid", ssid);
-            _db.getWritableDatabase().insert(DataStore.SQL_WIFI_LOCATION_SSID,
+            _db.getWritableDatabase().insertWithOnConflict(DataStore.SQL_WIFI_LOCATION_SSID,
                     null,
-                    values
+                    values,
+                    SQLiteDatabase.CONFLICT_IGNORE
             );
 
         }
@@ -57,7 +59,7 @@ public class WIFILocation extends LocMessLocation {
         List<String> ssidList = new ArrayList<String>();
         if (cursor.getCount() != 0) {
             while (cursor.moveToNext()) {
-                ssidList.add(cursor.getString(2));
+                ssidList.add(cursor.getString(1));
             }
         }
         _ssidList = ssidList;

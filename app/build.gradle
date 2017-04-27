@@ -29,8 +29,8 @@ dependencies {
 
     //for GPS location
     compile fileTree(dir: 'libs', include: ['*.jar'])
-    compile 'com.google.android.gms:play-services:10.2.1'
 
+    compile 'com.google.android.gms:play-services:10.2.1'
     compile 'com.google.android.gms:play-services-location:10.2.1'
     compile 'com.google.android.gms:play-services-places:10.2.1'
     compile 'com.google.android.gms:play-services-maps:10.2.1'

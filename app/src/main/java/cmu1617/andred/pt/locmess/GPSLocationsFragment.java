@@ -27,6 +27,18 @@ public class GPSLocationsFragment extends ListLocationsFragment {
     }
 
     @Override
+    protected void onItemClick(RecyclerViewAdapter mAdapter, int position) {
+            GPSLocation location = (GPSLocation) mAdapter.getItem(position);
+            Intent i = new Intent(getActivity(), ShowGPSLocation.class);
+            i.putExtra("name", location.name());
+            i.putExtra("latitude", location.latitude());
+            i.putExtra("longitude", location.longitude());
+            i.putExtra("radius", location.radius());
+
+            startActivity(i);
+    }
+
+    @Override
     public RecyclerViewAdapter createNewAdapter() {
         return new GPSRecycleViewAdapter();
     }

@@ -92,8 +92,9 @@ public interface DataStore {
     String SQL_CREATE_WIFI_LOCATION_SSID =
             "CREATE TABLE " + SQL_WIFI_LOCATION_SSID + " (" +
                     "location_id INT NOT NULL," +
-                    "ssid VARCHAR(255), " +
-                    "enabled BOOLEAN" +
+                    "ssid VARCHAR(255)," +
+                    "enabled BOOLEAN, " +
+                    "unique(location_id, ssid)"+
                     ")";
     String SQL_CREATE_GPS_LOCATION =
             "CREATE TABLE " + SQL_GPS_LOCATION + " (" +

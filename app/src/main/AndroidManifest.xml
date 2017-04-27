@@ -77,10 +77,16 @@
             android:name=".NewGPSLocation"
             android:label="@string/title_activity_new_gpslocation2" />
         <activity
-            android:name=".ShowLocation"
+            android:name=".ShowGPSLocation"
             android:label="@string/title_activity_show_location" />
-        <service android:name=".LocMessMainService" android:enabled="true" android:exported="false"/>
+
+        <service
+            android:name=".LocMessMainService"
+            android:enabled="true"
+            android:exported="false" />
+
         <activity android:name=".NewWIFILocation" />
+        <activity android:name=".ShowWIFILocation"></activity>
     </application>
 
 </manifest>

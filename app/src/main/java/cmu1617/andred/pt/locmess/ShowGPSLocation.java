@@ -30,7 +30,7 @@ import com.google.android.gms.maps.model.PolygonOptions;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ShowLocation extends FragmentActivity implements OnMapReadyCallback,
+public class ShowGPSLocation extends FragmentActivity implements OnMapReadyCallback,
         LocationListener,
         GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener{
@@ -38,7 +38,7 @@ public class ShowLocation extends FragmentActivity implements OnMapReadyCallback
     private GoogleMap mMap;
     private Marker myLocation;
     private GoogleApiClient mGoogleApiClient;
-    private final static String TAG = "ShowLocation";
+    private final static String TAG = "ShowGPSLocation";
     private String _name;
     private double _latitude;
     private double _longitude;

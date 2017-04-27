@@ -48,6 +48,7 @@ public class NewWIFILocation extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_new_wifilocation);
+        numberOfItemsInList = 0;
         _db = new SQLDataStoreHelper(getApplicationContext());
         WifiManager wifiManager = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
         WifiInfo info = wifiManager.getConnectionInfo();
@@ -63,29 +64,7 @@ public class NewWIFILocation extends AppCompatActivity {
         _addMoreSSIDButtom.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                LayoutInflater inflater = getLayoutInflater();
-                final View vi = inflater.inflate(R.layout.ssid_item, null);
-                _ssidListLayout.addView(vi);
-
-                final ViewHolder viewHolder = new ViewHolder(vi,numberOfItemsInList++);
-
-                viewHolder._delete.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        int position = viewHolder._position;
-                        _ssidsViewsList.remove(viewHolder);
-                        _ssidListLayout.removeView(vi);
-                        for(ViewHolder oldViewHolder : _ssidsViewsList) {
-                            if(oldViewHolder._position >position) {
-                                oldViewHolder._position--;
-                            }
-//                            oldViewHolder._ssid.setText(oldViewHolder._position+"");
-                        }
-                        numberOfItemsInList--;
-                    }
-                });
-                _ssidsViewsList.add(viewHolder);
-                vi.requestFocus();
+                createNewSSIDView();
             }
         });
         _addToServerButton = (Button) findViewById(R.id.add_wifi_location_to_server_button);
@@ -102,6 +81,32 @@ public class NewWIFILocation extends AppCompatActivity {
         location_name_view = (TextView) findViewById(R.id.new_wifi_location_name);
         _addMoreSSIDButtom.performClick();
         location_name_view.requestFocus();
+    }
+
+    private void createNewSSIDView() {
+        LayoutInflater inflater = getLayoutInflater();
+        final View vi = inflater.inflate(R.layout.ssid_item, null);
+        _ssidListLayout.addView(vi);
+
+        final ViewHolder viewHolder = new ViewHolder(vi,numberOfItemsInList++);
+
+        viewHolder._delete.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                int position = viewHolder._position;
+                _ssidsViewsList.remove(viewHolder);
+                _ssidListLayout.removeView(vi);
+                for(ViewHolder oldViewHolder : _ssidsViewsList) {
+                    if(oldViewHolder._position >position) {
+                        oldViewHolder._position--;
+                    }
+//                            oldViewHolder._ssid.setText(oldViewHolder._position+"");
+                }
+                numberOfItemsInList--;
+            }
+        });
+        _ssidsViewsList.add(viewHolder);
+        vi.requestFocus();
     }
 
     @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR2)

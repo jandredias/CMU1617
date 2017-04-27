@@ -90,6 +90,7 @@ public abstract class ListLocationsFragment extends Fragment implements View.OnC
         mRecyclerView.addOnItemTouchListener(new RecyclerTouchListener(getContext(), mRecyclerView, new ClickListener() {
             @Override
             public void onClick(View view, int position) {
+                onItemClick(mAdapter,position);
 //                LocMessLocation location = mAdapter.getItem(_position);
 //                Toast.makeText(getContext(), location.name() + " is selected!", Toast.LENGTH_SHORT).show();
 
@@ -138,6 +139,8 @@ public abstract class ListLocationsFragment extends Fragment implements View.OnC
 
         return view;
     }
+
+    protected abstract void onItemClick(RecyclerViewAdapter mAdapter, int position);
 
     @Override
     public void onStart(){
@@ -295,20 +298,7 @@ public abstract class ListLocationsFragment extends Fragment implements View.OnC
             ViewHolder v = holder;
 
             v._name.setText(location.name());
-            if(location instanceof GPSLocation){
-                v.itemView.findViewById(R.id.location_name).setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        Intent i = new Intent(getActivity(), ShowLocation.class);
-                        i.putExtra("name", ((GPSLocation) location).name());
-                        i.putExtra("latitude", ((GPSLocation) location).latitude());
-                        i.putExtra("longitude", ((GPSLocation) location).longitude());
-                        i.putExtra("radius", ((GPSLocation) location).radius());
 
-                        startActivity(i);
-                    }
-                });
-            }
             v._add_message_button.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {

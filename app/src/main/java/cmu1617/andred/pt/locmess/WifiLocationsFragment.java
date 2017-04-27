@@ -94,6 +94,15 @@ public class WifiLocationsFragment extends ListLocationsFragment {
 
     }
 
+    @Override
+    protected void onItemClick(RecyclerViewAdapter mAdapter, int position) {
+        LocMessLocation location = mAdapter.getItem(position);
+        Intent i = new Intent(getActivity(), ShowWIFILocation.class);
+        i.putExtra("id", location.id());
+
+        startActivity(i);
+    }
+
 //    public void setNewLocation(String name, String ssid) {
 //        new NewWIFILocationAsync().execute(name, ssid);
 //    }

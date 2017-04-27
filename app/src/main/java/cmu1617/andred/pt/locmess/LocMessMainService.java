@@ -71,7 +71,7 @@ public class LocMessMainService extends Service implements GoogleApiClient.Conne
         return _instance;
     }
 
-    private LocMessMainService() {}
+    public LocMessMainService() {}
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {

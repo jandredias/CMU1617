@@ -50,11 +50,13 @@ public class ProfileActivity extends AppCompatActivity implements OnTaskComplete
     private Map<String, String > _startUserValues;
     private View mainView;
     private View mProgressView;
+    private int numberOfItemsInList = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_profile);
+        numberOfItemsInList = 0;
         _db = new SQLDataStoreHelper(this);
         mainView = findViewById(R.id.scroll_view_profile);
         mProgressView = findViewById(R.id.progress_bar);
@@ -114,10 +116,28 @@ public class ProfileActivity extends AppCompatActivity implements OnTaskComplete
 
     private ViewHolder createNewKeywordView() {
         LayoutInflater inflater = getLayoutInflater();
-        View vi = inflater.inflate(R.layout.keyword_profile_item, null);
+        final View vi = inflater.inflate(R.layout.keyword_profile_item, null);
         _keywordsListLayout.addView(vi);
-        ViewHolder viewHolder = new ViewHolder(vi);
+        final ViewHolder viewHolder = new ViewHolder(vi,numberOfItemsInList++);
+
+        viewHolder._delete.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                int position = viewHolder._position;
+                _keywordsViewsList.remove(viewHolder);
+                _keywordsListLayout.removeView(vi);
+                for(ViewHolder oldViewHolder : _keywordsViewsList) {
+                    if(oldViewHolder._position >position) {
+                        oldViewHolder._position--;
+                    }
+//                            oldViewHolder._ssid.setText(oldViewHolder._position+"");
+                }
+                numberOfItemsInList--;
+            }
+        });
+
         _keywordsViewsList.add(viewHolder);
+        vi.requestFocus();
         return viewHolder;
     }
 
@@ -151,14 +171,16 @@ public class ProfileActivity extends AppCompatActivity implements OnTaskComplete
         EditText _value;
         ImageView _delete;
         View _holder;
+        int _position;
 
-        ViewHolder(View itemView) {
+        ViewHolder(View itemView,int position) {
             super(itemView);
             _holder = itemView;
             _keyword = (AutoCompleteTextView) itemView.findViewById(R.id.profile_keyword_name_text_view);
             _keyword.setAdapter(_keywordListAdapter);
             _value = (EditText) itemView.findViewById(R.id.profile_keyword_value_edit_text);
             _delete = (ImageView) itemView.findViewById(R.id.delete_profile_keyword_item);
+            _position = position;
         }
     }
     /**

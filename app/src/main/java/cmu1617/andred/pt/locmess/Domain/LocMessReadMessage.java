@@ -17,8 +17,9 @@ public class LocMessReadMessage {
     private String _authorId;
     private String _readerId;
     private String _content;
+    private String _postTimestamp;
 
-//    private DateT
+    //    private DateT
     public LocMessReadMessage(SQLDataStoreHelper dbHelper, String message_id) {
         _id = message_id;
         _db = dbHelper;
@@ -41,11 +42,12 @@ public class LocMessReadMessage {
         cursor.close();
     }
 
-    public void completeObject(String locationId,String authorId, String content,String readerId) {
+    public void completeObject(String locationId,String authorId, String content,String readerId,String postTimestamp) {
         this.location(locationId);
         this.authorId(authorId);
         this.readerId(readerId);
         this.content(content);
+        this.postTimestamp(postTimestamp);
     }
 
     public String id() {
@@ -162,6 +164,35 @@ public class LocMessReadMessage {
         cursor.moveToFirst();
         _location  = new LocMessLocation(_db,cursor.getString(4));
         return _location;
+    }
+
+    public void postTimestamp(String postTimestamp) {
+        String[] selectionArgs = {_id};
+        ContentValues values = new ContentValues();
+        values.put("post_timestamp", postTimestamp);
+        _db.getWritableDatabase().update(DataStore.SQL_READ_MESSAGES,
+                values,
+                "message_id = ?",
+                selectionArgs);
+        _postTimestamp = postTimestamp;
+    }
+
+    public String postTimestamp(){
+        if (_postTimestamp!= null) return _postTimestamp;
+        String[] selectionArgs = { _id };
+        Cursor cursor = _db.getReadableDatabase().query(
+                DataStore.SQL_READ_MESSAGES,
+                DataStore.SQL_READ_MESSAGES_COLUMNS,
+                "message_id = ?",
+                selectionArgs,
+                null, null, null);
+
+        if (cursor.getCount() == 0) {
+            return null;
+        }
+        cursor.moveToFirst();
+        _postTimestamp =cursor.getString(5);
+        return _postTimestamp ;
     }
 
 }

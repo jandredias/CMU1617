@@ -309,7 +309,7 @@ public final class LocMessAPIClientImpl extends LocMessAPIClientBase implements 
     }
 
     @Override
-    public String addMessage(String location_id,String message, String dateBegin, String dateEnd, List<MessageConstraint> list) {
+    public String addMessage(String location_id, String message, String dateBegin, String dateEnd, List<MessageConstraint> list, String current_timestamp) {
         Map<String, String> post = new HashMap<>();
         String listDelimiter = "><(((('>";
         String restrictions = convertToString(list,listDelimiter);
@@ -318,6 +318,7 @@ public final class LocMessAPIClientImpl extends LocMessAPIClientBase implements 
         post.put("message_content",message);
         post.put("time_start",dateBegin);
         post.put("time_end",dateEnd);
+        post.put("post_timestamp",current_timestamp);
         post.put("restrictions",restrictions);
         for (int i = 0; i < TRIES; i++) {
 

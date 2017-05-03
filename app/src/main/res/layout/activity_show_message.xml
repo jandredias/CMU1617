@@ -30,13 +30,22 @@
         android:text="post Message very big i dont really care how big it is, but it kinda should resemble an message." />
 
     <TextView
-        android:layout_below="@id/show_message_message_body"
+        android:id="@+id/show_message_author"
         android:textSize="20sp"
         android:gravity="end"
-        android:id="@+id/show_message_author"
+        android:layout_below="@id/show_message_message_body"
+        android:layout_marginTop="10dp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="By: fakas95" />
+    <TextView
+        android:id="@+id/show_message_post_timestamp"
+        android:textSize="20sp"
+        android:gravity="end"
+        android:layout_below="@id/show_message_author"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="In: 2017" />
 
     <RelativeLayout
         android:layout_marginTop="15dp"

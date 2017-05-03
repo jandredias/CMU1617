@@ -82,6 +82,7 @@ public abstract class ListMessagesFragment extends Fragment {
                 intent.putExtra("author",message.authorId());
                 intent.putExtra("location_id",message.location().id());
                 intent.putExtra("content",message.content());
+                intent.putExtra("post_timestamp",message.postTimestamp());
 
                 String timeEnd = message.timeEnd();
                 SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");

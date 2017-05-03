@@ -16,16 +16,7 @@ public interface DataStore {
     String SQL_READ_MESSAGES = "sql_read_messages";
     String SQL_WIFI_MESSAGES="sql_wifi_messages";
 
-    String[] SQL_WIFI_MESSAGES_COLUMNS = {
-            "message_id",
-            "content",
-            "author_id",
-            "location_id",
-            "time_start",
-            "time_end",
-            "jumped"
 
-    };
 
     String[] SQL_LOCATION_COLUMNS = {
             "location_id",
@@ -64,6 +55,7 @@ public interface DataStore {
             "location_id",
             "time_start",
             "time_end",
+            "post_timestamp",
             "enabled"
     };
     String[] SQL_READ_MESSAGES_COLUMNS = {
@@ -71,20 +63,20 @@ public interface DataStore {
             "content",
             "author_id",
             "reader_id",
-            "location_id"
+            "location_id",
+            "post_timestamp"
+    };
+    String[] SQL_WIFI_MESSAGES_COLUMNS = {
+            "message_id",
+            "content",
+            "author_id",
+            "location_id",
+            "time_start",
+            "time_end",
+            "jumped"
     };
 
 
-    String SQL_CREATE_WIFI_MESSAGES =
-            "CREATE TABLE " + SQL_WIFI_MESSAGES+ " (" +
-                    "message_id VARCHAR(255) NOT NULL PRIMARY KEY,"+
-                    "content VARCHAR (20000),"+
-                    "author_id VARCHAR(255)," +
-                    "location_id INT ,"+
-                    "time_start DATETIME ,"+
-                    "time_end DATETIME,"+
-                    "jumped INT DEFAULT 0"+
-                    ")";
     String SQL_CREATE_LOCATION =
             "CREATE TABLE " + SQL_LOCATION + " (" +
             "location_id INT NOT NULL," +
@@ -129,6 +121,7 @@ public interface DataStore {
                     "location_id INT ,"+
                     "time_start DATETIME ,"+
                     "time_end DATETIME,"+
+                    "post_timestamp DATETIME,"+
                     "enabled boolean"+
                     ")";
 
@@ -138,9 +131,19 @@ public interface DataStore {
                     "content VARCHAR (20000),"+
                     "author_id VARCHAR(255)," +
                     "reader_id VARCHAR(255)," +
-                    "location_id INT "+
+                    "location_id INT, "+
+                    "post_timestamp DATETIME"+
                     ")";
-
+    String SQL_CREATE_WIFI_MESSAGES =
+            "CREATE TABLE " + SQL_WIFI_MESSAGES+ " (" +
+                    "message_id VARCHAR(255) NOT NULL PRIMARY KEY,"+
+                    "content VARCHAR (20000),"+
+                    "author_id VARCHAR(255)," +
+                    "location_id INT ,"+
+                    "time_start DATETIME ,"+
+                    "time_end DATETIME,"+
+                    "jumped INT DEFAULT 0"+
+                    ")";
 
 
 

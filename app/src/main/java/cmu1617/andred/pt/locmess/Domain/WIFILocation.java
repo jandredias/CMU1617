@@ -42,7 +42,6 @@ public class WIFILocation extends LocMessLocation {
                     values,
                     SQLiteDatabase.CONFLICT_IGNORE
             );
-
         }
         _ssidList = ssidList;
     }

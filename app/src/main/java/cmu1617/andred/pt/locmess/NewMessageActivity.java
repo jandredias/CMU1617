@@ -496,7 +496,11 @@ public class NewMessageActivity extends AppCompatActivity implements OnTaskCompl
         @Override
         protected Boolean doInBackground(Void... params) {
             try {
-                String message_id = LocMessAPIClientImpl.getInstance().addMessage(mLocation.id(),_message, _dateBegin, _dateEnd, _list);
+                SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+                Date date = new Date();
+                String current_timestamp = dateFormat.format(date);
+                String message_id = LocMessAPIClientImpl.getInstance().addMessage(mLocation.id(),_message, _dateBegin, _dateEnd, _list, current_timestamp);
+
             } catch (APIException e) {
                 return false;
             }

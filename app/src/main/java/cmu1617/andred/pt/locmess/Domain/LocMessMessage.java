@@ -18,6 +18,7 @@ public class LocMessMessage {
     private String _content;
     private String _timeStart;
     private String _timeEnd;
+    private String _postTimestamp;
 //    private DateT
     public LocMessMessage(SQLDataStoreHelper dbHelper, String message_id) {
         _id = message_id;
@@ -41,14 +42,16 @@ public class LocMessMessage {
         cursor.close();
     }
 
-    public void completeObject(String locationId,String authorId, String content, String timeStart, String timeEnd, String enabled) {
+    public void completeObject(String locationId,String authorId, String content, String timeStart, String timeEnd, String postTimestamp ,String enabled) {
         this.location(locationId);
         this.authorId(authorId);
         this.content(content);
         this.timeStart(timeStart);
         this.timeEnd(timeEnd);
+        this.postTimestamp(postTimestamp);
         this.enabled(enabled);
     }
+
 
     public String id() {
         return _id;
@@ -194,6 +197,36 @@ public class LocMessMessage {
         return _location;
     }
 
+    public void postTimestamp(String postTimestamp) {
+        String[] selectionArgs = {_id};
+        ContentValues values = new ContentValues();
+        values.put("post_timestamp", postTimestamp);
+        _db.getWritableDatabase().update(DataStore.SQL_MESSAGES,
+                values,
+                "message_id = ?",
+                selectionArgs);
+        _postTimestamp = postTimestamp;
+    }
+
+    public String postTimestamp(){
+        if (_postTimestamp!= null) return _postTimestamp;
+        String[] selectionArgs = { _id };
+        Cursor cursor = _db.getReadableDatabase().query(
+                DataStore.SQL_MESSAGES,
+                DataStore.SQL_MESSAGES_COLUMNS,
+                "message_id = ?",
+                selectionArgs,
+                null, null, null);
+
+        if (cursor.getCount() == 0) {
+            return null;
+        }
+        cursor.moveToFirst();
+        _postTimestamp =cursor.getString(6);
+        return _postTimestamp ;
+    }
+
+
     public boolean enabled(){
         String[] selectionArgs = { _id };
         Cursor cursor = _db.getReadableDatabase().query(
@@ -207,7 +240,7 @@ public class LocMessMessage {
             return false;
         }
         cursor.moveToFirst();
-        return cursor.getInt(6) == 1;
+        return cursor.getInt(7) == 1;
     }
 
     public void enabled(String enabled) {

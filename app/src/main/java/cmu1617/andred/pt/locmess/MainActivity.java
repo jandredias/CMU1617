@@ -2,10 +2,16 @@ package cmu1617.andred.pt.locmess;
 
 import android.Manifest;
 import android.app.Activity;
+import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.IntentSender;
+import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.os.IBinder;
+import android.os.Messenger;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
 import android.support.design.widget.NavigationView;
@@ -40,6 +46,11 @@ import java.util.List;
 
 import cmu1617.andred.pt.locmess.Domain.LocmessSettings;
 import pt.andred.cmu1617.LocMessAPIClientImpl;
+import pt.inesc.termite.wifidirect.SimWifiP2pBroadcast;
+import pt.inesc.termite.wifidirect.SimWifiP2pManager;
+import pt.inesc.termite.wifidirect.SimWifiP2pManager.Channel;
+import pt.inesc.termite.wifidirect.service.SimWifiP2pService;
+import pt.inesc.termite.wifidirect.sockets.SimWifiP2pSocketManager;
 
 public class MainActivity extends AppCompatActivity implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
     private final String TAG = "MainActivity";
@@ -53,6 +64,11 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     private Fragment _main_fragment;
     private FragmentManager _fragmentManager = getSupportFragmentManager();
     private GoogleApiClient mGoogleApiClient;
+
+    private SimWifiP2pManager mManager = null;
+    private Channel mChannel = null;
+    private Messenger mService = null;
+    private boolean mBound = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -124,6 +140,20 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
 
         startService(new Intent(this, LocMessMainService.class));
+
+        // initialize the Termite API
+        SimWifiP2pSocketManager.Init(getApplicationContext());
+
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(SimWifiP2pBroadcast.WIFI_P2P_STATE_CHANGED_ACTION);
+        filter.addAction(SimWifiP2pBroadcast.WIFI_P2P_PEERS_CHANGED_ACTION);
+        filter.addAction(SimWifiP2pBroadcast.WIFI_P2P_NETWORK_MEMBERSHIP_CHANGED_ACTION);
+        filter.addAction(SimWifiP2pBroadcast.WIFI_P2P_GROUP_OWNERSHIP_CHANGED_ACTION);
+        SimWifiP2pBroadcastReceiver receiver = new SimWifiP2pBroadcastReceiver();
+        registerReceiver(receiver, filter);
+
+        Intent intent = new Intent(getApplicationContext(), SimWifiP2pService.class);
+        bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
     }
 
     private void enableLocation() {
@@ -232,4 +262,22 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                 break;
         }
     }
+    private ServiceConnection mConnection = new ServiceConnection() {
+        // callbacks for service binding, passed to bindService()
+        @Override
+        public void onServiceConnected(ComponentName className, IBinder service) {
+            mService = new Messenger(service);
+            mManager = new SimWifiP2pManager(mService);
+            mChannel = mManager.initialize(getApplication(), getMainLooper(),
+                    null);
+            mBound = false;
+        }
+        @Override
+        public void onServiceDisconnected(ComponentName arg0) {
+            mService = null;
+            mManager = null;
+            mChannel = null;
+            mBound = false;
+        }
+    };
 }

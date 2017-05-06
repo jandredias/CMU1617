@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     package="cmu1617.andred.pt.locmess">
 
     <!--
@@ -17,6 +18,7 @@
 
     <application
         android:allowBackup="true"
+        tools:replace="android:icon"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher"
@@ -87,6 +89,14 @@
 
         <activity android:name=".NewWIFILocation" />
         <activity android:name=".ShowWIFILocation"></activity>
+
+        <service
+            android:name="pt.inesc.termite.wifidirect.service.SimWifiP2pService" />
+        <!--<service-->
+            <!--android:name="cmu1617.andred.pt.locmess.SimWifiP2pService" />-->
+
+        cmu1617.andred.pt.locmess
+
     </application>
 
 </manifest>

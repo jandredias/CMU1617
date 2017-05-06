@@ -5,6 +5,6 @@ package cmu1617.andred.pt.locmess;
  */
 
 public interface LocMessIntent {
-    String CREATED_NEW_WIFI_MESSAGE_REQUEST = "0";
-    String CREATED_NEW_WIFI_MESSAGE_RESPONSE = "1";
+    String NEW_PEERS_AVAILABLE = "0";
+    String CNEW_PEERS_AVAILABLE_RESPONSE = "1";
 }

@@ -2,22 +2,19 @@ package cmu1617.andred.pt.locmess;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
+import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.app.DatePickerDialog;
 import android.app.Dialog;
 import android.app.TimePickerDialog;
-import android.content.ContentValues;
-import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
-import android.net.wifi.p2p.WifiP2pManager;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.DialogFragment;
-import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
 import android.text.format.DateFormat;
@@ -47,8 +44,6 @@ import cmu1617.andred.pt.locmess.Domain.LocMessWIFIMessage;
 import pt.andred.cmu1617.APIException;
 import pt.andred.cmu1617.LocMessAPIClientImpl;
 import pt.andred.cmu1617.MessageConstraint;
-
-import static android.icu.lang.UCharacter.GraphemeClusterBreak.L;
 
 public class NewMessageActivity extends AppCompatActivity implements OnTaskCompleted{
 
@@ -329,7 +324,7 @@ public class NewMessageActivity extends AppCompatActivity implements OnTaskCompl
             else{
                 LocMessWIFIMessage message = new LocMessWIFIMessage(dbHelper);
                 message.completeObject(mLocation.id(), text, begin, end, "0");
-                LocalBroadcastManager.getInstance(getBaseContext()).sendBroadcast(new Intent(LocMessIntent.CREATED_NEW_WIFI_MESSAGE_REQUEST));
+               // LocalBroadcastManager.getInstance(getBaseContext()).sendBroadcast(new Intent(LocMessIntent.CREATED_NEW_WIFI_MESSAGE_REQUEST));
             }
 
 
@@ -371,7 +366,7 @@ public class NewMessageActivity extends AppCompatActivity implements OnTaskCompl
         DialogFragment newFragment = new DatePickerFragment(v);
         newFragment.show(getSupportFragmentManager(), "datePicker");
     }
-
+    @SuppressLint("ValidFragment")
     public static class DatePickerFragment extends DialogFragment implements
             DatePickerDialog.OnDateSetListener {
 
@@ -408,6 +403,7 @@ public class NewMessageActivity extends AppCompatActivity implements OnTaskCompl
         newFragment.show(getSupportFragmentManager(), "timePicker");
     }
 
+    @SuppressLint("ValidFragment")
     public static class TimePickerFragment extends DialogFragment implements
             TimePickerDialog.OnTimeSetListener {
 

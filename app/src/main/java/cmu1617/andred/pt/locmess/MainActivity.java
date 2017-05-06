@@ -9,6 +9,7 @@ import android.content.IntentFilter;
 import android.content.IntentSender;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Messenger;
@@ -21,6 +22,7 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
@@ -41,18 +43,30 @@ import com.google.android.gms.location.LocationSettingsResult;
 import com.google.android.gms.location.LocationSettingsStates;
 import com.google.android.gms.location.LocationSettingsStatusCodes;
 
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import cmu1617.andred.pt.locmess.Domain.LocmessSettings;
 import pt.andred.cmu1617.LocMessAPIClientImpl;
 import pt.inesc.termite.wifidirect.SimWifiP2pBroadcast;
+import pt.inesc.termite.wifidirect.SimWifiP2pDevice;
+import pt.inesc.termite.wifidirect.SimWifiP2pDeviceList;
+import pt.inesc.termite.wifidirect.SimWifiP2pInfo;
 import pt.inesc.termite.wifidirect.SimWifiP2pManager;
 import pt.inesc.termite.wifidirect.SimWifiP2pManager.Channel;
 import pt.inesc.termite.wifidirect.service.SimWifiP2pService;
+import pt.inesc.termite.wifidirect.sockets.SimWifiP2pSocket;
 import pt.inesc.termite.wifidirect.sockets.SimWifiP2pSocketManager;
 
-public class MainActivity extends AppCompatActivity implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
+public class MainActivity extends AppCompatActivity implements
+        GoogleApiClient.ConnectionCallbacks,
+        GoogleApiClient.OnConnectionFailedListener,
+        SimWifiP2pManager.PeerListListener,
+        SimWifiP2pManager.GroupInfoListener
+
+{
     private final String TAG = "MainActivity";
 //    private TextView mTextMessage;
     private final int REQUEST_LOCATION = 200;
@@ -69,6 +83,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     private Channel mChannel = null;
     private Messenger mService = null;
     private boolean mBound = false;
+    private final WifiDirectServer wfds  = new WifiDirectServer(this);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -149,11 +164,12 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         filter.addAction(SimWifiP2pBroadcast.WIFI_P2P_PEERS_CHANGED_ACTION);
         filter.addAction(SimWifiP2pBroadcast.WIFI_P2P_NETWORK_MEMBERSHIP_CHANGED_ACTION);
         filter.addAction(SimWifiP2pBroadcast.WIFI_P2P_GROUP_OWNERSHIP_CHANGED_ACTION);
-        SimWifiP2pBroadcastReceiver receiver = new SimWifiP2pBroadcastReceiver();
+        SimWifiP2pBroadcastReceiver receiver = new SimWifiP2pBroadcastReceiver(this);
         registerReceiver(receiver, filter);
 
         Intent intent = new Intent(getApplicationContext(), SimWifiP2pService.class);
         bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
+        wfds.start();
     }
 
     private void enableLocation() {
@@ -280,4 +296,46 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
             mBound = false;
         }
     };
+
+    public void wifiPeersChanged() {
+        mManager.requestPeers(mChannel, this);
+    }
+
+    @Override
+    public void onPeersAvailable(SimWifiP2pDeviceList simWifiP2pDeviceList) {
+        LocalBroadcastManager.getInstance(getBaseContext()).sendBroadcast(new Intent(LocMessIntent.NEW_PEERS_AVAILABLE));
+
+
+    }
+
+    @Override
+    public void onGroupInfoAvailable(SimWifiP2pDeviceList simWifiP2pDeviceList, SimWifiP2pInfo simWifiP2pInfo) {
+
+    }
+
+    public void printToast(String s){
+        Log.d(TAG, "Printing Toast: " + s);
+        Toast.makeText(getBaseContext(), "Received this: " + s, Toast.LENGTH_LONG);
+    }
+
+    public class OutgoingCommTask extends AsyncTask<SimWifiP2pDeviceList, String, String>{
+
+        @Override
+        protected String doInBackground(SimWifiP2pDeviceList... params) {
+            Collection<SimWifiP2pDevice> device_list = params[0].getDeviceList();
+            SimWifiP2pSocket mCliSocket;
+
+            for(SimWifiP2pDevice device : device_list){
+                try {
+                    mCliSocket = new SimWifiP2pSocket(device.getVirtIp(), device.getVirtPort());
+                    mCliSocket.getOutputStream().write("Hello".getBytes());
+
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+            return null;
+        }
+    }
+
 }

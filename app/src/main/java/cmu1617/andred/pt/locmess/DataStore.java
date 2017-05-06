@@ -17,7 +17,6 @@ public interface DataStore {
     String SQL_WIFI_MESSAGES="sql_wifi_messages";
 
 
-
     String[] SQL_LOCATION_COLUMNS = {
             "location_id",
             "name"
@@ -75,6 +74,7 @@ public interface DataStore {
             "time_end",
             "jumped"
     };
+
 
 
     String SQL_CREATE_LOCATION =

@@ -4,15 +4,17 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.BroadcastReceiver;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.database.Cursor;
 import android.location.Location;
 import android.location.LocationManager;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiManager;
-import android.net.wifi.p2p.WifiP2pManager;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -30,16 +32,33 @@ import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import cmu1617.andred.pt.locmess.AsyncTasks.GetMessagesAsyncTask;
 import cmu1617.andred.pt.locmess.Domain.LocmessSettings;
+import pt.inesc.termite.wifidirect.SimWifiP2pDevice;
+import pt.inesc.termite.wifidirect.SimWifiP2pDeviceList;
+import pt.inesc.termite.wifidirect.SimWifiP2pManager;
+import pt.inesc.termite.wifidirect.sockets.SimWifiP2pSocket;
+import pt.inesc.termite.wifidirect.sockets.SimWifiP2pSocketServer;
 
 import static android.R.attr.value;
-import static android.os.Build.VERSION_CODES.M;
 
-public class LocMessMainService extends Service implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener, OnTaskCompleted {
+public class LocMessMainService
+        extends
+        Service
+        implements
+        GoogleApiClient.ConnectionCallbacks,
+        GoogleApiClient.OnConnectionFailedListener,
+        LocationListener,
+        SimWifiP2pManager.PeerListListener,
+        OnTaskCompleted {
     private static final String TAG = "LocMessMainService";
     private GoogleApiClient mGoogleApiClient;
     protected static final int REQUEST_CHECK_SETTINGS = 0x1;
@@ -59,8 +78,8 @@ public class LocMessMainService extends Service implements GoogleApiClient.Conne
     private LocationManager locationManager;
     //WiFi Direct
     private final IntentFilter mIntentFilter = new IntentFilter();
-    WifiP2pManager.Channel mChannel;
     WiFiDirectBroadcastReceiver mReceiver;
+    BroadcastReceiver _mMessageReceiver = new LocMessBroadcastReceiver();
 
     private static LocMessMainService _instance;
 
@@ -94,26 +113,10 @@ public class LocMessMainService extends Service implements GoogleApiClient.Conne
         createLocationRequest();
         setAlarm();
 
-        //WiFi Direct
-        //  Indicates a change in the Wi-Fi P2P status.
-        mIntentFilter.addAction(WifiP2pManager.WIFI_P2P_STATE_CHANGED_ACTION);
-
-        // Indicates a change in the list of available peers.
-        mIntentFilter.addAction(WifiP2pManager.WIFI_P2P_PEERS_CHANGED_ACTION);
-
-        // Indicates the state of Wi-Fi P2P connectivity has changed.
-        mIntentFilter.addAction(WifiP2pManager.WIFI_P2P_CONNECTION_CHANGED_ACTION);
-
-        // Indicates this device's details have changed.
-        mIntentFilter.addAction(WifiP2pManager.WIFI_P2P_THIS_DEVICE_CHANGED_ACTION);
-        WifiP2pManager mManager = (WifiP2pManager) getSystemService(Context.WIFI_P2P_SERVICE);
-        mChannel = mManager.initialize(this, getMainLooper(), null);
-        mReceiver = new WiFiDirectBroadcastReceiver(mManager, mChannel, this, new SQLDataStoreHelper(this));
-
+        new ReceiveWIFIMessagesAsync().execute();
 
         return START_STICKY;
     }
-
 
     private void registerWifiReceiver() {
         registerReceiver(mReceiver, mIntentFilter);
@@ -280,6 +283,11 @@ public class LocMessMainService extends Service implements GoogleApiClient.Conne
         return _ssidList;
     }
 
+    @Override
+    public void onPeersAvailable(SimWifiP2pDeviceList simWifiP2pDeviceList) {
+        new SendWifiMessagesAsync().execute(simWifiP2pDeviceList);
+    }
+
     class WifiReceiver extends BroadcastReceiver {
 
         // This method call when number of wifi connections changed
@@ -292,6 +300,172 @@ public class LocMessMainService extends Service implements GoogleApiClient.Conne
             for(int i = 0; i < wifiList.size(); i++){
                 _ssidList.add(wifiList.get(i).SSID);
             }
+        }
+    }
+
+    private class LocMessBroadcastReceiver extends BroadcastReceiver{
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            switch (intent.getAction()) {
+                case LocMessIntent.NEW_PEERS_AVAILABLE:
+                    new SendWifiMessagesAsync().execute();
+                    break;
+            }
+        }
+    }
+
+    private class SendWifiMessagesAsync extends AsyncTask<SimWifiP2pDeviceList, Void, Void>{
+        private SQLDataStoreHelper _db;
+        private Cursor cursor;
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            _db = new SQLDataStoreHelper(getApplicationContext());
+            cursor = _db.getReadableDatabase().query(
+                    DataStore.SQL_WIFI_MESSAGES,
+                    DataStore.SQL_WIFI_MESSAGES_COLUMNS,
+                    "jumped = 0 OR jumped = 1",
+                    null, null, null, null
+            );
+        }
+
+        @Override
+        protected Void doInBackground(SimWifiP2pDeviceList... params) {
+            Collection<SimWifiP2pDevice> device_list = params[0].getDeviceList();
+            SimWifiP2pSocket sock;
+
+            for(SimWifiP2pDevice device : device_list) {
+                try {
+                    sock = new SimWifiP2pSocket(device.getVirtIp(), device.getVirtPort());
+                    BufferedReader sockIn = new BufferedReader( new InputStreamReader(sock.getInputStream()));
+                    OutputStream sockOut = sock.getOutputStream();
+                    while (cursor.moveToNext()) {
+                        String tosend = "MESSAGE-LOCATION::"+cursor.getString(3);
+                        sockOut.write(tosend.getBytes());
+                        String response = sockIn.readLine();
+                        if (response.equals("YES")){
+                            tosend = "MESSAGE" +
+                                    "::"+ cursor.getString(0) +//id
+                                    "::"+ cursor.getString(1) +//content
+                                    "::"+ cursor.getString(2) +//author
+                                    "::"+ cursor.getString(4) +//time_start
+                                    "::"+ cursor.getString(5) +//time_end
+                                    "::"+ cursor.getString(6) //jumped
+                                    ;
+                            sockOut.write(tosend.getBytes());
+
+                            String reply = sockIn.readLine();
+                           /* if(reply.equals("SUCCESS")){
+                                //FTODO
+                            }*/
+
+                        }
+                    }
+
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
+            }
+
+            return null;
+        }
+
+
+
+    }
+
+    private class ReceiveWIFIMessagesAsync extends AsyncTask<Void, Void, Void>{
+        private WifiManager wifiManager;
+        private String SSID;
+        private SQLDataStoreHelper _db;
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            wifiManager = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+            _db = new SQLDataStoreHelper(getApplicationContext());
+        }
+
+        @Override
+        protected Void doInBackground(Void... params) {
+
+            SimWifiP2pSocketServer mSrvSocket = null;
+            try {
+                mSrvSocket = new SimWifiP2pSocketServer(
+                        Integer.parseInt(getString(R.string.port)));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            while (!Thread.currentThread().isInterrupted()) {
+                try {
+                    SimWifiP2pSocket sock = mSrvSocket.accept();
+                    try {
+                        BufferedReader sockIn = new BufferedReader(
+                                new InputStreamReader(sock.getInputStream()));
+                        String request = sockIn.readLine();
+
+                        String response;
+                        OutputStream sockOut = sock.getOutputStream();
+                        if ((response =processInput(request)) != null){
+                            sockOut.write(response.getBytes());
+                            String message = sockIn.readLine();
+                            String reply = processMessage(message);
+                            sockOut.write(reply.getBytes());
+                        }
+
+
+                        sock.getOutputStream().write(("\n").getBytes());
+                    } catch (IOException e) {
+                        Log.d("Error reading socket:", e.getMessage());
+                    } finally {
+                        sock.close();
+                    }
+                } catch (IOException e) {
+                    Log.d("Error socket:", e.getMessage());
+                    break;
+                    //e.printStackTrace();
+                }
+            }
+            return null;
+        }
+
+
+        private String processInput(String input){
+            String[] data = input.split("::");
+            if(data[0].equals("MESSAGE-LOCATION")){
+                if(data[1].equals(wifiManager.getConnectionInfo().getBSSID())) {
+                    SSID = data[1];
+                    return "YES";
+                }
+                return "NO";
+            }
+            return null;
+        }
+        private String processMessage(String message) {
+            String[] data = message.split("::");
+            int j;
+            try {
+                j = Integer.parseInt(data[7]);
+            }catch (Exception e){
+                return "ERROR";
+            }
+            ContentValues values = new ContentValues();
+            values.put("id", data[1]);
+            values.put("content", data[2]);
+            values.put("author_id", data[3]);
+            values.put("location_id", SSID);
+            values.put("time_start", data[5]);
+            values.put("time_end", data[6]);
+            j++;
+            values.put("jumped", Integer.toString(j));
+
+            _db.getWritableDatabase().insert(
+                    DataStore.SQL_WIFI_MESSAGES,
+                    null,
+                    values);
+            return "SUCCESS";
         }
     }
 }

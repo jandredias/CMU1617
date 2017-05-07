@@ -433,6 +433,41 @@ public final class LocMessAPIClientImpl extends LocMessAPIClientBase implements 
         throw new APIException("Couldn't connect to server");
     }
 
+    public void deleteMessage(String message_id) {
+        Map<String, String> post = new HashMap<>();
+
+        post.put("message_id",message_id);
+        for (int i = 0; i < TRIES; i++) {
+
+            JSONObject response = invoke(Endpoint.DELETE_MESSAGE, _auth, null, post);
+            if (response == null) {
+                continue;
+            }
+            if (!response.has("status")) continue;
+            if (response.getInt("status") != 200) {
+                throw new APIException("HTTP Error: " +
+                        response.getInt("status") + " " +
+                        (response.has("details") ? response.getString("details") : ""));
+            }
+            if (response.getInt("status") == 200) {
+                return;
+
+            } else {
+                if (!response.has("error")) {
+                    throw new APIException("Response is malformed. error missing");
+                }
+                if (!response.has("details")) {
+                    throw new APIException("Response is malformed. error missing");
+                }
+                throw new APIException(
+                        response.getString("error"),
+                        response.getString("details"));
+            }
+        }
+        throw new APIException("Couldn't connect to server");
+    }
+
+
 //    @Override
 //    public JSONObject newGPSLocation(String name, String latitude, String longitude, String radius){
 //        Map<String, String> post = new HashMap<>();

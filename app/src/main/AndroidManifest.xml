@@ -88,15 +88,10 @@
             android:exported="false" />
 
         <activity android:name=".NewWIFILocation" />
-        <activity android:name=".ShowWIFILocation"></activity>
-
-        <service
-            android:name="pt.inesc.termite.wifidirect.service.SimWifiP2pService" />
-        <!--<service-->
-            <!--android:name="cmu1617.andred.pt.locmess.SimWifiP2pService" />-->
-
-        cmu1617.andred.pt.locmess
-
+        <activity android:name=".ShowWIFILocation"/>
+        
+        <activity android:name=".MyMessagesActivity"/>
+        <service android:name="pt.inesc.termite.wifidirect.service.SimWifiP2pService" />
     </application>
 
 </manifest>

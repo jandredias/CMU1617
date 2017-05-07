@@ -40,7 +40,9 @@ import java.util.List;
 
 import cmu1617.andred.pt.locmess.AsyncTasks.GetKeywordsAsyncTask;
 import cmu1617.andred.pt.locmess.Domain.LocMessLocation;
+import cmu1617.andred.pt.locmess.Domain.LocMessMessage;
 import cmu1617.andred.pt.locmess.Domain.LocMessWIFIMessage;
+import cmu1617.andred.pt.locmess.Domain.UserProfile;
 import pt.andred.cmu1617.APIException;
 import pt.andred.cmu1617.LocMessAPIClientImpl;
 import pt.andred.cmu1617.MessageConstraint;
@@ -484,7 +486,6 @@ public class NewMessageActivity extends AppCompatActivity implements OnTaskCompl
         @Override
         protected void onPreExecute() {
             Log.d(Tag,"start");
-            Log.d(Tag,"start");
             showProgress(true);
         }
 
@@ -496,7 +497,7 @@ public class NewMessageActivity extends AppCompatActivity implements OnTaskCompl
                 Date date = new Date();
                 String current_timestamp = dateFormat.format(date);
                 String message_id = LocMessAPIClientImpl.getInstance().addMessage(mLocation.id(),_message, _dateBegin, _dateEnd, _list, current_timestamp);
-
+                new LocMessMessage(dbHelper,message_id).completeObject(mLocation.id(),new UserProfile(dbHelper).userName(),_message, _dateBegin, _dateEnd,current_timestamp,"0");
             } catch (APIException e) {
                 return false;
             }

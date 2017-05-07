@@ -87,7 +87,7 @@ public abstract class ListLocationsFragment extends Fragment implements View.OnC
         mRecyclerView.addItemDecoration(new DividerItemDecoration(getContext(), LinearLayoutManager.VERTICAL));
         mRecyclerView.setItemAnimator(new DefaultItemAnimator());
 
-        mRecyclerView.addOnItemTouchListener(new RecyclerTouchListener(getContext(), mRecyclerView, new ClickListener() {
+        /*mRecyclerView.addOnItemTouchListener(new RecyclerTouchListener(getContext(), mRecyclerView, new ClickListener() {
             @Override
             public void onClick(View view, int position) {
                 onItemClick(mAdapter,position);
@@ -103,7 +103,7 @@ public abstract class ListLocationsFragment extends Fragment implements View.OnC
             public void onLongClick(View view, int position) {
 
             }
-        }));
+        }));*/
 
         FloatingActionButton fab = (FloatingActionButton) view.findViewById(R.id.add_location);
         fab.setOnClickListener(this);
@@ -141,6 +141,22 @@ public abstract class ListLocationsFragment extends Fragment implements View.OnC
     }
 
     protected abstract void onItemClick(RecyclerViewAdapter mAdapter, int position);
+
+    protected void onDeleteClick(RecyclerViewAdapter mAdapter, int position){
+        LocMessLocation location = mAdapter.getItem(position);
+
+        String location_id = location.id();
+        new DeleteLocationTask().execute(location_id);
+    }
+
+    protected void onAddMessageClick(RecyclerViewAdapter mAdapter, int position) {
+        LocMessLocation location = mAdapter.getItem(position);
+
+        Intent intent = new Intent(getContext(),NewMessageActivity.class);
+        intent.putExtra("location_id",location.id());
+        startActivity(intent);
+
+    }
 
     @Override
     public void onStart(){
@@ -298,40 +314,38 @@ public abstract class ListLocationsFragment extends Fragment implements View.OnC
             ViewHolder v = holder;
 
             v._name.setText(location.name());
-
-            v._add_message_button.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    Intent intent = new Intent(getContext(),NewMessageActivity.class);
-                    intent.putExtra("location_id",location.id());
-                    startActivity(intent);
-                }
-            });
-            v._delete_location_button.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    String location_id = location.id();
-                    new DeleteLocationTask().execute(location_id);
-                }
-            });
         }
 
 
 
-        class ViewHolder extends RecyclerView.ViewHolder {
+        class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
             View _holder;
             TextView _name;
             View _add_message_button;
             View _delete_location_button;
-
-
 
             ViewHolder(View itemView) {
                 super(itemView);
                 _holder = itemView;
                 _name = (TextView) itemView.findViewById(R.id.location_name);
                 _add_message_button = itemView.findViewById(R.id.location_add_mesage_button);
+                _add_message_button.setOnClickListener(this);
                 _delete_location_button = itemView.findViewById(R.id.delete_location_item);
+                _delete_location_button.setOnClickListener(this);
+                itemView.setOnClickListener(this);
+            }
+
+            @Override
+            public void onClick(View v) {
+                int position = getAdapterPosition();
+//                Toast.makeText(v.getContext(), "CLICK = " + String.valueOf(getAdapterPosition()), Toast.LENGTH_SHORT).show();
+                if(v.getId() == _delete_location_button.getId()) {
+                    onDeleteClick(mAdapter,position);
+                }else if (v.getId() == _add_message_button.getId()){
+                    onAddMessageClick(mAdapter,position);
+                } else {
+                    onItemClick(mAdapter,position);
+                }
             }
         }
     }
@@ -457,6 +471,7 @@ public abstract class ListLocationsFragment extends Fragment implements View.OnC
         @Override
         protected  void onPreExecute() {
             Log.wtf(Tag,"Pre execute");
+
             showProgress(true);
         }
 

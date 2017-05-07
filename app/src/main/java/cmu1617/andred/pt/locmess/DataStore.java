@@ -169,12 +169,12 @@ public interface DataStore {
 
     String SQL_POPULATE_MESSAGES =
             "INSERT INTO " + SQL_MESSAGES+ " (message_id, content, author_id, location_id, time_start, time_end ) VALUES " +
-            "(1,'small message','1',1,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP),"+
-            "(6,'small message','1',1,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP),"+
-            "(7,'small message','1',1,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP),"+
-            "(8,'small message','1',1,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP),"+
+            "(1,'small message','small author',1,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP),"+
+            "(6,'small message','small author',1,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP),"+
+            "(7,'small message','small author',1,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP),"+
+            "(8,'small message','small author',1,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP),"+
             "(2,'small message','Big User Name, Its Big, Its Huge, Why am I doing this, it just hurts.. :(',1,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP),"+
-            "(3,'small message','1',5,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP),"+
+            "(3,'small message','small author',5,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP),"+
             "(4,'A really big message, the biggest of message, it must be good to shoot the mother of all bombs and then go on vacation to florida on a Thursday, at 4pm','1',1,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP),"+
             "(5,'A really big message, the biggest of message, it must be good to shoot the mother of all bombs and then go on vacation to florida on a Thursday, at 4pm Aparently not big enough so we ought make it go out of the screen if really are testing for everything, at least I am not missing much, maybe save message as read in the database :D','Big User Name, Its Big, Its Huge, Why am I doing this, it just hurts.. :(',5,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP)";
 

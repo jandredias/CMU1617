@@ -4,10 +4,12 @@ import android.content.ContentValues;
 import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import cmu1617.andred.pt.locmess.Domain.GPSLocation;
 import cmu1617.andred.pt.locmess.Domain.LocMessLocation;
@@ -49,12 +51,16 @@ public class GPSLocationsFragment extends ListLocationsFragment {
            case R.id.add_location:
                startActivity(new Intent(getActivity(), NewGPSLocation.class));
        }
-
     }
 
 
     private class GPSRecycleViewAdapter extends RecyclerViewAdapter {
-        public LocMessLocation getItem(int position) {
+
+        List<LocMessLocation> locations = new ArrayList<>();
+
+
+        GPSRecycleViewAdapter(){
+            locations = new ArrayList<>();
             String[] columns = {"location_id"};
             Cursor cursor = _dbHelper.getReadableDatabase().query(
                     true, //distinct
@@ -67,33 +73,35 @@ public class GPSLocationsFragment extends ListLocationsFragment {
                     null, //orderBy
                     null
             );
-            if (cursor.getCount() == 0) {
-                cursor.close();
-                return null;
+            while(cursor.moveToNext()){
+                locations.add(new GPSLocation(_dbHelper,cursor.getString(0)));
             }
-            cursor.moveToPosition(cursor.getCount() - position - 1);
+        }
 
-            return new GPSLocation(_dbHelper, cursor.getString(0));
+        public LocMessLocation getItem(int position) {
+            return locations.get(position);
         }
 
 
         public int getItemCount() {
-            String[] columns = {"location_id"};
-            Cursor cursor = _dbHelper.getReadableDatabase().query(
-                    true, //distinct
-                    DataStore.SQL_GPS_LOCATION, //table name
-                    columns, //columns to return
-                    "enabled = 1", //selection string
-                    null, //selection args
-                    null, //groupBy
-                    null, //having
-                    null, //orderBy
-                    null
-            );
-            int c = cursor.getCount();
-            cursor.close();
-            Log.d("GPS LOCATIONS",c+"");
-            return c;
+            return locations.size();
+//
+//            String[] columns = {"location_id"};
+//            Cursor cursor = _dbHelper.getReadableDatabase().query(
+//                    true, //distinct
+//                    DataStore.SQL_GPS_LOCATION, //table name
+//                    columns, //columns to return
+//                    "enabled = 1", //selection string
+//                    null, //selection args
+//                    null, //groupBy
+//                    null, //having
+//                    null, //orderBy
+//                    null
+//            );
+//            int c = cursor.getCount();
+//            cursor.close();
+//            Log.d("GPS LOCATIONS",c+"");
+//            return c;
         }
 
 

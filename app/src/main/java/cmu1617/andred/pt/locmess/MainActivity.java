@@ -120,6 +120,10 @@ public class MainActivity extends AppCompatActivity implements
                          new Login(_db).logout();
                          startActivity(new Intent(MainActivity.this, LoginActivity.class));
                          break;
+                     case R.id.my_messages:
+                         Log.wtf(TAG, "My Messages");
+                         startActivity(new Intent(getBaseContext(), MyMessagesActivity.class));
+                         break;
                  }
 
                  DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);

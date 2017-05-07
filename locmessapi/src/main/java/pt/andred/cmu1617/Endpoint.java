@@ -19,6 +19,7 @@ enum Endpoint {
 //    CREATE_LOCATIONS("/dummy/dummy", Scope.AUTH, HttpMethod.POST, MediaType.parse("application/json; charset=utf-8"), JSONObject.class),
     DELETE_LOCATIONS("/location/delete", Scope.AUTH, HttpMethod.POST, MediaType.parse("application/json; charset=utf-8"), JSONObject.class),
 
+    DELETE_MESSAGE("/message/delete", Scope.AUTH, HttpMethod.POST, MediaType.parse("application/json; charset=utf-8"), JSONObject.class),
     GET_MESSAGES("/message/list", Scope.AUTH, HttpMethod.POST, MediaType.parse("application/json; charset=utf-8"), JSONObject.class),
     PUT_MESSAGE("/message/new", Scope.AUTH, HttpMethod.POST, MediaType.parse("application/json; charset=utf-8"), JSONObject.class),
 

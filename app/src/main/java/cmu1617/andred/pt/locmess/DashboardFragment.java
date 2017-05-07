@@ -67,6 +67,7 @@ public class DashboardFragment extends ListMessagesFragment {
         List<LocMessMessage> messages = new ArrayList<>();
 
         NewMessagesRecyclerViewAdapter(){
+            messages = new ArrayList<>();
             String[] selectionArgs = { new UserProfile(_dbHelper).userName() };
             Cursor cursor = _dbHelper.getReadableDatabase().query(
                     true, //distinct

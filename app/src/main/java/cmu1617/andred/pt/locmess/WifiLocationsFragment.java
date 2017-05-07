@@ -3,8 +3,10 @@ package cmu1617.andred.pt.locmess;
 import android.content.ContentValues;
 import android.content.Intent;
 import android.database.Cursor;
-import android.util.Log;
 import android.view.View;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import cmu1617.andred.pt.locmess.Domain.LocMessLocation;
 import cmu1617.andred.pt.locmess.Domain.WIFILocation;
@@ -50,7 +52,10 @@ public class WifiLocationsFragment extends ListLocationsFragment {
 
 
     private class WIFIRecycleViewAdapter extends RecyclerViewAdapter {
-        public LocMessLocation getItem(int position) {
+        List<LocMessLocation> locations = new ArrayList<>();
+
+        WIFIRecycleViewAdapter(){
+            locations = new ArrayList<>();
             String[] columns = {"location_id"};
             Cursor cursor = _dbHelper.getReadableDatabase().query(
                     true, //distinct
@@ -63,33 +68,18 @@ public class WifiLocationsFragment extends ListLocationsFragment {
                     null, //orderBy
                     null //limit
             );
-            if (cursor.getCount() == 0) {
-                cursor.close();
-                return null;
+            while(cursor.moveToNext()){
+                locations.add(new WIFILocation(_dbHelper,cursor.getString(0)));
             }
-            cursor.moveToPosition(cursor.getCount() - position - 1);
 
-            return new WIFILocation(_dbHelper, cursor.getString(0));
+        }
+        public LocMessLocation getItem(int position) {
+            return locations.get(position);
         }
 
 
         public int getItemCount() {
-            String[] columns = {"location_id"};
-            Cursor cursor = _dbHelper.getReadableDatabase().query(
-                    true, //distinct
-                    DataStore.SQL_WIFI_LOCATION_SSID, //table name
-                    columns, //columns to return
-                    "enabled = 1", //selection string
-                    null, //selection args
-                    null, //groupBy
-                    null, //having
-                    null, //orderBy
-                    null //limit
-            );
-            int c = cursor.getCount();
-            cursor.close();
-            Log.d("WIFI LOCATIONS", c + "");
-            return c;
+            return locations.size();
         }
 
     }

@@ -113,7 +113,7 @@ public class LocMessMainService
         createLocationRequest();
         setAlarm();
 
-        new ReceiveWIFIMessagesAsync().execute();
+//        new ReceiveWIFIMessagesAsync().execute();
 
         return START_STICKY;
     }

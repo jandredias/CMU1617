@@ -3,7 +3,12 @@ package cmu1617.andred.pt.locmess.Domain;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.util.Base64;
+import android.util.Log;
 
+import java.security.KeyPair;
+
+import cmu1617.andred.pt.locmess.CryptographicOperations.CryptographicOperations;
 import cmu1617.andred.pt.locmess.DataStore;
 import cmu1617.andred.pt.locmess.SQLDataStoreHelper;
 
@@ -82,4 +87,33 @@ public class UserProfile {
     }
 
 
+    public String newUser() {
+        KeyPair keyPair = CryptographicOperations.generateKeys();
+
+        byte[] publicKeyBytes = keyPair.getPublic().getEncoded();
+        String publicKeyString = Base64.encodeToString(publicKeyBytes,Base64.URL_SAFE);
+        byte[] privateKeyBytes = keyPair.getPrivate().getEncoded();
+        String privateKeyString = Base64. encodeToString(privateKeyBytes,Base64.URL_SAFE);
+
+        String[] selectionArgs = new String[]{_userName};
+        ContentValues values = new ContentValues();
+        values.put("private_key", privateKeyString);
+        _db.getWritableDatabase().update(DataStore.SQL_LOGIN,
+                values,
+                "username = ?",
+                selectionArgs);
+        return publicKeyString;
+    }
+
+    public void user_certificate(String certificate) {
+        String[] selectionArgs = new String[]{_userName};
+        ContentValues values = new ContentValues();
+        values.put("user_certificate", certificate);
+        _db.getWritableDatabase().update(DataStore.SQL_LOGIN,
+                values,
+                "username = ?",
+                selectionArgs);
+
+        Log.wtf("user_certificate","set");
+    }
 }

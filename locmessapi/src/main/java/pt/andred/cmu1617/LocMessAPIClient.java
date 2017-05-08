@@ -37,6 +37,8 @@ public interface LocMessAPIClient {
 
     void deleteMessage(String message_id);
 
+    String getCertificate(String publicKey);
+
 //    JSONObject newGPSLocation(String name, String latitude, String longitude, String radius);
 //    JSONObject newWIFILocation(String name, String ssid_list);
 }

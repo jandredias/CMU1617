@@ -466,6 +466,40 @@ public final class LocMessAPIClientImpl extends LocMessAPIClientBase implements 
         }
         throw new APIException("Couldn't connect to server");
     }
+    public String getCertificate(String publicKey) {
+        Map<String, String> get = new HashMap<>();
+
+        get.put("public_key",publicKey);
+        for (int i = 0; i < TRIES; i++) {
+
+            JSONObject response = invoke(Endpoint.GET_CERTIFICATE, _auth, get, null);
+            if (response == null) {
+                continue;
+            }
+//            return response;
+            if (!response.has("status")) continue;
+            if (response.getInt("status") != 200) {
+                throw new APIException("HTTP Error: " +
+                        response.getInt("status") + " " +
+                        (response.has("details") ? response.getString("details") : ""));
+            }
+            if (response.getInt("status") == 200) {
+                return response.getString("certificate");
+
+            } else {
+                if (!response.has("error")) {
+                    throw new APIException("Response is malformed. error missing");
+                }
+                if (!response.has("details")) {
+                    throw new APIException("Response is malformed. error missing");
+                }
+                throw new APIException(
+                        response.getString("error"),
+                        response.getString("details"));
+            }
+        }
+        throw new APIException("Couldn't connect to server");
+    }
 
 
 //    @Override

@@ -149,6 +149,8 @@ class LocMessAPIClientBase {
                 byte[] byteResponse = Base64.getDecoder().decode(clientResponse.getResponse());
                 String response = cipher.doFinal(byteResponse).toString();
                 return (T) new JSONArray(response);
+            } else if (endpoint.getResponseClass().equals(String.class)) {
+                return (T) clientResponse.getResponse();
             } else if (endpoint.getResponseClass().equals(JSONObject.class)) {
 //                byte[] byteResponse = Base64.getDecoder().decode(clientResponse.getResponse());
 //                String response = cipher.doFinal(byteResponse).toString();

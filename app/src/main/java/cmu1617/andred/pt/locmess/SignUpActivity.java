@@ -18,6 +18,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import cmu1617.andred.pt.locmess.Domain.UserProfile;
 import pt.andred.cmu1617.LocMessAPIClientImpl;
 
 /**
@@ -213,8 +214,16 @@ public class SignUpActivity extends AppCompatActivity {
             if(result) {
                 String[] loginResult = LocMessAPIClientImpl.getInstance().login(mEmail,mPassword); //Hopefully this will never fail
                 String last = loginResult [loginResult .length-1];
+                SQLDataStoreHelper db = new SQLDataStoreHelper(getBaseContext());
                 if(last .equals( "true")) {
-                    new Login(new SQLDataStoreHelper(getBaseContext())).registerLogin(mEmail,loginResult[0],loginResult[1]);
+                    new Login(db).registerLogin(mEmail,loginResult[0],loginResult[1]);
+
+                    UserProfile user = new UserProfile(db);
+
+                    String publicKey = user.newUser();
+                    String certificate = LocMessAPIClientImpl.getInstance().getCertificate(publicKey);
+                    user.user_certificate(certificate);
+
                 }
             }
             return result;

@@ -115,7 +115,7 @@ public class LocMessMainService
         createLocationRequest();
         setAlarm();
 
-        new ReceiveWIFIMessagesAsync().execute();
+//        new ReceiveWIFIMessagesAsync().execute();
 
         mManager = intent.getSerializableExtra("mManager");
 

@@ -115,6 +115,8 @@ public abstract class ListMessagesFragment extends Fragment {
             }
         }));
 
+
+
         return view;
     }
 
@@ -126,6 +128,8 @@ public abstract class ListMessagesFragment extends Fragment {
         mAdapter = createNewAdapter();
         mRecyclerView.setAdapter(mAdapter);
         treatEmptyView();
+
+
 
     }
 

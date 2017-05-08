@@ -104,9 +104,9 @@ public class WiFiDirectBroadcastReceiver extends BroadcastReceiver {
             fragment.updateThisDevice((WifiP2pDevice) intent.getParcelableExtra(
                     WifiP2pManager.EXTRA_WIFI_P2P_DEVICE));*/
 
-        }else if(LocMessIntent.CREATED_NEW_WIFI_MESSAGE_REQUEST.equals(action)){
+        }/*else if(LocMessIntent.CREATED_NEW_WIFI_MESSAGE_REQUEST.equals(action)){
 
-        }
+        }*/
 
     }
 

@@ -36,6 +36,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -80,6 +81,7 @@ public class LocMessMainService
     private final IntentFilter mIntentFilter = new IntentFilter();
     WiFiDirectBroadcastReceiver mReceiver;
     BroadcastReceiver _mMessageReceiver = new LocMessBroadcastReceiver();
+    private Serializable mManager;
 
     private static LocMessMainService _instance;
 
@@ -114,6 +116,8 @@ public class LocMessMainService
         setAlarm();
 
         new ReceiveWIFIMessagesAsync().execute();
+
+        mManager = intent.getSerializableExtra("mManager");
 
         return START_STICKY;
     }
@@ -276,7 +280,9 @@ public class LocMessMainService
             task.setSsidList(_ssidList);
             task.execute();
 
+
         }
+
     }
 
     public List<String> getSsidList() {
@@ -307,6 +313,7 @@ public class LocMessMainService
 
         @Override
         public void onReceive(Context context, Intent intent) {
+            Log.d(TAG, "RECEIVED A BROADCAST");
             switch (intent.getAction()) {
                 case LocMessIntent.NEW_PEERS_AVAILABLE:
                     new SendWifiMessagesAsync().execute();
@@ -337,6 +344,7 @@ public class LocMessMainService
 
             for(SimWifiP2pDevice device : device_list) {
                 try {
+                    cursor.moveToFirst();
                     sock = new SimWifiP2pSocket(device.getVirtIp(), device.getVirtPort());
                     BufferedReader sockIn = new BufferedReader( new InputStreamReader(sock.getInputStream()));
                     OutputStream sockOut = sock.getOutputStream();

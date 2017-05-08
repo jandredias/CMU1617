@@ -29,7 +29,7 @@ public final class LocMessAPIClientImpl extends LocMessAPIClientBase implements 
         if (_instance == null) _instance =
                 new LocMessAPIClientImpl(
                         new ApplicationConfiguration(
-                                "http://newbie.rnl.tecnico.ulisboa.pt:31500",//baseurl
+                                "https://vigilante-eureka.tk",//baseurl
                                 "",//Consumer Key
                                 "")); //Secret Key
         return _instance;

@@ -37,7 +37,9 @@ public interface DataStore {
             "username",
             "access_token",
             "refresh_token",
-            "valid"
+            "valid",
+            "public_key",
+            "private_key"
     };
     String[] SQL_KEYWORDS_COLUMNS = {
             "keyword_id",
@@ -101,7 +103,9 @@ public interface DataStore {
                     "username VARCHAR(255) NOT NULL PRIMARY KEY," +
                     "access_token VARCHAR(255) NOT NULL,"+
                     "refresh_token VARCHAR(255) NOT NULL,"+
-                    "valid BOOLEAN NOT NULL"+
+                    "valid BOOLEAN NOT NULL,"+
+                    "public_key  VARCHAR(1000),"+
+                    "private_key VARCHAR(1000)"+
                     ")";
     String SQL_CREATE_KEYWORDS =
             "CREATE TABLE " + SQL_KEYWORDS + " (" +

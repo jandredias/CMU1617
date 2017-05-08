@@ -16,6 +16,8 @@ public class UserProfile {
     protected String _userName;
     protected String _accessToken;
     protected String _refreshToken;
+    protected String _certificate;
+    protected String _privateKey;
 
     public UserProfile(SQLDataStoreHelper dbHelper) {
         _db = dbHelper;

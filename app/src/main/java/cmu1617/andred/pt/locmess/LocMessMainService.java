@@ -77,9 +77,9 @@ public class LocMessMainService
     private int delay; //milliseconds
     private Handler alarmHandler;
     private LocationManager locationManager;
+    private WifiManager wifiManager;
     //WiFi Direct
     private final IntentFilter mIntentFilter = new IntentFilter();
-    WiFiDirectBroadcastReceiver mReceiver;
     BroadcastReceiver _mMessageReceiver = new LocMessBroadcastReceiver();
     private Serializable mManager;
 
@@ -111,7 +111,7 @@ public class LocMessMainService
         mGoogleApiClient.connect();
         alarmHandler = new Handler();
         locationManager =  (LocationManager) getSystemService( Context.LOCATION_SERVICE );
-        registerWifiReceiver();
+        wifiManager = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
         createLocationRequest();
         setAlarm();
 
@@ -123,7 +123,6 @@ public class LocMessMainService
     }
 
     private void registerWifiReceiver() {
-        registerReceiver(mReceiver, mIntentFilter);
         mWifiManager = (WifiManager) getApplicationContext().getApplicationContext().getSystemService(Context.WIFI_SERVICE);
         mWifiScanReceiver = new WifiReceiver();
         registerReceiver(mWifiScanReceiver,new IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION));
@@ -234,8 +233,6 @@ public class LocMessMainService
     public void onLocationChanged(Location location) {
         _latitude = location.getLatitude();
         _longitude = location.getLongitude();
-        mReceiver.set_latitude(_latitude);
-        mReceiver.set_logintude(_longitude);
     }
     protected void stopLocationUpdates() {
         LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, this);

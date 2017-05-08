@@ -78,7 +78,6 @@ public class MainActivity extends AppCompatActivity implements
     private Channel mChannel = null;
     private Messenger mService = null;
     private boolean mBound = false;
-   // private final WifiDirectServer wfds  = new WifiDirectServer(this);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

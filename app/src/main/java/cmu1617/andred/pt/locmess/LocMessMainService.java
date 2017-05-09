@@ -112,6 +112,7 @@ public class LocMessMainService
         alarmHandler = new Handler();
         locationManager =  (LocationManager) getSystemService( Context.LOCATION_SERVICE );
         wifiManager = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+        registerWifiReceiver();
         createLocationRequest();
         setAlarm();
 
@@ -346,10 +347,9 @@ public class LocMessMainService
                     BufferedReader sockIn = new BufferedReader( new InputStreamReader(sock.getInputStream()));
                     OutputStream sockOut = sock.getOutputStream();
                     while (cursor.moveToNext()) {
-                        String tosend = "MESSAGE-LOCATION::"+cursor.getString(3);
-                        sockOut.write(tosend.getBytes());
-                        String response = sockIn.readLine();
-                        if (response.equals("YES")){
+                        String tosend;
+
+
                             tosend = "MESSAGE" +
                                     "::"+ cursor.getString(0) +//id
                                     "::"+ cursor.getString(1) +//content
@@ -365,7 +365,7 @@ public class LocMessMainService
                                 //FTODO
                             }*/
 
-                        }
+
                     }
 
                 } catch (IOException e) {

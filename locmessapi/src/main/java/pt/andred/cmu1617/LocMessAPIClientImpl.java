@@ -309,7 +309,7 @@ public final class LocMessAPIClientImpl extends LocMessAPIClientBase implements 
     }
 
     @Override
-    public String addMessage(String location_id, String message, String dateBegin, String dateEnd, List<MessageConstraint> list, String current_timestamp) {
+    public String addMessage(String location_id, String message, String dateBegin, String dateEnd, List<MessageConstraint> list, String current_timestamp, String user_certificate, String produced_signature, String authorPublicKey) {
         Map<String, String> post = new HashMap<>();
         String listDelimiter = "><(((('>";
         String restrictions = convertToString(list,listDelimiter);
@@ -320,6 +320,10 @@ public final class LocMessAPIClientImpl extends LocMessAPIClientBase implements 
         post.put("time_end",dateEnd);
         post.put("post_timestamp",current_timestamp);
         post.put("restrictions",restrictions);
+        post.put("user_certificate",user_certificate);
+        post.put("signature",produced_signature);
+        post.put("author_public_key",authorPublicKey);
+
         for (int i = 0; i < TRIES; i++) {
 
             JSONObject response = invoke(Endpoint.PUT_MESSAGE, _auth, null, post);

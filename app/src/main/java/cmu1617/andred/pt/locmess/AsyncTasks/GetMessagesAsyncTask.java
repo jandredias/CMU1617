@@ -83,11 +83,17 @@ public class GetMessagesAsyncTask extends AsyncTask<Void, Void, Boolean> {
                 String time_start = message_json.getString("time_start");
                 String time_end = message_json.getString("time_end");
                 String post_timestamp = message_json.getString("post_timestamp");
+                String user_certificate = message_json.getString("user_certificate");
+                String signature = message_json.getString("signature");
+                String authorPublicKey = message_json.getString("author_public_key");
 
                 new LocMessLocation(_db,location_id).name(location_name);
 
                 LocMessMessage message = new LocMessMessage(_db, message_id);
-                message.completeObject(location_id,author,content,time_start,time_end,post_timestamp,"1");
+                Log.wtf(Tag,"author pub: " + authorPublicKey.substring(50,80));
+                Log.wtf(Tag,"certificat: " + user_certificate.substring(15,45));
+
+                message.completeObject(location_id,author,content,time_start,time_end,post_timestamp,"1",signature,user_certificate,authorPublicKey);
             }
         } catch (JSONException e) {
             e.printStackTrace();

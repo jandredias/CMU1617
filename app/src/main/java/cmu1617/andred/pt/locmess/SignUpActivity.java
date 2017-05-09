@@ -222,7 +222,7 @@ public class SignUpActivity extends AppCompatActivity {
 
                     String publicKey = user.newUser();
                     String certificate = LocMessAPIClientImpl.getInstance().getCertificate(publicKey);
-                    user.user_certificate(certificate);
+                    user.userCertificate(certificate);
 
                 }
             }

@@ -29,7 +29,7 @@ public interface LocMessAPIClient {
 
     JSONArray getMessages(String latitude, String longitude, List<String> ssid_list);
 
-    String addMessage(String location_id, String message, String dateBegin, String dateEnd, List<MessageConstraint> list, String current_timestamp);
+    String addMessage(String location_id, String message, String dateBegin, String dateEnd, List<MessageConstraint> list, String current_timestamp, String user_certificate, String produced_signature, String authorPublicKey);
 
     String editProfileKeys(boolean add, String name, String value);
 

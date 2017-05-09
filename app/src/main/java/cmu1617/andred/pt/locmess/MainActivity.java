@@ -9,7 +9,6 @@ import android.content.IntentFilter;
 import android.content.IntentSender;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Messenger;
@@ -43,21 +42,17 @@ import com.google.android.gms.location.LocationSettingsResult;
 import com.google.android.gms.location.LocationSettingsStates;
 import com.google.android.gms.location.LocationSettingsStatusCodes;
 
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 import cmu1617.andred.pt.locmess.Domain.LocmessSettings;
 import pt.andred.cmu1617.LocMessAPIClientImpl;
 import pt.inesc.termite.wifidirect.SimWifiP2pBroadcast;
-import pt.inesc.termite.wifidirect.SimWifiP2pDevice;
 import pt.inesc.termite.wifidirect.SimWifiP2pDeviceList;
 import pt.inesc.termite.wifidirect.SimWifiP2pInfo;
 import pt.inesc.termite.wifidirect.SimWifiP2pManager;
 import pt.inesc.termite.wifidirect.SimWifiP2pManager.Channel;
 import pt.inesc.termite.wifidirect.service.SimWifiP2pService;
-import pt.inesc.termite.wifidirect.sockets.SimWifiP2pSocket;
 import pt.inesc.termite.wifidirect.sockets.SimWifiP2pSocketManager;
 
 public class MainActivity extends AppCompatActivity implements
@@ -83,7 +78,6 @@ public class MainActivity extends AppCompatActivity implements
     private Channel mChannel = null;
     private Messenger mService = null;
     private boolean mBound = false;
-    private final WifiDirectServer wfds  = new WifiDirectServer(this);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -168,13 +162,40 @@ public class MainActivity extends AppCompatActivity implements
         filter.addAction(SimWifiP2pBroadcast.WIFI_P2P_PEERS_CHANGED_ACTION);
         filter.addAction(SimWifiP2pBroadcast.WIFI_P2P_NETWORK_MEMBERSHIP_CHANGED_ACTION);
         filter.addAction(SimWifiP2pBroadcast.WIFI_P2P_GROUP_OWNERSHIP_CHANGED_ACTION);
+        filter.addAction(LocMessIntent.TEST_REQUEST);
         SimWifiP2pBroadcastReceiver receiver = new SimWifiP2pBroadcastReceiver(this);
         registerReceiver(receiver, filter);
+       /* Intent intent = new Intent(getApplicationContext(), SimWifiP2pService.class);
+        startService(new Intent(this, SimWifiP2pBroadcastReceiver.class));
+        bindService(intent, mConnection, Context.BIND_AUTO_CREATE);*/
 
         Intent intent = new Intent(getApplicationContext(), SimWifiP2pService.class);
         bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
-        wfds.start();
+
+
     }
+
+    private ServiceConnection mConnection = new ServiceConnection() {
+
+        // callbacks for service binding, passed to bindService()
+        @Override
+        public void onServiceConnected(ComponentName className, IBinder service) {
+            Log.d("ServiceConnection", "onServiceConnected");
+            mService = new Messenger(service);
+            mManager = new SimWifiP2pManager(mService);
+            mChannel = mManager.initialize(getApplication(), getMainLooper(),
+                    null);
+            mBound = false;
+        }
+        @Override
+        public void onServiceDisconnected(ComponentName arg0) {
+            Log.d("ServiceConnection", "onServiceDisconnected");
+            mService = null;
+            mManager = null;
+            mChannel = null;
+            mBound = false;
+        }
+    };
 
     private void enableLocation() {
         if(LocmessSettings.trueIfAskedUserAlready()) { return; }
@@ -282,31 +303,16 @@ public class MainActivity extends AppCompatActivity implements
                 break;
         }
     }
-    private ServiceConnection mConnection = new ServiceConnection() {
-        // callbacks for service binding, passed to bindService()
-        @Override
-        public void onServiceConnected(ComponentName className, IBinder service) {
-            mService = new Messenger(service);
-            mManager = new SimWifiP2pManager(mService);
-            mChannel = mManager.initialize(getApplication(), getMainLooper(),
-                    null);
-            mBound = false;
-        }
-        @Override
-        public void onServiceDisconnected(ComponentName arg0) {
-            mService = null;
-            mManager = null;
-            mChannel = null;
-            mBound = false;
-        }
-    };
+
 
     public void wifiPeersChanged() {
         mManager.requestPeers(mChannel, this);
+        Log.d(TAG, "Request for peers");
     }
 
     @Override
     public void onPeersAvailable(SimWifiP2pDeviceList simWifiP2pDeviceList) {
+        Log.d(TAG, "Peers Available");
         LocalBroadcastManager.getInstance(getBaseContext()).sendBroadcast(new Intent(LocMessIntent.NEW_PEERS_AVAILABLE));
 
 
@@ -322,24 +328,6 @@ public class MainActivity extends AppCompatActivity implements
         Toast.makeText(getBaseContext(), "Received this: " + s, Toast.LENGTH_LONG);
     }
 
-    public class OutgoingCommTask extends AsyncTask<SimWifiP2pDeviceList, String, String>{
 
-        @Override
-        protected String doInBackground(SimWifiP2pDeviceList... params) {
-            Collection<SimWifiP2pDevice> device_list = params[0].getDeviceList();
-            SimWifiP2pSocket mCliSocket;
-
-            for(SimWifiP2pDevice device : device_list){
-                try {
-                    mCliSocket = new SimWifiP2pSocket(device.getVirtIp(), device.getVirtPort());
-                    mCliSocket.getOutputStream().write("Hello".getBytes());
-
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-            return null;
-        }
-    }
 
 }

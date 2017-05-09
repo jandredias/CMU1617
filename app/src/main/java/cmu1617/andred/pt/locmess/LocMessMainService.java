@@ -36,6 +36,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -76,10 +77,11 @@ public class LocMessMainService
     private int delay; //milliseconds
     private Handler alarmHandler;
     private LocationManager locationManager;
+    private WifiManager wifiManager;
     //WiFi Direct
     private final IntentFilter mIntentFilter = new IntentFilter();
-    WiFiDirectBroadcastReceiver mReceiver;
     BroadcastReceiver _mMessageReceiver = new LocMessBroadcastReceiver();
+    private Serializable mManager;
 
     private static LocMessMainService _instance;
 
@@ -109,17 +111,18 @@ public class LocMessMainService
         mGoogleApiClient.connect();
         alarmHandler = new Handler();
         locationManager =  (LocationManager) getSystemService( Context.LOCATION_SERVICE );
-        registerWifiReceiver();
+        wifiManager = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
         createLocationRequest();
         setAlarm();
 
 //        new ReceiveWIFIMessagesAsync().execute();
 
+        mManager = intent.getSerializableExtra("mManager");
+
         return START_STICKY;
     }
 
     private void registerWifiReceiver() {
-        registerReceiver(mReceiver, mIntentFilter);
         mWifiManager = (WifiManager) getApplicationContext().getApplicationContext().getSystemService(Context.WIFI_SERVICE);
         mWifiScanReceiver = new WifiReceiver();
         registerReceiver(mWifiScanReceiver,new IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION));
@@ -230,8 +233,6 @@ public class LocMessMainService
     public void onLocationChanged(Location location) {
         _latitude = location.getLatitude();
         _longitude = location.getLongitude();
-        mReceiver.set_latitude(_latitude);
-        mReceiver.set_logintude(_longitude);
     }
     protected void stopLocationUpdates() {
         LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, this);
@@ -276,7 +277,9 @@ public class LocMessMainService
             task.setSsidList(_ssidList);
             task.execute();
 
+
         }
+
     }
 
     public List<String> getSsidList() {
@@ -307,6 +310,7 @@ public class LocMessMainService
 
         @Override
         public void onReceive(Context context, Intent intent) {
+            Log.d(TAG, "RECEIVED A BROADCAST");
             switch (intent.getAction()) {
                 case LocMessIntent.NEW_PEERS_AVAILABLE:
                     new SendWifiMessagesAsync().execute();
@@ -337,6 +341,7 @@ public class LocMessMainService
 
             for(SimWifiP2pDevice device : device_list) {
                 try {
+                    cursor.moveToFirst();
                     sock = new SimWifiP2pSocket(device.getVirtIp(), device.getVirtPort());
                     BufferedReader sockIn = new BufferedReader( new InputStreamReader(sock.getInputStream()));
                     OutputStream sockOut = sock.getOutputStream();

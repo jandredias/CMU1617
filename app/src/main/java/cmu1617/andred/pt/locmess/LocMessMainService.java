@@ -77,7 +77,6 @@ public class LocMessMainService
     private int delay; //milliseconds
     private Handler alarmHandler;
     private LocationManager locationManager;
-    private WifiManager wifiManager;
     //WiFi Direct
     private final IntentFilter mIntentFilter = new IntentFilter();
     BroadcastReceiver _mMessageReceiver = new LocMessBroadcastReceiver();
@@ -111,9 +110,10 @@ public class LocMessMainService
         mGoogleApiClient.connect();
         alarmHandler = new Handler();
         locationManager =  (LocationManager) getSystemService( Context.LOCATION_SERVICE );
-        wifiManager = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+        registerWifiReceiver();
         createLocationRequest();
         setAlarm();
+
 
 //        new ReceiveWIFIMessagesAsync().execute();
 

@@ -23,6 +23,7 @@ public class UserProfile {
     protected String _refreshToken;
     protected String _certificate;
     protected String _privateKey;
+    protected String _publicKey;
 
     public UserProfile(SQLDataStoreHelper dbHelper) {
         _db = dbHelper;
@@ -98,6 +99,7 @@ public class UserProfile {
         String[] selectionArgs = new String[]{_userName};
         ContentValues values = new ContentValues();
         values.put("private_key", privateKeyString);
+        values.put("public_key", publicKeyString);
         _db.getWritableDatabase().update(DataStore.SQL_LOGIN,
                 values,
                 "username = ?",
@@ -105,7 +107,7 @@ public class UserProfile {
         return publicKeyString;
     }
 
-    public void user_certificate(String certificate) {
+    public void userCertificate(String certificate) {
         String[] selectionArgs = new String[]{_userName};
         ContentValues values = new ContentValues();
         values.put("user_certificate", certificate);
@@ -116,4 +118,51 @@ public class UserProfile {
 
         Log.wtf("user_certificate","set");
     }
+
+    public String userCertificate(){
+        if(_certificate != null) return _certificate;
+        String[] selectionArgs = new String[]{_userName};
+        Cursor cursor = _db.getReadableDatabase().query(true,DataStore.SQL_LOGIN,DataStore.SQL_LOGIN_COLUMNS,"username = ?",selectionArgs,null,null,null,null);
+
+        if(cursor.moveToFirst()) _certificate = cursor.getString(4);
+        return _certificate;
+    }
+
+    public String privateKey(){
+        if(_privateKey != null) return _privateKey;
+        String[] selectionArgs = new String[]{_userName};
+        Cursor cursor = _db.getReadableDatabase().query(true,DataStore.SQL_LOGIN,DataStore.SQL_LOGIN_COLUMNS,"username = ?",selectionArgs,null,null,null,null);
+        if(cursor.moveToFirst()) _privateKey = cursor.getString(5);
+        return _privateKey;
+    }
+
+//    authorPublicKey
+
+    public String publicKey(){
+        if(_publicKey != null) return _publicKey;
+        String[] selectionArgs = new String[]{_userName};
+        Cursor cursor = _db.getReadableDatabase().query(true,DataStore.SQL_LOGIN,DataStore.SQL_LOGIN_COLUMNS,"username = ?",selectionArgs,null,null,null,null);
+        if(cursor.moveToFirst()) _publicKey = cursor.getString(6);
+        return _publicKey;
+    }
+
+
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

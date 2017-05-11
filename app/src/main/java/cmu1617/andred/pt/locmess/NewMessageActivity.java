@@ -310,22 +310,42 @@ public class NewMessageActivity extends AppCompatActivity implements OnTaskCompl
 
         //Check message
         String text = messageText.getText().toString();
+        text = text.replaceAll("\\s+$", "");
         if(text.equals("")) {
             messageText.setError("Message required");
             focusView = messageText;
             cancel = true;
         }
 
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");;
+        Date date = new Date();
+        String current_timestamp = dateFormat.format(date);
+//        LocMessMessage tempoMessage = new LocMessMessage(dbHelper,"-1");
+//        tempoMessage.postTimestamp(current_timestamp);
+//        current_timestamp = tempoMessage.postTimestamp();
+//        tempoMessage.content(text);
+//        text = tempoMessage.content();
+//
+//        tempoMessage.eraseMessage();
+
+
+
         if(cancel) {
             focusView.requestFocus();
         } else {
+            //Only sign if not canceled..
+            UserProfile userProfile = new UserProfile(dbHelper);
+            String privateKey = userProfile.privateKey();
+            String publicKey = userProfile.publicKey();
+            String user_certificate = userProfile.userCertificate();
+            String produced_signature = LocMessMessage.produce_signature(privateKey,mLocation.id(),new UserProfile(dbHelper).userName(),text, begin, end,current_timestamp);
             if(serverMode) {
-                AddMessageToServerAsyncTask task = new AddMessageToServerAsyncTask(begin, end, text, messageConstraints);
+                AddMessageToServerAsyncTask task = new AddMessageToServerAsyncTask(begin, end, text, messageConstraints,current_timestamp, produced_signature,user_certificate, publicKey);
                 task.execute();
             }
             else{
                 LocMessWIFIMessage message = new LocMessWIFIMessage(dbHelper);
-                message.completeObject(mLocation.id(), text, begin, end, "0");
+                message.completeObject(mLocation.id(), text, begin, end, "0", current_timestamp, produced_signature, user_certificate, publicKey, messageConstraints);
                // LocalBroadcastManager.getInstance(getBaseContext()).sendBroadcast(new Intent(LocMessIntent.CREATED_NEW_WIFI_MESSAGE_REQUEST));
             }
 
@@ -470,17 +490,25 @@ public class NewMessageActivity extends AppCompatActivity implements OnTaskCompl
     }
 
     protected class AddMessageToServerAsyncTask extends AsyncTask<Void, Void, Boolean> {
+        private String _current_timestamp;
         private String _dateBegin;
         private String _dateEnd;
         private String _message;
+        private String _user_certificate;
         private List<MessageConstraint> _list;
+        private String _produced_signature;
         private String Tag = "AddMessageAsyncTask";
+        private String _publicKey;
 
-        AddMessageToServerAsyncTask(String dateBegin, String dateEnd, String message, List<MessageConstraint> list) {
+        AddMessageToServerAsyncTask(String dateBegin, String dateEnd, String message, List<MessageConstraint> list, String current_timestamp, String produced_signature,String user_certificate,String publicKey) {
             _list = list;
             _dateBegin = dateBegin;
             _dateEnd = dateEnd;
             _message = message;
+            _current_timestamp = current_timestamp;
+            _user_certificate = user_certificate;
+            _produced_signature = produced_signature;
+            _publicKey = publicKey;
         }
 
         @Override
@@ -493,11 +521,14 @@ public class NewMessageActivity extends AppCompatActivity implements OnTaskCompl
         @Override
         protected Boolean doInBackground(Void... params) {
             try {
-                SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
-                Date date = new Date();
-                String current_timestamp = dateFormat.format(date);
-                String message_id = LocMessAPIClientImpl.getInstance().addMessage(mLocation.id(),_message, _dateBegin, _dateEnd, _list, current_timestamp);
-                new LocMessMessage(dbHelper,message_id).completeObject(mLocation.id(),new UserProfile(dbHelper).userName(),_message, _dateBegin, _dateEnd,current_timestamp,"0");
+
+                String message_id = LocMessAPIClientImpl.getInstance().addMessage(mLocation.id(),_message, _dateBegin, _dateEnd, _list, _current_timestamp,_user_certificate,_produced_signature,_publicKey);
+
+                new LocMessMessage(dbHelper,message_id).completeObject(mLocation.id(),new UserProfile(dbHelper).userName(),_message, _dateBegin, _dateEnd,_current_timestamp,"0",_produced_signature,_user_certificate,_publicKey);
+//                Log.wtf(Tag,"author pub: " + publicKey.substring(50,80));
+//                Log.wtf(Tag,"certificat: " + user_certificate.substring(15,45));
+
+                Log.wtf(Tag,"Message added to server");
             } catch (APIException e) {
                 return false;
             }

@@ -1,5 +1,6 @@
 package cmu1617.andred.pt.locmess;
 
+import android.app.ActivityManager;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
@@ -23,6 +24,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.NotificationCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
@@ -77,11 +79,12 @@ public class LocMessMainService
     private int delay; //milliseconds
     private Handler alarmHandler;
     private LocationManager locationManager;
-    private WifiManager wifiManager;
     //WiFi Direct
     private final IntentFilter mIntentFilter = new IntentFilter();
     BroadcastReceiver _mMessageReceiver = new LocMessBroadcastReceiver();
     private Serializable mManager;
+
+    private static final int PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 1;
 
     private static LocMessMainService _instance;
 
@@ -111,10 +114,11 @@ public class LocMessMainService
         mGoogleApiClient.connect();
         alarmHandler = new Handler();
         locationManager =  (LocationManager) getSystemService( Context.LOCATION_SERVICE );
-        wifiManager = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+
         registerWifiReceiver();
         createLocationRequest();
         setAlarm();
+
 
 //        new ReceiveWIFIMessagesAsync().execute();
 
@@ -323,6 +327,9 @@ public class LocMessMainService
     private class SendWifiMessagesAsync extends AsyncTask<SimWifiP2pDeviceList, Void, Void>{
         private SQLDataStoreHelper _db;
         private Cursor cursor;
+        private boolean mLocationPermissionGranted = false;
+        private int GPS_location;
+        private String WIFI_location;
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
@@ -333,12 +340,96 @@ public class LocMessMainService
                     "jumped = 0 OR jumped = 1",
                     null, null, null, null
             );
+           if(!mLocationPermissionGranted) {
+               if (ContextCompat.checkSelfPermission(getBaseContext(),
+                       android.Manifest.permission.ACCESS_FINE_LOCATION)
+                       == PackageManager.PERMISSION_GRANTED) {
+                   mLocationPermissionGranted = true;
+                   getGPSLocation();
+
+               } else {
+                   GPS_location = -1;
+               }
+           }
+           else{
+               getGPSLocation();
+
+           }
+           getWIFILocation();
+
+        }
+        private void getGPSLocation(){
+            Location location = null;
+            try {
+                location = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
+            }catch (SecurityException e){
+                //The permission is already being checked above, so this won't happen
+            }
+            cursor = _db.getReadableDatabase().query(
+                    DataStore.SQL_GPS_LOCATION,
+                    DataStore.SQL_GPS_LOCATION_COLUMNS,
+                    "enabled = true",
+                    null, null, null, null
+            );
+            cursor.moveToFirst();
+
+            double longitude;
+            double latitude;
+            Location loc;
+            int radius;
+            while(cursor.moveToNext()){
+                longitude =cursor.getDouble(2);
+                latitude =cursor.getDouble(1);
+                radius =cursor.getInt(3);
+                loc = new Location("");
+                loc.setLongitude(longitude);
+                loc.setLatitude(latitude);
+                if(loc.distanceTo(location)<=radius){
+                    GPS_location = cursor.getInt(0);
+                    break;
+                }
+            }
+
+
+        }
+
+
+        private void getWIFILocation(){
+            WifiManager wifiManager;
+            wifiManager = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+
+
+            WIFI_location = wifiManager.getConnectionInfo().getBSSID();
         }
 
         @Override
         protected Void doInBackground(SimWifiP2pDeviceList... params) {
             Collection<SimWifiP2pDevice> device_list = params[0].getDeviceList();
             SimWifiP2pSocket sock;
+
+            cursor.moveToFirst();
+
+            while(cursor.moveToNext()){
+                int jumped = cursor.getInt(6);
+                String tosend;
+                if(jumped == 1){
+
+                }
+
+                tosend = "MESSAGE" +
+                        "::"+ cursor.getString(0) +//id
+                        "::"+ cursor.getString(1) +//content
+                        "::"+ cursor.getString(2) +//author
+                        "::"+ cursor.getInt(3) +//location_id
+                        "::"+ cursor.getString(4) +//time_start
+                        "::"+ cursor.getString(5) +//time_end
+                        "::"+ cursor.getInt(6) +//jumped
+                        "::"+ cursor.getString(7) +//timestamp
+                        "::"+ cursor.getString(8) +//signature
+                        "::"+ cursor.getString(9) +//certificate
+                        "::"+ cursor.getString(10) //publicKey
+                ;
+            }
 
             for(SimWifiP2pDevice device : device_list) {
                 try {

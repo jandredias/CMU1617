@@ -15,6 +15,7 @@ public interface DataStore {
     String SQL_MESSAGES = "sql_messages";
     String SQL_READ_MESSAGES = "sql_read_messages";
     String SQL_WIFI_MESSAGES="sql_wifi_messages";
+    String SQL_WIFI_MESSAGES_RESTRICTIONS = "sql_wifi_messages_restrictions";
 
 
     String[] SQL_LOCATION_COLUMNS = {
@@ -39,7 +40,8 @@ public interface DataStore {
             "refresh_token",
             "valid",
             "user_certificate",
-            "private_key"
+            "private_key",
+            "public_key"
     };
     String[] SQL_KEYWORDS_COLUMNS = {
             "keyword_id",
@@ -68,15 +70,24 @@ public interface DataStore {
             "post_timestamp"
     };
     String[] SQL_WIFI_MESSAGES_COLUMNS = {
-            "message_id",
+            "message_id", //00
             "content",
-            "author_id",
+            "author_id", //2
             "location_id",
-            "time_start",
+            "time_start", //4
             "time_end",
-            "jumped"
+            "jumped", //6
+            "timestamp",
+            "signature", //8
+            "certificate",
+            "publicKey" //10
     };
-
+    String[] SQL_WIFI_MESSAGES_RESTRICTIONS_COLUMNS = {
+            "message_id",
+            "keyword_id",
+            "keyword_value",
+            "equal"
+    };
 
 
     String SQL_CREATE_LOCATION =
@@ -105,7 +116,8 @@ public interface DataStore {
                     "refresh_token VARCHAR(255) NOT NULL,"+
                     "valid BOOLEAN NOT NULL,"+
                     "user_certificate  VARCHAR(1000),"+
-                    "private_key VARCHAR(1000)"+
+                    "private_key VARCHAR(1000),"+
+                    "public_key VARCHAR(1000)"+
                     ")";
     String SQL_CREATE_KEYWORDS =
             "CREATE TABLE " + SQL_KEYWORDS + " (" +
@@ -146,8 +158,21 @@ public interface DataStore {
                     "location_id INT ,"+
                     "time_start DATETIME ,"+
                     "time_end DATETIME,"+
-                    "jumped INT DEFAULT 0"+
+                    "jumped INT DEFAULT 0, "+
+                    "timestamp VARCHAR(255), " +
+                    "signature VARCHAR(255), "+
+                    "certificate VARCHAR (255), "+
+                    "publicKey VARCHAR(255)"+
                     ")";
+
+    String SQL_CREATE_WIFI_MESSAGES_RESTRICTIONS =
+            "CREATE TABLE " + SQL_WIFI_MESSAGES_RESTRICTIONS+ " (" +
+                    "message_id VARCHAR(255) NOT NULL, " +
+                    "keyword_id INT NOT NULL, " +
+                    "keyword_value VARCHAR(255), " +
+                    "equal BOOLEAN NOT NULL"+
+                    ")";
+
 
 
 
@@ -201,5 +226,7 @@ public interface DataStore {
             "DROP TABLE IF EXISTS " + SQL_READ_MESSAGES;
     String SQL_DELETE_WIFI_MESSAGES=
             "DROP TABLE IF EXISTS " + SQL_WIFI_MESSAGES;
+    String SQL_DELETE_WIFI_MESSAGES_RESTRICTIONS=
+            "DROP TABLE IF EXISTS " + SQL_WIFI_MESSAGES_RESTRICTIONS;
 
 }

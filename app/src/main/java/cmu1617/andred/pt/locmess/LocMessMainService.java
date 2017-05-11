@@ -328,11 +328,12 @@ public class LocMessMainService
         private SQLDataStoreHelper _db;
         private Cursor cursor;
         private boolean mLocationPermissionGranted = false;
-        private int GPS_location;
-        private String WIFI_location;
+        private ArrayList<Integer> GPS_location;
+        private ArrayList<Integer> WIFI_location;
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
+            GPS_location = new ArrayList<>();
             _db = new SQLDataStoreHelper(getApplicationContext());
             cursor = _db.getReadableDatabase().query(
                     DataStore.SQL_WIFI_MESSAGES,
@@ -347,8 +348,6 @@ public class LocMessMainService
                    mLocationPermissionGranted = true;
                    getGPSLocation();
 
-               } else {
-                   GPS_location = -1;
                }
            }
            else{
@@ -365,7 +364,7 @@ public class LocMessMainService
             }catch (SecurityException e){
                 //The permission is already being checked above, so this won't happen
             }
-            cursor = _db.getReadableDatabase().query(
+            Cursor cursor = _db.getReadableDatabase().query(
                     DataStore.SQL_GPS_LOCATION,
                     DataStore.SQL_GPS_LOCATION_COLUMNS,
                     "enabled = true",
@@ -385,7 +384,7 @@ public class LocMessMainService
                 loc.setLongitude(longitude);
                 loc.setLatitude(latitude);
                 if(loc.distanceTo(location)<=radius){
-                    GPS_location = cursor.getInt(0);
+                    GPS_location.add(cursor.getInt(0));
                     break;
                 }
             }
@@ -395,11 +394,26 @@ public class LocMessMainService
 
 
         private void getWIFILocation(){
-            WifiManager wifiManager;
-            wifiManager = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+            List<String> ssid_list = LocMessMainService.getInstance().getSsidList();
+            String[] ssid_list_string = (String[]) ssid_list.toArray();
+            String sql = "where (0 = 1) ";
+            for(String ssid : ssid_list){
+                sql += " OR ssid = ? AND enabled = 1";
+            }
 
+            Cursor cursor = _db.getReadableDatabase().query(
+                    DataStore.SQL_WIFI_LOCATION_SSID,
+                    DataStore.SQL_WIFI_LOCATION_SSID_COLUMNS,
+                    sql,
+                    ssid_list_string, null, null, null
+            );
+            cursor.moveToFirst();
 
-            WIFI_location = wifiManager.getConnectionInfo().getBSSID();
+            WIFI_location = new ArrayList<>();
+            while(cursor.moveToNext()){
+                WIFI_location.add(cursor.getInt(0));
+            }
+
         }
 
         @Override
@@ -413,7 +427,11 @@ public class LocMessMainService
                 int jumped = cursor.getInt(6);
                 String tosend;
                 if(jumped == 1){
-
+                    int a_int = cursor.getInt(3);
+                    for(Integer loc : GPS_location){
+                        if(loc == a_int)
+                            sendall();
+                    }
                 }
 
                 tosend = "MESSAGE" +
@@ -468,7 +486,29 @@ public class LocMessMainService
             return null;
         }
 
+    private void sendall(){
+        String tosend = "MESSAGE" +
+                "::"+ cursor.getString(0) +//id
+                "::"+ cursor.getString(1) +//content
+                "::"+ cursor.getString(2) +//author
+                "::"+ cursor.getInt(3) +//location_id
+                "::"+ cursor.getString(4) +//time_start
+                "::"+ cursor.getString(5) +//time_end
+                "::"+ cursor.getInt(6) +//jumped
+                "::"+ cursor.getString(7) +//timestamp
+                "::"+ cursor.getString(8) +//signature
+                "::"+ cursor.getString(9) +//certificate
+                "::"+ cursor.getString(10) //publicKey
+        ;
 
+       /* for(SimWifiP2pDevice device : device_list) {
+            try {
+                cursor.moveToFirst();
+                sock = new SimWifiP2pSocket(device.getVirtIp(), device.getVirtPort());
+                BufferedReader sockIn = new BufferedReader( new InputStreamReader(sock.getInputStream()));
+                OutputStream sockOut = sock.getOutputStream();
+                }*/
+    }
 
     }
 

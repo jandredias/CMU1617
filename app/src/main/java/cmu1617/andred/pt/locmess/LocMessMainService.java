@@ -66,6 +66,8 @@ public class LocMessMainService
     private GoogleApiClient mGoogleApiClient;
     protected static final int REQUEST_CHECK_SETTINGS = 0x1;
 
+    private final static int MAX_MULE_WIFI_MESSAGES = 10;
+
     private GetMessagesAsyncTask task;
     private LocationRequest mLocationRequest;
     private boolean mRequestingLocationUpdates = false;
@@ -120,7 +122,7 @@ public class LocMessMainService
         setAlarm();
 
 
-//        new ReceiveWIFIMessagesAsync().execute();
+        new ReceiveWIFIMessagesAsync().execute();
 
         mManager = intent.getSerializableExtra("mManager");
 
@@ -324,12 +326,13 @@ public class LocMessMainService
         }
     }
 
-    private class SendWifiMessagesAsync extends AsyncTask<SimWifiP2pDeviceList, Void, Void>{
+    private class SendWifiMessagesAsync extends AsyncTask<SimWifiP2pDeviceList, Void, Void> {
         private SQLDataStoreHelper _db;
         private Cursor cursor;
         private boolean mLocationPermissionGranted = false;
         private ArrayList<Integer> GPS_location;
         private ArrayList<Integer> WIFI_location;
+
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
@@ -341,33 +344,33 @@ public class LocMessMainService
                     "jumped = 0 OR jumped = 1",
                     null, null, null, null
             );
-           if(!mLocationPermissionGranted) {
-               if (ContextCompat.checkSelfPermission(getBaseContext(),
-                       android.Manifest.permission.ACCESS_FINE_LOCATION)
-                       == PackageManager.PERMISSION_GRANTED) {
-                   mLocationPermissionGranted = true;
-                   getGPSLocation();
+            if (!mLocationPermissionGranted) {
+                if (ContextCompat.checkSelfPermission(getBaseContext(),
+                        android.Manifest.permission.ACCESS_FINE_LOCATION)
+                        == PackageManager.PERMISSION_GRANTED) {
+                    mLocationPermissionGranted = true;
+                    getGPSLocation();
 
-               }
-           }
-           else{
-               getGPSLocation();
+                }
+            } else {
+                getGPSLocation();
 
-           }
-           getWIFILocation();
+            }
+            getWIFILocation();
 
         }
-        private void getGPSLocation(){
+
+        private void getGPSLocation() {
             Location location = null;
             try {
                 location = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
-            }catch (SecurityException e){
+            } catch (SecurityException e) {
                 //The permission is already being checked above, so this won't happen
             }
             Cursor cursor = _db.getReadableDatabase().query(
                     DataStore.SQL_GPS_LOCATION,
                     DataStore.SQL_GPS_LOCATION_COLUMNS,
-                    "enabled = true",
+                    "enabled = 1",
                     null, null, null, null
             );
             cursor.moveToFirst();
@@ -376,29 +379,27 @@ public class LocMessMainService
             double latitude;
             Location loc;
             int radius;
-            while(cursor.moveToNext()){
-                longitude =cursor.getDouble(2);
-                latitude =cursor.getDouble(1);
-                radius =cursor.getInt(3);
+            while (cursor.moveToNext()) {
+                longitude = cursor.getDouble(2);
+                latitude = cursor.getDouble(1);
+                radius = cursor.getInt(3);
                 loc = new Location("");
                 loc.setLongitude(longitude);
                 loc.setLatitude(latitude);
-                if(loc.distanceTo(location)<=radius){
+                if (loc.distanceTo(location) <= radius) {
                     GPS_location.add(cursor.getInt(0));
                     break;
                 }
             }
-
-
         }
 
 
-        private void getWIFILocation(){
+        private void getWIFILocation() {
             List<String> ssid_list = LocMessMainService.getInstance().getSsidList();
             String[] ssid_list_string = (String[]) ssid_list.toArray();
             String sql = "where (0 = 1) ";
-            for(String ssid : ssid_list){
-                sql += " OR ssid = ? AND enabled = 1";
+            for (String ssid : ssid_list) {
+                sql += " OR (ssid = ? AND enabled = 1)";
             }
 
             Cursor cursor = _db.getReadableDatabase().query(
@@ -410,7 +411,7 @@ public class LocMessMainService
             cursor.moveToFirst();
 
             WIFI_location = new ArrayList<>();
-            while(cursor.moveToNext()){
+            while (cursor.moveToNext()) {
                 WIFI_location.add(cursor.getInt(0));
             }
 
@@ -418,110 +419,102 @@ public class LocMessMainService
 
         @Override
         protected Void doInBackground(SimWifiP2pDeviceList... params) {
-            Collection<SimWifiP2pDevice> device_list = params[0].getDeviceList();
-            SimWifiP2pSocket sock;
 
             cursor.moveToFirst();
+            Collection<SimWifiP2pDevice> devices = params[0].getDeviceList();
 
-            while(cursor.moveToNext()){
-                int jumped = cursor.getInt(6);
-                String tosend;
-                if(jumped == 1){
-                    int a_int = cursor.getInt(3);
-                    for(Integer loc : GPS_location){
-                        if(loc == a_int)
-                            sendall();
+            messageLoop:
+            while (cursor.moveToNext()) {
+                int jumped = cursor.getInt(6); //jumped
+                if (jumped == 1) {
+                    int a_int = cursor.getInt(3); //location_id
+                    for (Integer loc : GPS_location) {
+                        if (loc == a_int) {
+                            sendAll(devices, 1);
+                            continue messageLoop;
+                        }
                     }
+                    for (Integer loc : WIFI_location) {
+                        if (loc == a_int) {
+                            sendAll(devices, 1);
+                            continue messageLoop;
+                        }
+                    }
+                } else { // jumped == 0
+                    int a_int = cursor.getInt(3); //location_id
+                    for (Integer loc : GPS_location) {
+                        if (loc == a_int) {
+                            sendAll(devices, 1);
+                            continue messageLoop;
+                        }
+                    }
+                    for (Integer loc : WIFI_location) {
+                        if (loc == a_int) {
+                            sendAll(devices, 1);
+                            continue messageLoop;
+                        }
+                    }
+                    sendAll(devices, 0);
                 }
-
-                tosend = "MESSAGE" +
-                        "::"+ cursor.getString(0) +//id
-                        "::"+ cursor.getString(1) +//content
-                        "::"+ cursor.getString(2) +//author
-                        "::"+ cursor.getInt(3) +//location_id
-                        "::"+ cursor.getString(4) +//time_start
-                        "::"+ cursor.getString(5) +//time_end
-                        "::"+ cursor.getInt(6) +//jumped
-                        "::"+ cursor.getString(7) +//timestamp
-                        "::"+ cursor.getString(8) +//signature
-                        "::"+ cursor.getString(9) +//certificate
-                        "::"+ cursor.getString(10) //publicKey
-                ;
             }
 
-            for(SimWifiP2pDevice device : device_list) {
-                try {
-                    cursor.moveToFirst();
-                    sock = new SimWifiP2pSocket(device.getVirtIp(), device.getVirtPort());
-                    BufferedReader sockIn = new BufferedReader( new InputStreamReader(sock.getInputStream()));
-                    OutputStream sockOut = sock.getOutputStream();
-                    while (cursor.moveToNext()) {
-                        String tosend;
-
-
-                            tosend = "MESSAGE" +
-                                    "::"+ cursor.getString(0) +//id
-                                    "::"+ cursor.getString(1) +//content
-                                    "::"+ cursor.getString(2) +//author
-                                    "::"+ cursor.getString(4) +//time_start
-                                    "::"+ cursor.getString(5) +//time_end
-                                    "::"+ cursor.getString(6) //jumped
-                                    ;
-                            sockOut.write(tosend.getBytes());
-
-                            String reply = sockIn.readLine();
-                           /* if(reply.equals("SUCCESS")){
-                                //FTODO
-                            }*/
-
-
-                    }
-
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-
-            }
 
             return null;
         }
 
-    private void sendall(){
-        String tosend = "MESSAGE" +
-                "::"+ cursor.getString(0) +//id
-                "::"+ cursor.getString(1) +//content
-                "::"+ cursor.getString(2) +//author
-                "::"+ cursor.getInt(3) +//location_id
-                "::"+ cursor.getString(4) +//time_start
-                "::"+ cursor.getString(5) +//time_end
-                "::"+ cursor.getInt(6) +//jumped
-                "::"+ cursor.getString(7) +//timestamp
-                "::"+ cursor.getString(8) +//signature
-                "::"+ cursor.getString(9) +//certificate
-                "::"+ cursor.getString(10) //publicKey
-        ;
+        private void sendAll(Collection<SimWifiP2pDevice> device_list, int jumped) {
+            String toSend = "MESSAGE" +
+                    "::" + cursor.getString(0) +//id
+                    "::" + cursor.getString(1) +//content
+                    "::" + cursor.getString(2) +//author
+                    "::" + cursor.getInt(3) +//location_id
+                    "::" + cursor.getString(4) +//time_start
+                    "::" + cursor.getString(5) +//time_end
+                    "::" + jumped +//jumped
+                    "::" + cursor.getString(7) +//timestamp
+                    "::" + cursor.getString(8) +//signature
+                    "::" + cursor.getString(9) +//certificate
+                    "::" + cursor.getString(10) //publicKey
+                    ;
+            sendAll_part2(device_list, toSend);
+        }
 
-       /* for(SimWifiP2pDevice device : device_list) {
-            try {
-                cursor.moveToFirst();
-                sock = new SimWifiP2pSocket(device.getVirtIp(), device.getVirtPort());
-                BufferedReader sockIn = new BufferedReader( new InputStreamReader(sock.getInputStream()));
-                OutputStream sockOut = sock.getOutputStream();
-                }*/
+        private void sendAll_part2(Collection<SimWifiP2pDevice> device_list, String toSend) {
+            SimWifiP2pSocket sock = null;
+            for (SimWifiP2pDevice device : device_list) {
+                try {
+                    sock = new SimWifiP2pSocket(device.getVirtIp(), device.getVirtPort());
+                    OutputStream sockOut = sock.getOutputStream();
+                    sockOut.write(toSend.getBytes());
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                finally {
+                    try {
+                        sock.close();
+                    } catch (Exception e){
+                        e.printStackTrace();
+                    }
+                }
+            }
+        }
     }
-
-    }
-
     private class ReceiveWIFIMessagesAsync extends AsyncTask<Void, Void, Void>{
-        private WifiManager wifiManager;
-        private String SSID;
         private SQLDataStoreHelper _db;
+        private int current_mule = 0;
 
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
-            wifiManager = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
             _db = new SQLDataStoreHelper(getApplicationContext());
+            Cursor cursor = _db.getReadableDatabase().query(
+                    DataStore.SQL_WIFI_MESSAGES,
+                    DataStore.SQL_WIFI_MESSAGES_COLUMNS,
+                    "jumped = 1",
+                    null, null, null, null
+            );
+            if(cursor.moveToFirst()) current_mule = 1;
+            while(cursor.moveToNext()) current_mule++;
         }
 
         @Override
@@ -541,18 +534,8 @@ public class LocMessMainService
                         BufferedReader sockIn = new BufferedReader(
                                 new InputStreamReader(sock.getInputStream()));
                         String request = sockIn.readLine();
+                        processInput(request);
 
-                        String response;
-                        OutputStream sockOut = sock.getOutputStream();
-                        if ((response =processInput(request)) != null){
-                            sockOut.write(response.getBytes());
-                            String message = sockIn.readLine();
-                            String reply = processMessage(message);
-                            sockOut.write(reply.getBytes());
-                        }
-
-
-                        sock.getOutputStream().write(("\n").getBytes());
                     } catch (IOException e) {
                         Log.d("Error reading socket:", e.getMessage());
                     } finally {
@@ -568,40 +551,45 @@ public class LocMessMainService
         }
 
 
-        private String processInput(String input){
+        private void processInput(String input){
             String[] data = input.split("::");
-            if(data[0].equals("MESSAGE-LOCATION")){
-                if(data[1].equals(wifiManager.getConnectionInfo().getBSSID())) {
-                    SSID = data[1];
-                    return "YES";
-                }
-                return "NO";
-            }
-            return null;
-        }
-        private String processMessage(String message) {
-            String[] data = message.split("::");
-            int j;
+            int jumped;
             try {
-                j = Integer.parseInt(data[7]);
+                jumped = Integer.parseInt(data[7]);
             }catch (Exception e){
-                return "ERROR";
+                return;
             }
+            if(jumped==0){
+                if(current_mule<MAX_MULE_WIFI_MESSAGES){
+                    jumped=1;
+                    current_mule++;
+                }
+                else
+                    return;
+            }
+            else jumped = 2;
             ContentValues values = new ContentValues();
-            values.put("id", data[1]);
-            values.put("content", data[2]);
-            values.put("author_id", data[3]);
-            values.put("location_id", SSID);
-            values.put("time_start", data[5]);
-            values.put("time_end", data[6]);
-            j++;
-            values.put("jumped", Integer.toString(j));
+            try {
+                values.put("id", data[1]);
+                values.put("content", data[2]);
+                values.put("author_id", data[3]);
+                values.put("location_id", Integer.parseInt(data[4]));
+                values.put("time_start", data[5]);
+                values.put("time_end", data[6]);
+                values.put("jumped", jumped);
+                values.put("timestamp", data[8]);
+                values.put("signature", data[9]);
+                values.put("certificate", data[10]);
+                values.put("publicKey", data[11]);
+            }catch (Exception e){
+                e.printStackTrace();
+                return;
+            }
 
             _db.getWritableDatabase().insert(
                     DataStore.SQL_WIFI_MESSAGES,
                     null,
                     values);
-            return "SUCCESS";
         }
     }
 }

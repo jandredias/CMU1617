@@ -90,11 +90,11 @@ public class LocMessMainService
     BroadcastReceiver _mMessageReceiver = new LocMessBroadcastReceiver();
     private Serializable mManager;
 
+    private static boolean _mLocationPermissionGranted = false;
+
     private static final int PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 1;
 
     private static LocMessMainService _instance;
-    private RefactorMessagesAsync rmaASYNC = new RefactorMessagesAsync();
-    private SendWifiMessagesAsync swmASYNC = new SendWifiMessagesAsync();
 
 
     public static LocMessMainService getInstance() {
@@ -296,7 +296,7 @@ public class LocMessMainService
 
         }
 
-        rmaASYNC.execute();
+       new RefactorMessagesAsync().execute();
 
     }
 
@@ -305,7 +305,6 @@ public class LocMessMainService
         private ArrayList<Integer> GPS_location;
         private ArrayList<Integer> WIFI_location;
         private SQLDataStoreHelper _db;
-        private boolean mLocationPermissionGranted = false;
 
         @Override
         protected void onPreExecute() {
@@ -313,11 +312,11 @@ public class LocMessMainService
             GPS_location = new ArrayList<>();
             _db = new SQLDataStoreHelper(getApplicationContext());
 
-            if (!mLocationPermissionGranted) {
+            if (!_mLocationPermissionGranted) {
                 if (ContextCompat.checkSelfPermission(getBaseContext(),
                         android.Manifest.permission.ACCESS_FINE_LOCATION)
                         == PackageManager.PERMISSION_GRANTED) {
-                    mLocationPermissionGranted = true;
+                    _mLocationPermissionGranted = true;
                     getGPSLocation();
 
                 }
@@ -363,17 +362,32 @@ public class LocMessMainService
 
         private void getWIFILocation() {
             List<String> ssid_list = LocMessMainService.getInstance().getSsidList();
-            String[] ssid_list_string = (String[]) ssid_list.toArray();
-            String sql = "where (0 = 1) ";
+            Object[] ssid_list_object =  ssid_list.toArray();
+
+
+            String sql = "(0 = 1) ";
+            String ssid_list_string = "";
+            boolean k = false;
             for (String ssid : ssid_list) {
                 sql += " OR (ssid = ? AND enabled = 1)";
+                if (k)
+                    ssid_list_string += "::" +ssid;
+                else {
+                    ssid_list_string += ssid;
+                    k = true;
+                }
             }
+            Log.d(TAG, "SQL: " + sql);
+            String[] ssid_list_array = null;
+            if(k)
+                ssid_list_array = ssid_list_string.split("::");
 
             Cursor cursor = _db.getReadableDatabase().query(
                     DataStore.SQL_WIFI_LOCATION_SSID,
                     DataStore.SQL_WIFI_LOCATION_SSID_COLUMNS,
                     sql,
-                    ssid_list_string, null, null, null
+                    ssid_list_array,
+                    null, null, null
             );
             cursor.moveToFirst();
 
@@ -499,7 +513,7 @@ public class LocMessMainService
 
     @Override
     public void onPeersAvailable(SimWifiP2pDeviceList simWifiP2pDeviceList) {
-       swmASYNC.execute(simWifiP2pDeviceList);
+       new SendWifiMessagesAsync().execute(simWifiP2pDeviceList);
     }
 
     class WifiReceiver extends BroadcastReceiver {
@@ -524,7 +538,7 @@ public class LocMessMainService
             Log.d(TAG, "RECEIVED A BROADCAST");
             switch (intent.getAction()) {
                 case LocMessIntent.NEW_PEERS_AVAILABLE:
-                    swmASYNC.execute();
+                    new SendWifiMessagesAsync().execute();
                     break;
             }
         }
@@ -533,7 +547,6 @@ public class LocMessMainService
     private class SendWifiMessagesAsync extends AsyncTask<SimWifiP2pDeviceList, Void, Void> {
         private SQLDataStoreHelper _db;
         private Cursor cursor;
-        private boolean mLocationPermissionGranted = false;
         private ArrayList<Integer> GPS_location;
         private ArrayList<Integer> WIFI_location;
 
@@ -548,11 +561,11 @@ public class LocMessMainService
                     "jumped = 0 OR jumped = 1",
                     null, null, null, null
             );
-            if (!mLocationPermissionGranted) {
+            if (!_mLocationPermissionGranted) {
                 if (ContextCompat.checkSelfPermission(getBaseContext(),
                         android.Manifest.permission.ACCESS_FINE_LOCATION)
                         == PackageManager.PERMISSION_GRANTED) {
-                    mLocationPermissionGranted = true;
+                    _mLocationPermissionGranted = true;
                     getGPSLocation();
 
                 }

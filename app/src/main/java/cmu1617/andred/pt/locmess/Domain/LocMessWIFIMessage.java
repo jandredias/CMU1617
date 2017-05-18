@@ -2,6 +2,7 @@ package cmu1617.andred.pt.locmess.Domain;
 
 import android.content.ContentValues;
 import android.database.Cursor;
+import android.util.Log;
 
 import java.util.List;
 
@@ -14,6 +15,7 @@ import pt.andred.cmu1617.MessageConstraint;
  */
 
 public class LocMessWIFIMessage {
+    private final String TAG = "LocMessWIFIMessage";
     private SQLDataStoreHelper _db;
     private String _id;
     private LocMessLocation _location;
@@ -29,8 +31,8 @@ public class LocMessWIFIMessage {
     private  List<MessageConstraint> _messageConstraints;
     public LocMessWIFIMessage(SQLDataStoreHelper dbHelper) {
 
-        _id = new UserProfile(_db).userName() +"::"+ (System.currentTimeMillis()/1000);
         _db = dbHelper;
+        _id = new UserProfile(_db).userName() +"::"+ (System.currentTimeMillis()/1000);
 
         ContentValues values = new ContentValues();
         values.put("message_id", _id);
@@ -76,6 +78,8 @@ public class LocMessWIFIMessage {
                     null, values);
 
         }
+
+        Log.w(TAG,"New message: " + _id + " // " + content + " // " + timeStart + "-//-" + timeEnd);
     }
 
     public String id() {

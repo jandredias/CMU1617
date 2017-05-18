@@ -550,11 +550,13 @@ public class NewGPSLocation extends FragmentActivity implements
         @Override
         protected void onPreExecute() {
             showProgress(true);
+            Log.d(TAG, "ASYNC (NewGPSLocation) onPreExecute");
         }
 
         @Override
         protected void onPostExecute(final Boolean success) {
             showProgress(false);
+            Log.d(TAG, "ASYNC (NewGPSLocation) onPostExecute. Value: " + success);
 
             if (success) {
                 onBackPressed();
@@ -577,6 +579,7 @@ public class NewGPSLocation extends FragmentActivity implements
 
         @Override
         protected Boolean doInBackground(String... params) {
+            Log.d(TAG, "ASYNC (NewGPSLocation) doInBackground");
             String location_id;
             try {
                 location_id = LocMessAPIClientImpl.getInstance().addLocation(params[0], params[1], params[2], params[3]);

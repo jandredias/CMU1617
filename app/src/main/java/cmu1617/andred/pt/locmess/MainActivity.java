@@ -78,6 +78,8 @@ public class MainActivity extends AppCompatActivity implements
     private Channel mChannel = null;
     private Messenger mService = null;
     private boolean mBound = false;
+    SimWifiP2pBroadcastReceiver receiver;
+    IntentFilter filter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -157,14 +159,14 @@ public class MainActivity extends AppCompatActivity implements
         // initialize the Termite API
         SimWifiP2pSocketManager.Init(getApplicationContext());
 
-        IntentFilter filter = new IntentFilter();
+         filter = new IntentFilter();
         filter.addAction(SimWifiP2pBroadcast.WIFI_P2P_STATE_CHANGED_ACTION);
         filter.addAction(SimWifiP2pBroadcast.WIFI_P2P_PEERS_CHANGED_ACTION);
         filter.addAction(SimWifiP2pBroadcast.WIFI_P2P_NETWORK_MEMBERSHIP_CHANGED_ACTION);
         filter.addAction(SimWifiP2pBroadcast.WIFI_P2P_GROUP_OWNERSHIP_CHANGED_ACTION);
         filter.addAction(LocMessIntent.TEST_REQUEST);
-        SimWifiP2pBroadcastReceiver receiver = new SimWifiP2pBroadcastReceiver(this);
-        registerReceiver(receiver, filter);
+        receiver = new SimWifiP2pBroadcastReceiver(this);
+
        /* Intent intent = new Intent(getApplicationContext(), SimWifiP2pService.class);
         startService(new Intent(this, SimWifiP2pBroadcastReceiver.class));
         bindService(intent, mConnection, Context.BIND_AUTO_CREATE);*/
@@ -173,6 +175,20 @@ public class MainActivity extends AppCompatActivity implements
         bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
 
 
+
+
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        registerReceiver(receiver, filter);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        unregisterReceiver(receiver);
     }
 
     private ServiceConnection mConnection = new ServiceConnection() {

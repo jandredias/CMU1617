@@ -19,6 +19,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
+import android.provider.ContactsContract;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -39,19 +40,23 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.Serializable;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 
 import cmu1617.andred.pt.locmess.AsyncTasks.GetMessagesAsyncTask;
+import cmu1617.andred.pt.locmess.Domain.LocMessMessage;
 import cmu1617.andred.pt.locmess.Domain.LocmessSettings;
 import pt.inesc.termite.wifidirect.SimWifiP2pDevice;
 import pt.inesc.termite.wifidirect.SimWifiP2pDeviceList;
 import pt.inesc.termite.wifidirect.SimWifiP2pManager;
 import pt.inesc.termite.wifidirect.sockets.SimWifiP2pSocket;
-import pt.inesc.termite.wifidirect.sockets.SimWifiP2pSocketServer;
 
 import static android.R.attr.value;
+import static android.R.id.message;
 
 public class LocMessMainService
         extends
@@ -66,7 +71,6 @@ public class LocMessMainService
     private GoogleApiClient mGoogleApiClient;
     protected static final int REQUEST_CHECK_SETTINGS = 0x1;
 
-    private final static int MAX_MULE_WIFI_MESSAGES = 10;
 
     private GetMessagesAsyncTask task;
     private LocationRequest mLocationRequest;
@@ -89,6 +93,9 @@ public class LocMessMainService
     private static final int PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 1;
 
     private static LocMessMainService _instance;
+    private RefactorMessagesAsync rmaASYNC = new RefactorMessagesAsync();
+    private SendWifiMessagesAsync swmASYNC = new SendWifiMessagesAsync();
+
 
     public static LocMessMainService getInstance() {
         if(_instance != null){
@@ -122,7 +129,9 @@ public class LocMessMainService
         setAlarm();
 
 
-        new ReceiveWIFIMessagesAsync().execute();
+      //  new ReceiveWIFIMessagesAsync().execute();
+        SQLDataStoreHelper db = new SQLDataStoreHelper(getBaseContext());
+        new Thread(new ReceiveWiFiDirectThread(db)).start();
 
         mManager = intent.getSerializableExtra("mManager");
 
@@ -287,6 +296,201 @@ public class LocMessMainService
 
         }
 
+        rmaASYNC.execute();
+
+    }
+
+
+    private class RefactorMessagesAsync extends AsyncTask<Void, Void, Void>{
+        private ArrayList<Integer> GPS_location;
+        private ArrayList<Integer> WIFI_location;
+        private SQLDataStoreHelper _db;
+        private boolean mLocationPermissionGranted = false;
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            GPS_location = new ArrayList<>();
+            _db = new SQLDataStoreHelper(getApplicationContext());
+
+            if (!mLocationPermissionGranted) {
+                if (ContextCompat.checkSelfPermission(getBaseContext(),
+                        android.Manifest.permission.ACCESS_FINE_LOCATION)
+                        == PackageManager.PERMISSION_GRANTED) {
+                    mLocationPermissionGranted = true;
+                    getGPSLocation();
+
+                }
+            } else {
+                getGPSLocation();
+
+            }
+            getWIFILocation();
+        }
+        private void getGPSLocation() {
+            Location location = null;
+            try {
+                location = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
+            } catch (SecurityException e) {
+                //The permission is already being checked above, so this won't happen
+            }
+            Cursor cursor = _db.getReadableDatabase().query(
+                    DataStore.SQL_GPS_LOCATION,
+                    DataStore.SQL_GPS_LOCATION_COLUMNS,
+                    "enabled = 1",
+                    null, null, null, null
+            );
+            cursor.moveToFirst();
+
+            double longitude;
+            double latitude;
+            Location loc;
+            int radius;
+            while (cursor.moveToNext()) {
+                longitude = cursor.getDouble(2);
+                latitude = cursor.getDouble(1);
+                radius = cursor.getInt(3);
+                loc = new Location("");
+                loc.setLongitude(longitude);
+                loc.setLatitude(latitude);
+                if (loc.distanceTo(location) <= radius) {
+                    GPS_location.add(cursor.getInt(0));
+                    break;
+                }
+            }
+        }
+
+
+        private void getWIFILocation() {
+            List<String> ssid_list = LocMessMainService.getInstance().getSsidList();
+            String[] ssid_list_string = (String[]) ssid_list.toArray();
+            String sql = "where (0 = 1) ";
+            for (String ssid : ssid_list) {
+                sql += " OR (ssid = ? AND enabled = 1)";
+            }
+
+            Cursor cursor = _db.getReadableDatabase().query(
+                    DataStore.SQL_WIFI_LOCATION_SSID,
+                    DataStore.SQL_WIFI_LOCATION_SSID_COLUMNS,
+                    sql,
+                    ssid_list_string, null, null, null
+            );
+            cursor.moveToFirst();
+
+            WIFI_location = new ArrayList<>();
+            while (cursor.moveToNext()) {
+                WIFI_location.add(cursor.getInt(0));
+            }
+
+        }
+
+        @Override
+        protected Void doInBackground(Void... params) {
+
+            String[] first = {
+                    DataStore.SQL_WIFI_MESSAGES,
+                    DataStore.SQL_MESSAGES
+            };
+            String[][] second = {
+                    DataStore.SQL_WIFI_MESSAGES_COLUMNS,
+                    DataStore.SQL_MESSAGES_COLUMNS
+            };
+            int[] third ={
+                    5,
+                    5
+            };
+            for (int i = 0; i<2; i++) {
+
+
+                Cursor cursor = _db.getReadableDatabase().query(
+                        first[i],
+                        second[i],
+                        null,
+                        null, null, null, null
+                );
+                Date date = new Date();
+                SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                messageLoop:
+                while (cursor.moveToNext()) {
+                    String date2 = cursor.getString(third[i]);
+                    Date date3;
+                    try {
+                        date3 = dateFormat.parse(date2);
+                    } catch (ParseException e) {
+                        e.printStackTrace();
+                        continue;
+                    }
+                    if (date.after(date3)) {
+                        String[] selectionArgs = {cursor.getString(0)};
+                        _db.getWritableDatabase().delete(
+                                DataStore.SQL_WIFI_MESSAGES,
+                                "message_id = ?",
+                                selectionArgs
+                        );
+
+                    }
+                    else if(i == 0){
+                        int loc_int = cursor.getInt(3); //location_id
+                        for (Integer loc : GPS_location) {
+                            if (loc == loc_int) {
+                                makeChange(cursor);
+                                continue messageLoop;
+                            }
+                        }
+                        for (Integer loc : WIFI_location) {
+                            if (loc == loc_int) {
+                                makeChange(cursor);
+                                continue messageLoop;
+                            }
+                        }
+                    }
+                }
+            }
+            return null;
+        }
+        private void makeChange(Cursor cursor){
+            String[] selectionArgs = {cursor.getString(0)};
+            Cursor restrictions = _db.getReadableDatabase().query(
+                    DataStore.SQL_WIFI_MESSAGES_RESTRICTIONS,
+                    DataStore.SQL_WIFI_MESSAGES_RESTRICTIONS_COLUMNS,
+                    "message_id = ?",
+                    selectionArgs,
+                    null, null, null
+            );
+
+
+
+            while (restrictions.moveToNext()){
+                selectionArgs = new String[]{restrictions.getString(1)};
+                Cursor user_restrictions = _db.getReadableDatabase().query(
+                        DataStore.SQL_USER_KEYWORDS,
+                        DataStore.SQL_USER_KEYWORDS_COLUMNS,
+                        "keyword_id",
+                        selectionArgs,
+                        null, null, null
+                );
+                boolean enabled = restrictions.getInt(3) ==1;
+
+                if(user_restrictions.moveToFirst()){
+                    if(restrictions.getString(2).equals(user_restrictions.getString(1)))
+                        if(!enabled)
+                            return;
+                    else if(enabled)
+                        return;
+                }
+                else if(enabled)
+                    return;
+
+            }
+
+
+
+            LocMessMessage LMm = new LocMessMessage(_db, cursor.getString(0));
+            String location = Integer.toString(cursor.getInt(3));
+            LMm.completeObject(location,cursor.getString(2),cursor.getString(1),
+                    cursor.getString(4),cursor.getString(5),cursor.getString(7),"1",
+                    cursor.getString(8),cursor.getString(9),cursor.getString(10));
+        }
     }
 
     public List<String> getSsidList() {
@@ -295,7 +499,7 @@ public class LocMessMainService
 
     @Override
     public void onPeersAvailable(SimWifiP2pDeviceList simWifiP2pDeviceList) {
-        new SendWifiMessagesAsync().execute(simWifiP2pDeviceList);
+       swmASYNC.execute(simWifiP2pDeviceList);
     }
 
     class WifiReceiver extends BroadcastReceiver {
@@ -320,7 +524,7 @@ public class LocMessMainService
             Log.d(TAG, "RECEIVED A BROADCAST");
             switch (intent.getAction()) {
                 case LocMessIntent.NEW_PEERS_AVAILABLE:
-                    new SendWifiMessagesAsync().execute();
+                    swmASYNC.execute();
                     break;
             }
         }
@@ -463,6 +667,26 @@ public class LocMessMainService
         }
 
         private void sendAll(Collection<SimWifiP2pDevice> device_list, int jumped) {
+            String[] selectionArgs = {cursor.getString(0)};
+
+            Cursor c = _db.getReadableDatabase().query(
+                    DataStore.SQL_WIFI_MESSAGES_RESTRICTIONS,
+                    DataStore.SQL_WIFI_MESSAGES_RESTRICTIONS_COLUMNS,
+                    "message_id = ?",
+                    selectionArgs,
+                    null,null, null
+            );
+            int number_restrictions = 0;
+            String appendable ="";
+            while (c.moveToNext()){
+                number_restrictions++;
+                appendable +=
+                        "::" + c.getString(1) + //keyword_id
+                        "::" + c.getString(2) + //keyword_value
+                        "::" + c.getInt(3); //equal
+            }
+            String toPass = number_restrictions + appendable;
+
             String toSend = "MESSAGE" +
                     "::" + cursor.getString(0) +//id
                     "::" + cursor.getString(1) +//content
@@ -474,7 +698,8 @@ public class LocMessMainService
                     "::" + cursor.getString(7) +//timestamp
                     "::" + cursor.getString(8) +//signature
                     "::" + cursor.getString(9) +//certificate
-                    "::" + cursor.getString(10) //publicKey
+                    "::" + cursor.getString(10) +//publicKey
+                    "::" + toPass
                     ;
             sendAll_part2(device_list, toSend);
         }
@@ -499,7 +724,7 @@ public class LocMessMainService
             }
         }
     }
-    private class ReceiveWIFIMessagesAsync extends AsyncTask<Void, Void, Void>{
+  /*  private class ReceiveWIFIMessagesAsync extends AsyncTask<Void, Void, Void>{
         private SQLDataStoreHelper _db;
         private int current_mule = 0;
 
@@ -559,6 +784,7 @@ public class LocMessMainService
             }catch (Exception e){
                 return;
             }
+
             if(jumped==0){
                 if(current_mule<MAX_MULE_WIFI_MESSAGES){
                     jumped=1;
@@ -591,5 +817,5 @@ public class LocMessMainService
                     null,
                     values);
         }
-    }
+    }*/
 }

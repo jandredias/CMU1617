@@ -70,7 +70,7 @@ public interface DataStore {
             "post_timestamp"
     };
     String[] SQL_WIFI_MESSAGES_COLUMNS = {
-            "message_id", //00
+            "message_id", //0
             "content",
             "author_id", //2
             "location_id",

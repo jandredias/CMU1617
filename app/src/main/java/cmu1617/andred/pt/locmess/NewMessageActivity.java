@@ -317,7 +317,7 @@ public class NewMessageActivity extends AppCompatActivity implements OnTaskCompl
             cancel = true;
         }
 
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");;
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         Date date = new Date();
         String current_timestamp = dateFormat.format(date);
 //        LocMessMessage tempoMessage = new LocMessMessage(dbHelper,"-1");

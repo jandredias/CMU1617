@@ -346,7 +346,9 @@ public class NewMessageActivity extends AppCompatActivity implements OnTaskCompl
             else{
                 LocMessWIFIMessage message = new LocMessWIFIMessage(dbHelper);
                 message.completeObject(mLocation.id(), text, begin, end, "0", current_timestamp, produced_signature, user_certificate, publicKey, messageConstraints);
-               // LocalBroadcastManager.getInstance(getBaseContext()).sendBroadcast(new Intent(LocMessIntent.CREATED_NEW_WIFI_MESSAGE_REQUEST));
+                Intent intent = new Intent(getApplicationContext(),MainActivity.class);
+                startActivity(intent);
+                finish();
             }
 
 

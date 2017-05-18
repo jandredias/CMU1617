@@ -427,6 +427,12 @@ public class LocMessMainService
                 messageLoop:
                 while (cursor.moveToNext()) {
                     String date2 = cursor.getString(third[i]);
+                    Log.e(TAG, i + " date2= " + date2 + " //"+ third[i] + " " + cursor.getString(third[i]));
+                    Log.e(TAG, cursor.getString(0) + " // " +
+                            cursor.getString(1) + " // " +
+                            cursor.getString(2) + " // " +
+                            cursor.getString(3) + " // " +
+                            cursor.getString(4) + " // ");
                     Date date3;
                     try {
                         date3 = dateFormat.parse(date2);

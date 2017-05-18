@@ -36,7 +36,7 @@ public class LocMessWIFIMessage {
 
         ContentValues values = new ContentValues();
         values.put("message_id", _id);
-        _db.getWritableDatabase().insert(DataStore.SQL_MESSAGES,
+        _db.getWritableDatabase().insert(DataStore.SQL_WIFI_MESSAGES,
                 null,
                 values);
 

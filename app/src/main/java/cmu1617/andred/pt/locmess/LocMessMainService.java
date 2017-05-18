@@ -34,10 +34,6 @@ import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
-
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.Serializable;
 import java.text.ParseException;
@@ -56,7 +52,6 @@ import pt.inesc.termite.wifidirect.SimWifiP2pManager;
 import pt.inesc.termite.wifidirect.sockets.SimWifiP2pSocket;
 
 import static android.R.attr.value;
-import static android.R.id.message;
 
 public class LocMessMainService
         extends
@@ -95,6 +90,7 @@ public class LocMessMainService
     private static final int PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 1;
 
     private static LocMessMainService _instance;
+
 
 
     public static LocMessMainService getInstance() {
@@ -301,16 +297,29 @@ public class LocMessMainService
     }
 
 
-    private class RefactorMessagesAsync extends AsyncTask<Void, Void, Void>{
+    private class RefactorMessagesAsync extends AsyncTask<Void, Void, Void>
+            implements LocationListener,
+            GoogleApiClient.ConnectionCallbacks,
+            GoogleApiClient.OnConnectionFailedListener
+    {
         private ArrayList<Integer> GPS_location;
         private ArrayList<Integer> WIFI_location;
         private SQLDataStoreHelper _db;
+        private final String TAG = "RefactorMessagesAsync";
+        private  GoogleApiClient mGoogleApiClient2;
 
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
+            Log.e(TAG, "onPreExecute");
             GPS_location = new ArrayList<>();
             _db = new SQLDataStoreHelper(getApplicationContext());
+
+            mGoogleApiClient2 = new GoogleApiClient.Builder(getBaseContext())
+                    .addConnectionCallbacks(this)
+                    .addOnConnectionFailedListener(this)
+                    .addApi(LocationServices.API)
+                    .build();
 
             if (!_mLocationPermissionGranted) {
                 if (ContextCompat.checkSelfPermission(getBaseContext(),
@@ -320,18 +329,47 @@ public class LocMessMainService
                     getGPSLocation();
 
                 }
+
             } else {
                 getGPSLocation();
 
             }
             getWIFILocation();
+            //getGPSLocation(); //This is not right!
         }
+
+        @Override
+        public void onLocationChanged(Location location) {
+
+        }
+
+
         private void getGPSLocation() {
+            Log.e(TAG, "getGPSLocation");
             Location location = null;
             try {
-                location = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
+                location = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient2);
+                if (location == null) {
+                    LocationRequest mLocationRequest = LocationRequest.create()
+                            .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY)
+                            .setInterval(10 * 1000)        // 10 seconds, in milliseconds
+                            .setFastestInterval(1 * 1000); // 1 second, in milliseconds
+                    LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient2, mLocationRequest, this);
+
+                    location = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient2);
+                    if (location == null){
+                        Log.e(TAG, "Location is null after requesting  updates");
+                        return;
+                    }
+                }
+                Log.e(TAG, "Our location: " +location.getLatitude() + " // " + location.getLongitude());
             } catch (SecurityException e) {
+                e.printStackTrace();
                 //The permission is already being checked above, so this won't happen
+            } catch (Exception e){
+                e.printStackTrace();
+                Log.e(TAG, "No GPS this time");
+                return;
             }
             Cursor cursor = _db.getReadableDatabase().query(
                     DataStore.SQL_GPS_LOCATION,
@@ -352,7 +390,9 @@ public class LocMessMainService
                 loc = new Location("");
                 loc.setLongitude(longitude);
                 loc.setLatitude(latitude);
-                if (loc.distanceTo(location) <= radius) {
+                Log.e(TAG, "Checking GPS: " + cursor.getInt(0));
+                    if (loc.distanceTo(location) <= radius) {
+                    Log.e(TAG, "Success");
                     GPS_location.add(cursor.getInt(0));
                     break;
                 }
@@ -427,12 +467,15 @@ public class LocMessMainService
                 messageLoop:
                 while (cursor.moveToNext()) {
                     String date2 = cursor.getString(third[i]);
-                    Log.e(TAG, i + " date2= " + date2 + " //"+ third[i] + " " + cursor.getString(third[i]));
-                    Log.e(TAG, cursor.getString(0) + " // " +
+                    Log.e(TAG, i + "::" + cursor.getString(0) + " // " +
                             cursor.getString(1) + " // " +
                             cursor.getString(2) + " // " +
                             cursor.getString(3) + " // " +
-                            cursor.getString(4) + " // ");
+                            cursor.getString(4) + " // " +
+                            cursor.getString(5) + " // " +
+                            cursor.getString(6) + " // " +
+                            cursor.getString(7) + " // "
+                    );
                     Date date3;
                     try {
                         date3 = dateFormat.parse(date2);
@@ -453,12 +496,14 @@ public class LocMessMainService
                         int loc_int = cursor.getInt(3); //location_id
                         for (Integer loc : GPS_location) {
                             if (loc == loc_int) {
+                                Log.d(TAG, "message is in GPS location");
                                 makeChange(cursor);
                                 continue messageLoop;
                             }
                         }
                         for (Integer loc : WIFI_location) {
                             if (loc == loc_int) {
+                                Log.d(TAG, "message is in WIFI location");
                                 makeChange(cursor);
                                 continue messageLoop;
                             }
@@ -510,6 +555,21 @@ public class LocMessMainService
             LMm.completeObject(location,cursor.getString(2),cursor.getString(1),
                     cursor.getString(4),cursor.getString(5),cursor.getString(7),"1",
                     cursor.getString(8),cursor.getString(9),cursor.getString(10));
+        }
+
+        @Override
+        public void onConnected(@Nullable Bundle bundle) {
+
+        }
+
+        @Override
+        public void onConnectionSuspended(int i) {
+
+        }
+
+        @Override
+        public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
+
         }
     }
 

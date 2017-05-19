@@ -36,7 +36,7 @@ import cmu1617.andred.pt.locmess.Domain.UserProfile;
  */
 
 public abstract class ListMessagesFragment extends Fragment {
-    private final String TAG = "List Available Messages";
+    private final String TAG = "ListMessagesFragment";
     protected SQLDataStoreHelper _dbHelper;
     private View _emptyView;
     protected View _mainView;

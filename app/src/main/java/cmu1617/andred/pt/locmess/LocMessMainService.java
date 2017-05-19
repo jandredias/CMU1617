@@ -1,14 +1,13 @@
 package cmu1617.andred.pt.locmess;
 
-import android.app.ActivityManager;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.BroadcastReceiver;
-import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.IntentSender;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.location.Location;
@@ -19,7 +18,6 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
-import android.provider.ContactsContract;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -34,6 +32,7 @@ import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
+
 import java.io.OutputStream;
 import java.io.Serializable;
 import java.text.ParseException;
@@ -66,6 +65,7 @@ public class LocMessMainService
     private GoogleApiClient mGoogleApiClient;
     protected static final int REQUEST_CHECK_SETTINGS = 0x1;
 
+    private static final boolean EMULATOR = true;
 
     private GetMessagesAsyncTask task;
     private LocationRequest mLocationRequest;
@@ -82,7 +82,7 @@ public class LocMessMainService
     private LocationManager locationManager;
     //WiFi Direct
     private final IntentFilter mIntentFilter = new IntentFilter();
-    BroadcastReceiver _mMessageReceiver = new LocMessBroadcastReceiver();
+    BroadcastReceiver _mMessageReceiver;
     private Serializable mManager;
 
     private static boolean _mLocationPermissionGranted = false;
@@ -90,6 +90,7 @@ public class LocMessMainService
     private static final int PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 1;
 
     private static LocMessMainService _instance;
+    private SimWifiP2pDeviceList _simWifiP2pDeviceList;
 
 
 
@@ -103,10 +104,26 @@ public class LocMessMainService
     public LocMessMainService() {}
 
     @Override
+    public void onCreate() {
+        super.onCreate();
+        _mMessageReceiver = new LocMessBroadcastReceiver();
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(LocMessIntent.NEW_PEERS_AVAILABLE);
+
+        registerReceiver(_mMessageReceiver, filter);
+    }
+
+
+
+    @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         Log.wtf(TAG, "Service Started + " + value);
 
         _instance = this;
+
+
+
+
 
         // Create an instance of GoogleAPIClient.
         if (mGoogleApiClient == null) {
@@ -117,6 +134,7 @@ public class LocMessMainService
                     .build();
         }
         mGoogleApiClient.connect();
+
         alarmHandler = new Handler();
         locationManager =  (LocationManager) getSystemService( Context.LOCATION_SERVICE );
 
@@ -130,6 +148,40 @@ public class LocMessMainService
         new Thread(new ReceiveWiFiDirectThread(db)).start();
 
         mManager = intent.getSerializableExtra("mManager");
+
+        if(EMULATOR) {
+            if (ContextCompat.checkSelfPermission(this.getApplicationContext(),
+                    android.Manifest.permission.ACCESS_FINE_LOCATION)
+                    == PackageManager.PERMISSION_GRANTED) {
+
+                Log.e(TAG, "It' an  Emulator and we have permissions");
+                ((LocationManager) getSystemService(Context.LOCATION_SERVICE)).requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, new android.location.LocationListener() {
+                    @Override
+                    public void onLocationChanged(Location location) {
+                        _longitude = location.getLongitude();
+                        _latitude = location.getLatitude();
+                        Log.e("LocationListener", "Location updated");
+                    }
+
+                    @Override
+                    public void onStatusChanged(String provider, int status, Bundle extras) {
+
+                    }
+
+                    @Override
+                    public void onProviderEnabled(String provider) {
+
+                    }
+
+                    @Override
+                    public void onProviderDisabled(String provider) {
+
+                    }
+                });
+            }
+
+        }
+
 
         return START_STICKY;
     }
@@ -204,10 +256,21 @@ public class LocMessMainService
     }
 
     protected void startGPSUpdates() {
+        Log.d(TAG, "startGPSUpdates");
         if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             return; //if no permissions nothing to do here :(
         }
         LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
+        Location location = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
+        if(location!= null){
+            _latitude = location.getLatitude();
+            _longitude = location.getLongitude();
+            Log.e(TAG, "GPS location update on firts request");
+        }
+
+
+
+
     }
 
     @Nullable
@@ -245,6 +308,7 @@ public class LocMessMainService
     public void onLocationChanged(Location location) {
         _latitude = location.getLatitude();
         _longitude = location.getLongitude();
+        Log.e(TAG, "GPS location updated");
     }
     protected void stopLocationUpdates() {
         LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, this);
@@ -280,6 +344,8 @@ public class LocMessMainService
     }
 
     private void executeNewTask() {
+        new RefactorMessagesAsync().execute();
+
         if(mReadyToLaunchNewTask) {
             mReadyToLaunchNewTask = false;
 
@@ -292,7 +358,6 @@ public class LocMessMainService
 
         }
 
-       new RefactorMessagesAsync().execute();
 
     }
 
@@ -306,7 +371,8 @@ public class LocMessMainService
         private ArrayList<Integer> WIFI_location;
         private SQLDataStoreHelper _db;
         private final String TAG = "RefactorMessagesAsync";
-        private  GoogleApiClient mGoogleApiClient2;
+        public RefactorMessagesAsync(){
+        }
 
         @Override
         protected void onPreExecute() {
@@ -315,13 +381,8 @@ public class LocMessMainService
             GPS_location = new ArrayList<>();
             _db = new SQLDataStoreHelper(getApplicationContext());
 
-            mGoogleApiClient2 = new GoogleApiClient.Builder(getBaseContext())
-                    .addConnectionCallbacks(this)
-                    .addOnConnectionFailedListener(this)
-                    .addApi(LocationServices.API)
-                    .build();
 
-            if (!_mLocationPermissionGranted) {
+           /* if (!_mLocationPermissionGranted) {
                 if (ContextCompat.checkSelfPermission(getBaseContext(),
                         android.Manifest.permission.ACCESS_FINE_LOCATION)
                         == PackageManager.PERMISSION_GRANTED) {
@@ -330,10 +391,10 @@ public class LocMessMainService
 
                 }
 
-            } else {
+            } else {*/
                 getGPSLocation();
 
-            }
+          //  }
             getWIFILocation();
             //getGPSLocation(); //This is not right!
         }
@@ -346,15 +407,15 @@ public class LocMessMainService
 
         private void getGPSLocation() {
             Log.e(TAG, "getGPSLocation");
-            Location location = null;
+           /* Location location = null;
             try {
                 location = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient2);
                 if (location == null) {
-                    LocationRequest mLocationRequest = LocationRequest.create()
+                    LocationRequest _mLocationRequest = LocationRequest.create()
                             .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY)
                             .setInterval(10 * 1000)        // 10 seconds, in milliseconds
                             .setFastestInterval(1 * 1000); // 1 second, in milliseconds
-                    LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient2, mLocationRequest, this);
+                    LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient2, _mLocationRequest, this);
 
                     location = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient2);
                     if (location == null){
@@ -370,7 +431,7 @@ public class LocMessMainService
                 e.printStackTrace();
                 Log.e(TAG, "No GPS this time");
                 return;
-            }
+            }*/
             Cursor cursor = _db.getReadableDatabase().query(
                     DataStore.SQL_GPS_LOCATION,
                     DataStore.SQL_GPS_LOCATION_COLUMNS,
@@ -378,6 +439,15 @@ public class LocMessMainService
                     null, null, null, null
             );
             cursor.moveToFirst();
+            Location location = new Location("");
+
+            if(_latitude == null || _longitude == null){
+
+                Log.e(TAG, "No GPS this time");
+                return;
+            }
+            location.setLongitude(_longitude);
+            location.setLatitude(_latitude);
 
             double longitude;
             double latitude;
@@ -394,7 +464,7 @@ public class LocMessMainService
                     if (loc.distanceTo(location) <= radius) {
                     Log.e(TAG, "Success");
                     GPS_location.add(cursor.getInt(0));
-                    break;
+
                 }
             }
         }
@@ -496,7 +566,7 @@ public class LocMessMainService
                         int loc_int = cursor.getInt(3); //location_id
                         for (Integer loc : GPS_location) {
                             if (loc == loc_int) {
-                                Log.d(TAG, "message is in GPS location");
+                                Log.d(TAG, "message is in GPS location: " + cursor.getString(0));
                                 makeChange(cursor);
                                 continue messageLoop;
                             }
@@ -514,6 +584,7 @@ public class LocMessMainService
             return null;
         }
         private void makeChange(Cursor cursor){
+            Log.d(TAG, "Changing message: "+ cursor.getString(0) + " // " + cursor.getString(1));
             String[] selectionArgs = {cursor.getString(0)};
             Cursor restrictions = _db.getReadableDatabase().query(
                     DataStore.SQL_WIFI_MESSAGES_RESTRICTIONS,
@@ -553,8 +624,11 @@ public class LocMessMainService
             LocMessMessage LMm = new LocMessMessage(_db, cursor.getString(0));
             String location = Integer.toString(cursor.getInt(3));
             LMm.completeObject(location,cursor.getString(2),cursor.getString(1),
-                    cursor.getString(4),cursor.getString(5),cursor.getString(7),"1",
-                    cursor.getString(8),cursor.getString(9),cursor.getString(10));
+                    cursor.getString(4),cursor.getString(5),cursor.getString(7),"2",
+                    cursor.getString(8),
+                    cursor.getString(9),
+                    cursor.getString(10));
+            Log.e(TAG, "Message changed");
         }
 
         @Override
@@ -570,6 +644,8 @@ public class LocMessMainService
         @Override
         public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
 
+                Log.e(TAG, "Location services connection failed with code " + connectionResult.getErrorCode());
+
         }
     }
 
@@ -580,6 +656,7 @@ public class LocMessMainService
     @Override
     public void onPeersAvailable(SimWifiP2pDeviceList simWifiP2pDeviceList) {
        new SendWifiMessagesAsync().execute(simWifiP2pDeviceList);
+        _simWifiP2pDeviceList =simWifiP2pDeviceList;
     }
 
     class WifiReceiver extends BroadcastReceiver {
@@ -597,30 +674,37 @@ public class LocMessMainService
         }
     }
 
-    private class LocMessBroadcastReceiver extends BroadcastReceiver{
+    public class LocMessBroadcastReceiver extends BroadcastReceiver{
 
         @Override
         public void onReceive(Context context, Intent intent) {
             Log.d(TAG, "RECEIVED A BROADCAST");
             switch (intent.getAction()) {
                 case LocMessIntent.NEW_PEERS_AVAILABLE:
-                    new SendWifiMessagesAsync().execute();
+                    new SendWifiMessagesAsync().execute(_simWifiP2pDeviceList);
                     break;
             }
         }
     }
 
-    private class SendWifiMessagesAsync extends AsyncTask<SimWifiP2pDeviceList, Void, Void> {
+    public /*static */class SendWifiMessagesAsync extends AsyncTask<SimWifiP2pDeviceList, Void, Void> {
         private SQLDataStoreHelper _db;
         private Cursor cursor;
         private ArrayList<Integer> GPS_location;
         private ArrayList<Integer> WIFI_location;
+        private static final String TAG = "SendWifiMessagesAsync";
+       // private Context _context;
+
+      /*  public SendWifiMessagesAsync(Context c){
+         _context = c;
+        }*/
 
         @Override
         protected void onPreExecute() {
+            Log.e(TAG, "onPreExecute");
             super.onPreExecute();
             GPS_location = new ArrayList<>();
-            _db = new SQLDataStoreHelper(getApplicationContext());
+            _db = new SQLDataStoreHelper(getBaseContext());
             cursor = _db.getReadableDatabase().query(
                     DataStore.SQL_WIFI_MESSAGES,
                     DataStore.SQL_WIFI_MESSAGES_COLUMNS,
@@ -644,12 +728,7 @@ public class LocMessMainService
         }
 
         private void getGPSLocation() {
-            Location location = null;
-            try {
-                location = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
-            } catch (SecurityException e) {
-                //The permission is already being checked above, so this won't happen
-            }
+
             Cursor cursor = _db.getReadableDatabase().query(
                     DataStore.SQL_GPS_LOCATION,
                     DataStore.SQL_GPS_LOCATION_COLUMNS,
@@ -657,6 +736,9 @@ public class LocMessMainService
                     null, null, null, null
             );
             cursor.moveToFirst();
+            Location location = new Location("");
+            location.setLongitude(_longitude);
+            location.setLatitude(_latitude);
 
             double longitude;
             double latitude;
@@ -671,7 +753,7 @@ public class LocMessMainService
                 loc.setLatitude(latitude);
                 if (loc.distanceTo(location) <= radius) {
                     GPS_location.add(cursor.getInt(0));
-                    break;
+
                 }
             }
         }
@@ -702,6 +784,7 @@ public class LocMessMainService
 
         @Override
         protected Void doInBackground(SimWifiP2pDeviceList... params) {
+            Log.e(TAG, "doInBackground");
 
             cursor.moveToFirst();
             Collection<SimWifiP2pDevice> devices = params[0].getDeviceList();
@@ -786,6 +869,8 @@ public class LocMessMainService
         private void sendAll_part2(Collection<SimWifiP2pDevice> device_list, String toSend) {
             SimWifiP2pSocket sock = null;
             for (SimWifiP2pDevice device : device_list) {
+                Log.e(TAG, "sendAll_part2, device: " + device.getVirtIp() + "::" +  device.getVirtPort());
+                Log.e(TAG, "sendAll_part2, message: " + toSend);
                 try {
                     sock = new SimWifiP2pSocket(device.getVirtIp(), device.getVirtPort());
                     OutputStream sockOut = sock.getOutputStream();

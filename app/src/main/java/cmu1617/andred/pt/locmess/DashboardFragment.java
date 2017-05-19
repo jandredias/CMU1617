@@ -73,7 +73,7 @@ public class DashboardFragment extends ListMessagesFragment {
                     true, //distinct
                     DataStore.SQL_MESSAGES, //table name
                     DataStore.SQL_MESSAGES_COLUMNS, //columns to return
-                    "enabled = 1 AND message_id NOT IN (SELECT message_id FROM "+DataStore.SQL_READ_MESSAGES+" WHERE reader_id = ? )", //selection string
+                    "(enabled = 1 OR enabled = 2) AND message_id NOT IN (SELECT message_id FROM "+DataStore.SQL_READ_MESSAGES+" WHERE reader_id = ? )", //selection string
                     selectionArgs, //selection args
                     null, //groupBy
                     null, //having
@@ -82,6 +82,7 @@ public class DashboardFragment extends ListMessagesFragment {
             );
             while(cursor.moveToNext()){
                 messages.add(new LocMessMessage(_dbHelper,cursor.getString(0)));
+                Log.e(TAG, "Adding message to dashboard: " + cursor.getString(0) + " // " + cursor.getString(1));
             }
         }
 
@@ -141,7 +142,7 @@ public class DashboardFragment extends ListMessagesFragment {
         @Override
         public void onReceive(Context context, Intent intent) {
             Log.wtf(TAG,"request for restart view");
-            new SimpleOkMessage(getContext(),"Messages Updated!");
+            //new SimpleOkMessage(getContext(),"Messages Updated!");
 
             dashboardFragment.restartListView();
 

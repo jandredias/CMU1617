@@ -9,6 +9,8 @@ import android.content.IntentFilter;
 import android.content.IntentSender;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
+import android.location.Location;
+import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Messenger;
@@ -21,7 +23,6 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.ContextCompat;
-import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
@@ -80,6 +81,9 @@ public class MainActivity extends AppCompatActivity implements
     private boolean mBound = false;
     SimWifiP2pBroadcastReceiver receiver;
     IntentFilter filter;
+    IntentFilter filter2;
+    private SendWifiDirectBReceiver swdbr;
+    private static final boolean EMULATOR = true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -156,15 +160,17 @@ public class MainActivity extends AppCompatActivity implements
 
         startService(new Intent(this, LocMessMainService.class));
 
+
         // initialize the Termite API
         SimWifiP2pSocketManager.Init(getApplicationContext());
 
-         filter = new IntentFilter();
+        filter = new IntentFilter();
         filter.addAction(SimWifiP2pBroadcast.WIFI_P2P_STATE_CHANGED_ACTION);
         filter.addAction(SimWifiP2pBroadcast.WIFI_P2P_PEERS_CHANGED_ACTION);
         filter.addAction(SimWifiP2pBroadcast.WIFI_P2P_NETWORK_MEMBERSHIP_CHANGED_ACTION);
         filter.addAction(SimWifiP2pBroadcast.WIFI_P2P_GROUP_OWNERSHIP_CHANGED_ACTION);
         filter.addAction(LocMessIntent.TEST_REQUEST);
+        filter.addAction(LocMessIntent.NEW_MESSAGE);
         receiver = new SimWifiP2pBroadcastReceiver(this);
 
        /* Intent intent = new Intent(getApplicationContext(), SimWifiP2pService.class);
@@ -174,7 +180,59 @@ public class MainActivity extends AppCompatActivity implements
         Intent intent = new Intent(getApplicationContext(), SimWifiP2pService.class);
         bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
 
+        swdbr = new SendWifiDirectBReceiver();
+        swdbr.set_context(getApplicationContext());
+        filter2 = new IntentFilter();
+        filter2.addAction(LocMessIntent.NEW_PEERS_AVAILABLE);
 
+        if(EMULATOR) {
+            boolean permission = false;
+            if (ContextCompat.checkSelfPermission(this.getApplicationContext(),
+                    android.Manifest.permission.ACCESS_FINE_LOCATION)
+                    == PackageManager.PERMISSION_GRANTED) {
+                permission = true;
+            }
+            else {
+                ActivityCompat.requestPermissions(this,
+                        new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION},
+                        1);
+            }
+                if(!permission) {
+                    if (ContextCompat.checkSelfPermission(this.getApplicationContext(),
+                            android.Manifest.permission.ACCESS_FINE_LOCATION)
+                            == PackageManager.PERMISSION_GRANTED)
+                        permission = true;
+                }
+
+            if(permission){
+
+                Log.e(TAG, "It' an  Emulator and we have permissions");
+                ((LocationManager) getSystemService(Context.LOCATION_SERVICE)).requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, new android.location.LocationListener() {
+                    @Override
+                    public void onLocationChanged(Location location) {
+                        swdbr.set_latitude(location.getLatitude());
+                        swdbr.set_longitude(location.getLongitude());
+                        Log.e("LocationListener", "Location updated");
+                    }
+
+                    @Override
+                    public void onStatusChanged(String provider, int status, Bundle extras) {
+
+                    }
+
+                    @Override
+                    public void onProviderEnabled(String provider) {
+
+                    }
+
+                    @Override
+                    public void onProviderDisabled(String provider) {
+
+                    }
+                });
+            }
+
+        }
 
 
     }
@@ -183,12 +241,14 @@ public class MainActivity extends AppCompatActivity implements
     protected void onResume() {
         super.onResume();
         registerReceiver(receiver, filter);
+        registerReceiver(swdbr, filter2);
     }
 
     @Override
     protected void onPause() {
         super.onPause();
         unregisterReceiver(receiver);
+        unregisterReceiver(swdbr);
     }
 
     private ServiceConnection mConnection = new ServiceConnection() {
@@ -329,7 +389,10 @@ public class MainActivity extends AppCompatActivity implements
     @Override
     public void onPeersAvailable(SimWifiP2pDeviceList simWifiP2pDeviceList) {
         Log.d(TAG, "Peers Available");
-        LocalBroadcastManager.getInstance(getBaseContext()).sendBroadcast(new Intent(LocMessIntent.NEW_PEERS_AVAILABLE));
+        swdbr.set_simWifiP2pDeviceList(simWifiP2pDeviceList);
+        //LocalBroadcastManager.getInstance(getBaseContext()).sendBroadcast(new Intent(LocMessIntent.NEW_PEERS_AVAILABLE));
+        swdbr.start();
+       /* new LocMessMainService.SendWifiMessagesAsync().execute(simWifiP2pDeviceList);*/
 
 
     }

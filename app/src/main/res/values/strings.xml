@@ -39,7 +39,7 @@
     <string name="username_already_exists">username already exists</string>
     <string name="post_message">Post Message</string>
     <string name="server_mode">Server Mode</string>
-    <string name="centralized_mode">Centralized Mode</string>
+    <string name="centralized_mode">Decentralized Mode</string>
     <string name="post_message_title">Add a Message</string>
 
     <string-array name="equal_different_array">

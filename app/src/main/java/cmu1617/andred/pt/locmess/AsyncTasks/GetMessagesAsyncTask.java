@@ -1,6 +1,7 @@
 package cmu1617.andred.pt.locmess.AsyncTasks;
 
 import android.content.ContentValues;
+import android.database.Cursor;
 import android.os.AsyncTask;
 import android.util.Log;
 
@@ -50,9 +51,27 @@ public class GetMessagesAsyncTask extends AsyncTask<Void, Void, Boolean> {
     }
 
     protected void disableAllMessages() {
-        ContentValues values = new ContentValues();
-        values.put("enabled","0");
-        _db.getWritableDatabase().update(DataStore.SQL_MESSAGES,values,null,null);
+        String[] selectionArgs = {"1"};
+        Cursor cursor = _db.getReadableDatabase().query(
+                DataStore.SQL_MESSAGES,
+                DataStore.SQL_MESSAGES_COLUMNS,
+                "enabled = ?",
+                selectionArgs,
+                null, null, null
+        );
+
+        while(cursor.moveToNext()){
+            selectionArgs = new String[]{cursor.getString(0)};
+            ContentValues values = new ContentValues();
+            values.put("enabled","0");
+            _db.getWritableDatabase().update(
+                    DataStore.SQL_MESSAGES,
+                    values,
+                    "message_id = ?",
+                    selectionArgs
+            );
+        }
+
     }
 
     @Override

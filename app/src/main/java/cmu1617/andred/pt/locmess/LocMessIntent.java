@@ -6,7 +6,7 @@ package cmu1617.andred.pt.locmess;
 
 public interface LocMessIntent {
     String NEW_PEERS_AVAILABLE = "0";
-    String NEW_PEERS_AVAILABLE_RESPONSE = "1";
+    String NEW_MESSAGE = "1";
 
     String TEST_REQUEST = "test";
 }

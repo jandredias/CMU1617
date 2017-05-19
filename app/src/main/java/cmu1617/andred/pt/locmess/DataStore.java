@@ -138,7 +138,7 @@ public interface DataStore {
                     "time_start DATETIME ,"+
                     "time_end DATETIME,"+
                     "post_timestamp DATETIME,"+
-                    "enabled boolean"+
+                    "enabled INT"+
                     ")";
 
     String SQL_CREATE_READ_MESSAGES =

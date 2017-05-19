@@ -32,7 +32,7 @@ public class LocMessWIFIMessage {
     public LocMessWIFIMessage(SQLDataStoreHelper dbHelper) {
 
         _db = dbHelper;
-        _id = new UserProfile(_db).userName() +"::"+ (System.currentTimeMillis()/1000);
+        _id = new UserProfile(_db).userName() +"-"+ (System.currentTimeMillis()/1000);
 
         ContentValues values = new ContentValues();
         values.put("message_id", _id);

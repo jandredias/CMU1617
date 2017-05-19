@@ -2,6 +2,7 @@ package cmu1617.andred.pt.locmess;
 
 import android.content.ContentValues;
 import android.database.Cursor;
+import android.util.Base64;
 import android.util.Log;
 
 import java.io.BufferedReader;
@@ -19,6 +20,7 @@ public class ReceiveWiFiDirectThread extends Thread {
     private SQLDataStoreHelper _db;
     private int current_mule = 0;
     private int PORT = 10001;
+    private static final String TAG = "ReceiveWiFiDirectThread";
     private final static int MAX_MULE_WIFI_MESSAGES = 10;
 
     public ReceiveWiFiDirectThread (SQLDataStoreHelper db) {
@@ -61,21 +63,26 @@ public class ReceiveWiFiDirectThread extends Thread {
 
 
     private void processInput(String input){
+        Log.e(TAG, "Received: "+ input);
         String[] data = input.split("::");
         int jumped;
         try {
             jumped = Integer.parseInt(data[7]);
         }catch (Exception e){
+            e.printStackTrace();
             return;
         }
         String[] selectionArgs = {data[1]};
            Cursor cursor = _db.getReadableDatabase().query(
                     DataStore.SQL_WIFI_MESSAGES,
                     DataStore.SQL_WIFI_MESSAGES_COLUMNS,
-                    "id = ?",
+                    "message_id = ?",
                    selectionArgs,
                     null, null, null);
-        if(cursor.moveToFirst()) return; //already in database
+        if(cursor.moveToFirst()){
+            Log.e(TAG, "message is already in database");
+            return; //already in database
+        }
 
         checkCurrentMule();
 
@@ -83,9 +90,12 @@ public class ReceiveWiFiDirectThread extends Thread {
             if(current_mule<MAX_MULE_WIFI_MESSAGES){
                 jumped=1;
                 current_mule++;
+                Log.e(TAG, "Current_mule is now: " + current_mule);
             }
-            else
+            else {
+                Log.e(TAG, "Current mule max reached");
                 return;
+            }
         }
         else jumped = 2;
         ContentValues values = new ContentValues();
@@ -98,9 +108,10 @@ public class ReceiveWiFiDirectThread extends Thread {
             values.put("time_end", data[6]);
             values.put("jumped", jumped);
             values.put("timestamp", data[8]);
-            values.put("signature", data[9]);
+            Log.d(TAG, "Signature = "+ new String(Base64.decode(data[9], Base64.DEFAULT)));
+            values.put("signature", new String(Base64.decode(data[9], Base64.DEFAULT)));
             values.put("certificate", data[10]);
-            values.put("publicKey", data[11]);
+            values.put("publicKey", new String(Base64.decode(data[11], Base64.DEFAULT)));
         }catch (Exception e){
             e.printStackTrace();
             return;
@@ -125,6 +136,7 @@ public class ReceiveWiFiDirectThread extends Thread {
                     values
             );
         }
+        Log.e(TAG, "Wrote on database;");
     }
 
     private void checkCurrentMule(){
@@ -139,5 +151,6 @@ public class ReceiveWiFiDirectThread extends Thread {
         );
         while(cursor.moveToNext()) current++;
         current_mule = current;
+        Log.d(TAG, "Current mule is: " + current_mule);
     }
 }

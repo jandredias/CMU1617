@@ -60,7 +60,7 @@ public class SimWifiP2pBroadcastReceiver extends BroadcastReceiver{
                     SimWifiP2pBroadcast.EXTRA_GROUP_INFO);
         }
 
-        else if(LocMessIntent.TEST_REQUEST.equals(action)){
+        else if(LocMessIntent.NEW_MESSAGE.equals(action)){
             Log.d(TAG, "Received TEST BROADCAST");
             _MA.wifiPeersChanged();
         }

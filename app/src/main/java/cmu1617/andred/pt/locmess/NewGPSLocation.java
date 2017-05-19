@@ -234,7 +234,7 @@ public class NewGPSLocation extends FragmentActivity implements
 
     @Override
     public void onLocationChanged(Location location) {
-       // handleNewLocation(location);
+        handleNewLocation(location);
     }
 
     @Override

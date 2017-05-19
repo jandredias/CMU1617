@@ -15,6 +15,7 @@ import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.DialogFragment;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
 import android.text.format.DateFormat;
@@ -346,8 +347,9 @@ public class NewMessageActivity extends AppCompatActivity implements OnTaskCompl
             else{
                 LocMessWIFIMessage message = new LocMessWIFIMessage(dbHelper);
                 message.completeObject(mLocation.id(), text, begin, end, "0", current_timestamp, produced_signature, user_certificate, publicKey, messageConstraints);
-                Intent intent = new Intent(getApplicationContext(),MainActivity.class);
-                startActivity(intent);
+                LocalBroadcastManager.getInstance(getBaseContext()).sendBroadcast(new Intent(LocMessIntent.NEW_MESSAGE));
+               /* Intent intent = new Intent(getApplicationContext(),MainActivity.class);
+                startActivity(intent);*/
                 finish();
             }
 
@@ -551,8 +553,8 @@ public class NewMessageActivity extends AppCompatActivity implements OnTaskCompl
                             }
                 });
             } else {
-                Intent intent = new Intent(getApplicationContext(),MainActivity.class);
-                startActivity(intent);
+               /* Intent intent = new Intent(getApplicationContext(),MainActivity.class);
+                startActivity(intent);*/
                 finish();
             }
         }
